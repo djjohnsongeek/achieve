@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import re
 
 from flask import Flask
 from flask import render_template, request, session, redirect, Response, jsonify
@@ -13,7 +14,7 @@ from SQL import db_connect
 # developer mode "  $env:FLASK_ENV="developement"
 # run with "flask run"
 
-DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\Achieve\\achieve.db"
+DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 
 # initialize app
 app = Flask(__name__, static_folder="C:\\Users\\Johnson\\Documents\\Projects\\Achieve\\static")
@@ -51,7 +52,13 @@ def clients():
     if not request.form.get("client_name"):
         return render_template("error.html", message="Please provide the Client's name")
     client_name = request.form.get("client_name").strip()
-
+    
+    # regular expressions
+    names = re.compile(r"[a-zA-Z]\s[a-zA]")
+    
+    result = names.match(client_name)
+    print(result)
+    
     # store client hours, check for no value
     
     if not request.form.get("client_hours"):
