@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block title %}Clients{% endblock %}
+
+{% block main %}
+    <div class="description">
+        <header><h1>Manage Staff</h1></header>
+    </div>
+    <div class="div_forms">
+        <h2>Add or Remove Staff</h2>
+        <form id="form_add_staff" action="/staff" method="POST">
+            <fieldset>
+                <legend>Add Staff</legend>
+                <input type="text" name="staff_name" placeholder="First and Last Name">
+                <input type="checkbox" value="1" name="RBT">RBT?
+                <input type="radio" value="1" name="Tier">Tier 1
+                <input type="radio" value="2" name="Tier">Tier 2
+                <input type="radio" value="3" name="Tier">Tier 3<br/>
+                <input type="text" name="staff_hours" placeholder="Enter Hours"><br/>
+                <button type="submit" class="btn_submit" id="btn_add_staff">Add Staff</button>
+            </fieldset>
+        </form>
+        <form id="form_remove_staff" action="/staff/remove" method="POST">
+            <fieldset>
+                <legend>Remove Staff</legend>
+                <select id="slct_staff_remove" name="slct_staff_remove">
+                    <option disabled selected>Staff Name</option>
+                    {% for name in staff_names %}
+                    <option value="{{ name['name'] }}">{{ name['name'] }}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn_submit">Remove Staff</button>
+            </fieldset>
+        </form>
+    </div>
+    <div class="div_forms">
+        <h2>Update Staff Info</h2>
+        <form id="form_update_staff" action="/staff/update" method="POST">
+            <fieldset>
+                <legend>Update Staff Info</legend>
+                <select id="slct_staff_update" name="slct_staff_update">
+                    <option disabled selected>Staff Name</option>
+                    {% for name in staff_names %}
+                    <option value="{{ name['name'] }}">{{ name['name'] }}</option>
+                    {% endfor %}
+                </select>
+                    <input type="checkbox" value="1" name="rbt_update">RBT?
+                    <input type="radio" value="1" name="tier_update">Tier 1
+                    <input type="radio" value="2" name="tier_update">Tier 2
+                    <input type="radio" value="3" name="tier_update">Tier 3<br/>
+                    <input type="text" name="staff_hours_update" placeholder="Enter Hours">
+                    <input type="radio" name="staff_absent" value="1">Absent Today?
+                    <input type="radio" name="staff_absent" value="0">Present Today?<br/>
+                    <button type="submit" class="btn_submit">Update Info</button>
+            </fieldset>
+        </form>
+    </div>
+{% endblock %}

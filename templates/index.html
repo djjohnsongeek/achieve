@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}Home{% endblock %}
+{% block main %}
+    <div class="description">
+        <header>
+            <h1>Welcome!</h1>
+        </header>
+        <p class="welcome">
+            This is not a paragraph. This is a paragraph. This is a paragraph. This is a paragraph. 
+            This is a paragraph. This is a paragraph. This is a paragraph. This is a paragraph. 
+            This is a paragraph. This is a paragraph. This is a paragraph. This is a paragraph. 
+            This is a paragraph. This is a paragraph. This is a paragraph. This is a paragraph. 
+        </p>
+        <p class="welcome">
+            This is a paragraph. This is a paragraph. This is a paragraph. This is a paragraph. 
+            This is a paragraph. This is a paragraph. This is a paragraph. This is a paragraph. 
+            This is a paragraph. This is a paragraph. This is a paragraph. This is a paragraph. 
+            This is a paragraph. This is a paragraph. This is a paragraph. This is a paragraph. 
+        </p>
+        <!--Large "Button" Links for each of the website's main pages/functions-->
+        <h2>Site Functions</h2>
+        <div id="container">
+            <div class="big_link">
+                <a href="/clients" class="icon_links"><image class="big_icon" src="static/clienticon.png" alt="Manage Clients Link">Manage Clients</image></a>
+            </div>
+            <div class="big_link">
+                <a href="/staff" class="icon_links"><image class="big_icon" src="static/stafficon.png" alt="Manage Staff Link">Manage Staff</image></a>
+            </div>
+            <div class="big_link">
+                <a href="/schedule" class="icon_links"><image class="big_icon" src="static/scheduleicon.png" alt="Generate Schedule Link">Generate Schedule</image></a>
+            </div>
+        </div>
+    </div>
+    
+{% endblock %}

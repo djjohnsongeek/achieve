@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+
+<html>
+    <head lang="eng"></head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link href="../static/styles.css" type="text/css" rel="stylesheet">
+        <!--Links to Scripts go here-->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <title>Achieve: {% block title %}{% endblock %}</title>
+    </head>
+    <body>
+        <nav>
+            <div id="nav">
+                <image id="img_puzzle" src="static/logo.png" alt="puzzle logo"></image>
+                <a class="page_title" href="/">Achieve</a>
+                <span><a id="staff_link" class="nav_links" href="/staff">Staff</a></span>
+                <a class="nav_links" href="/clients">Clients</a>
+                <span><a class="nav_links" href="/schedule">Schedule</a></span>
+            </div>
+        </nav>
+        
+        <main>{% block main %}{% endblock %}</main>
+        <footer>
+            Website Design and Implementation by Daniel Johnson
+        </footer>
+    </body>
+</html>

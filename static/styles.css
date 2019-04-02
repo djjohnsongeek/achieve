@@ -1,0 +1,145 @@
+body{
+    background-color: #212962;
+}
+
+nav{
+    background-color: #7acedc;
+}
+
+.page_title{
+    font-size: 9em;
+    text-decoration: none;
+    color: #212962;
+    transition: color .25s;
+}
+
+.nav_links{
+    text-decoration: none;
+    color: #212962;
+    font-size: 1.5em;
+    transition: font-size .5s, color .5s;
+    margin-left: 15px;
+}
+
+#staff_link
+{
+    margin-left: 50px;
+}
+
+.nav_links:hover{
+    font-size: 2.3em;
+}
+
+.nav_links:hover, .page_title:hover{
+    color: white;
+}
+
+#img_puzzle
+{
+    height: 200px;
+    width: 200px;
+    padding-left: 35px;
+    padding-top: 35px;
+}
+
+header
+{
+    text-align: center;
+    background-color: #a52228;
+    padding: 10px;
+}
+
+.description
+{
+    background-color: whitesmoke;
+}
+
+h2
+{
+    font-size: 2em;
+    background-color: #7acedc;
+    padding-left: 10px;
+    border: solid 2px darkslategrey;
+    margin-left: 20px;
+    margin-right: 20px;
+}
+
+#server_error
+{
+    text-align: center;
+    background-color: #a52228;
+    font-weight: bold;
+}
+
+footer
+{
+    text-align: center;
+    color: #aaaaaa;
+    font-size: 12px;
+    margin: 10px;
+}
+
+.div_forms
+{
+    background-color: whitesmoke;
+    margin-top: 0px;
+    padding: 1px;
+}
+
+.btn_submit
+{
+    width: 120px;
+    padding: 10px;
+    margin: 10px;
+}
+
+fieldset, .welcome
+{
+    padding: 10px;
+    margin: 20px;
+}
+
+.form_titles
+{
+    margin-left: 10px;
+}
+
+input, select
+{
+    padding: 10px 10px;
+    margin: 10px;
+}
+
+#container
+{
+    display: flex;
+    flex-direction: row;
+}
+
+.big_link
+{
+    width: 400px;
+    margin: 20px;
+    text-align: center;
+    padding: 5px;
+    background-color: #7acedc;
+    border: solid 2px darkslategrey;
+    
+}
+
+.big_icon
+{
+    width: 390px;
+    height: 390px;
+}
+
+.big_link:hover
+{
+    background-color: #b6dee6;
+}
+
+.icon_links
+{
+    text-decoration: none;
+    color: darkslategrey;
+}
