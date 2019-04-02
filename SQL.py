@@ -1,6 +1,6 @@
 import sqlite3
 from sqlite3 import Error
-
+# simple fuction to make connection to SQLite databases easier
 def db_connect(URL):
     # Attempt to create a connection to the database
     try:
