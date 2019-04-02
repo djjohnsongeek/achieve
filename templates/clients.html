@@ -42,6 +42,30 @@
                 <button type="submit" id="btn_add_client" class="btn_submit" value="add_client" name="btn_add_client">Add Client</button>
             </fieldset>
         </form>
+        <script>
+            // store client first and last name in variable
+            
+            var client_name = document.getElementById("client_name");
+            document.getElementById("btn_add_client").addEventListener("click", function(event){
+                //Listen for the button being clicked
+
+                event.preventDefault();
+                //prevent form submission
+                //send GET request with clientname
+                $.get("/addclient?clientname=" + client_name.value, function(data){
+                    console.log(data);
+                    if (data == true)
+                    {
+                        document.getElementById("form_add_client").submit();
+                    }
+                    else
+                    {
+                        alert("Client Name already Exists")
+                    }
+                    console.log("prevented submission");
+                });
+            });
+        </script>
         <form id="form_remove_client" name="form_remove_client" action="/clients/remove" method="POST">
             <fieldset>
                 <legend>Remove a Client</legend>
