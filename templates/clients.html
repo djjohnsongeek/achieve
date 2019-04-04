@@ -11,7 +11,7 @@
         <form id="form_add_client" name="form_add_client" method="POST" action="/clients">
             <fieldset>
                 <legend>Add a Client</legend>
-                <input type="text" id="client_name" name="client_name" placeholder="First and Last Name" required><br/>
+                <input type="text" id="client_name" name="client_name" placeholder="Client Name" required><br/>
                 <span class="form_titles">Assign Teachers to Team:</span><br/>
                 <select name="assign_teacher0">
                     <option value="" selected disabled>Select Staff</option>
@@ -37,8 +37,10 @@
                     <option value="{{item['name']}}">{{ item["name"] }}</option>
                     {% endfor %}
                 </select><br/>
-                <span class="form_titles">Enter Client Hours:</span><br/>
-                <input type="text" name="client_hours" placeholder="Client Hours">
+                <label for="client_hours_start" class="form_titles">Start Time:</label>
+                <input type="time" name="client_hours_start" id="client_hours_start" placeholder="hh:mm (24hr)">
+                <label for="client_hours_end" class="form_titles">End Time:</label>
+                <input type="time" name="client_hours_end" id="client_hours_end" placeholder="hh:mm (24hr)"><br/>
                 <button type="submit" id="btn_add_client" class="btn_submit" value="add_client" name="btn_add_client">Add Client</button>
             </fieldset>
         </form>
@@ -90,10 +92,13 @@
                     <option value ="{{ name['name'] }}">{{ name["name"] }}</option>
                     {% endfor %}
                 </select>
-                    <input type="text" name="txt_new_client_hours" placeholder="New Hours">
+                    <lable for="new_client_hours_start">Start Time:</lable>
+                    <input type="time" name="new_client_hours_start" id="new_client_hours_start" placeholder="hh:mm">
+                    <lable for="new_client_hours_end">End Time:</lable>
+                    <input type="time" name="new_client_hours_end" id="new_client_hours_end" placeholder="hh:mm"><br/>
                     <input type="radio" name="absent" value="1">Absent Today?
                     <input type="radio" name="absent" value="0">Present Today?<br/>
-                    Add or Remove a Teacher from Selected Client's Team<br/>
+                    <p></p>Add or Remove a Teacher from Selected Client's Team<br/>
                     <select name="new_teacher"><br/>
                         <option disabled selected value="">Staff Name</option>
                         {% for name in staff_query %}

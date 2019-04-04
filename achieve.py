@@ -8,11 +8,8 @@ from sqlite3 import Error
 from djlib import sanitize
 from SQL import db_connect
 
-# Terminal Commands:
-# initialize venv "  venv\Scripts\activate  "
-# initialize app "  $env:FLASK_APP="achieve.py"
-# developer mode "  $env:FLASK_ENV="developement"
-# run with "flask run"
+# NOTE: need to replace single error page with ui feedback
+# NOTE: need to make sure that POST requests with AJAX for the difference forms (Add, Remove, Update)
 
 DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 
@@ -46,31 +43,34 @@ def clients():
         conn.close()
         return render_template("clients.html", staff_query=staff_query, client_query=client_query)
 
-    # for POST Requests (adding client info) --NOTE: need to make sure that POST request for the difference forms (Add, Remove, Update) are delt with differently
-    # store client's name, check for no value -NOTE: ensure proper data format (regular expressions or stripping white space(TODO)
+    # for POST Requests (adding client info) --
+    # store client's name, check for no value
     
     if not request.form.get("client_name"):
         return render_template("error.html", message="Please provide the Client's name")
     client_name = request.form.get("client_name").strip()
-    
-    # regular expressions
-    names = re.compile(r"[a-zA-Z]\s[a-zA]")
-    
-    result = names.match(client_name)
-    print(result)
-    
+   
     # store client hours, check for no value
+    if not request.form.get("client_hours_start") or not request.form.get("client_hours_end"):
+        return render_template("error.html", message=f"Please provide the {client_name}'s start and end times")
     
-    if not request.form.get("client_hours"):
-        return render_template("error.html", message="Please provide the client's hours")
-    client_hours = request.form.get("client_hours").strip()
+    client_hours_start = request.form.get("client_hours_start")
+    client_hours_end = request.form.get("client_hours_end")
+
+    # validate both times with regular expresssions:
+    time = re.compile(r"[012][0-9]:[0-5][0-9]")
+    if not time.match(client_hours_start) or not time.match(client_hours_end):
+        return render_template("error.html", message="Start or End times are formatted incorrectly")
+
+    # combine start and end times into one variable
+    client_hours = client_hours_start + "-" + client_hours_end
 
     # prepare client info variables as a tuple
     client_info = (client_name, client_hours)
 
     # check to make sure at least one team member was assigend to client's team
     if not request.form.get("assign_teacher0") and not request.form.get("assign_teacher1") and not request.form.get("assign_teacher2") and not request.form.get("assign_teacher3"):
-        return render_template("error.html", message="Please provide client with at least one Team Member")
+        return render_template("error.html", message=f"Please provide {client_name} with at least one Team Member")
 
     # create list of team members, remove variables that have no data
     t_members = [request.form.get("assign_teacher0"), request.form.get("assign_teacher1"), request.form.get("assign_teacher2"),
@@ -86,25 +86,35 @@ def clients():
     # connect to database
     db, conn = db_connect(DB_URL)
 
+    # check if client's name is already in the database
+    db.execute("SELECT * FROM clients WHERE name=?", (client_name,))
+    if db.fetchall():
+        return render_template("error.html", message=f"{client_name} is already in the database")
+    
     # insert data, or ignore if name is already present
-    db.execute("INSERT OR IGNORE INTO clients (name, hours) VALUES (?,?)", client_info)
+    db.execute("INSERT INTO clients (name, hours) VALUES (?,?)", client_info) #NOTE: Test this site w/o JS to see if this line of code is working
 
-    # check if team members exist
+    # Insert client IDs and Staff ID's into the data base
     for staff in unique_members:
+        # get staff info
         db.execute("SELECT * FROM staff WHERE name=?", (staff,))
         staff_info = db.fetchone()
-        # if one does not exits, return warning
+
+        # if no staff into is found, return error
         if not staff_info:
             return render_template("error.html", message=f"{staff} was not found in the staff database. New Client was not added")
-        # if they exist, insert staff ID and client ID into table "teams"
+
+        # insert staff ID and client ID into table "teams"
         else:
+            # get client ID
             db.execute("SELECT clientID FROM clients WHERE name=?", (client_name,))
             client_ID = db.fetchone()
 
-            # check if staff member is already on client's team
+            # TODO check if staff member is already on client's team?
+            # insert client and staff ID into teams
             db.execute("INSERT INTO teams (clientID, staffID) VALUES(?,?)", (client_ID["clientID"], staff_info["staffID"]))
 
-    # commit and close database, render success message NOTE: to be changed
+    # commit and close database
     conn.commit()
     conn.close()
     return render_template("error.html", message="Success")
@@ -112,7 +122,7 @@ def clients():
 @app.route("/addclient", methods=["GET"])
 def addclient():
     clientname = request.args.get("clientname").strip()
-    # ensure proper data format (TODO)
+    
     # connect to database
     db, conn = db_connect(DB_URL)
 
@@ -131,9 +141,8 @@ def addclient():
 def remove_client():
     # validate remove_client form
     if not request.form.get("slct_client"):
-        return render_template("error.html", message="Please provide the client name to remove from the database")
+        return render_template("error.html", message="Please provide the client name to be removed the database")
     client_name = request.form.get("slct_client")
-    # ensure proper data format (TODO)
 
     # connect to database
     db, conn = db_connect(DB_URL)
@@ -142,18 +151,15 @@ def remove_client():
     db.execute("SELECT clientID FROM clients WHERE name=?", (client_name,))
     query = db.fetchone()
     if not query:
-        return render_template("error.html", message="No client with this name was found in the database")
+        return render_template("error.html", message=f"{client_name} was not found in the database")
 
-    # delete all rows in team table matching client ID
+    # delete client's team assignments, delete client
     db.execute("DELETE FROM teams where clientID=?", (query["clientID"],))
-
-    # delete client from client table
     db.execute("DELETE FROM clients WHERE name=?", (client_name,))
 
-    # commit changes and close the connection
+    # commit changes and close the connection, return success
     conn.commit()
     conn.close()
-    # render success page NOTE: change this to a legit message later
     return render_template("error.html", message="Success")
 
 @app.route("/clients/update", methods=["POST"])
@@ -161,6 +167,7 @@ def update_client():
     
     if not request.form.get("update_client"):
         return render_template("error.html", message="Please provide the Client's name")
+
     client_name = request.form.get("update_client")
 
     # connect to db
@@ -170,20 +177,41 @@ def update_client():
     db.execute("SELECT * FROM clients WHERE name=?", (client_name,))
     client_info = db.fetchone()
     if not client_info:
-        return render_template("error.html", message="No client with this name was found in the database")
+        return render_template("error.html", message=f"{client_name} was not found in the database")
+
+    # check for incomplete hours data
+    if not request.form.get("new_client_hours_start") and request.form.get("new_client_hours_end"):
+        return render_template("error.html", message="Pleave provide both start and end times")
+    if request.form.get("new_client_hours_start") and not request.form.get("new_client_hours_end"):
+        return render_template("error.html", message="Pleave provide both start and end times")
 
     # get and insert new hours data
-    client_hours = request.form.get("txt_new_client_hours")
-    if client_hours:
-        # ensure proper data format (TODO)
+    if request.form.get("new_client_hours_start") and request.form.get("new_client_hours_end"):
+        client_hours_start = request.form.get("new_client_hours_start")
+        client_hours_end = request.form.get("new_client_hours_end")
+
+        # ensure proper data format
+        time = re.compile(r"[012][0-9]:[0-5][0-9]")
+        if not time.match(client_hours_end) or not time.match(client_hours_start):
+            return render_template("error.html", message="Start-time and End-time data was not formatted correctly")
+
+        client_hours = client_hours_start + "-" + client_hours_end
         db.execute("UPDATE clients SET hours=? WHERE name=?", (client_hours, client_name))
-        
+
     # if there is absent data
     if request.form.get("absent"):
-        # ensure proper data format (TODO)
-        absent = int(request.form.get("absent"))
-        # update client
-        db.execute("UPDATE clients SET absent=? WHERE name=?", (absent, client_name))
+        # ensure proper data format
+        absent = request.form.get("absent")
+        if absent.isdigit():
+            absent = int(absent)
+        else:
+            return render_template("error.html", message="Absent field must be a digit")
+
+        if absent == 1 or 0:
+            # update client
+            db.execute("UPDATE clients SET absent=? WHERE name=?", (absent, client_name))
+        else:
+            return render_template("error.html", message="Absent field must be a 1 or a 0")
 
     # get team placement
     new_teacher = request.form.get("new_teacher")
@@ -191,7 +219,6 @@ def update_client():
 
     # if there is data, 
     if new_teacher and add_or_remove:
-        # ensure proper data format (TODO)
 
         # check if selected staff is in the database
         db.execute("SELECT * FROM staff WHERE name=?", (new_teacher,))
@@ -203,19 +230,26 @@ def update_client():
         db.execute("SELECT * FROM teams WHERE clientID=? AND staffID=?", (client_info["clientID"], staff_info["staffID"]))
         team_info = db.fetchone()
         
+        # check if data recieved matches expected pattern
+        regex = re.compile(r"add|remove")
+        result = regex.match(add_or_remove)
+
+        if not result:
+            return render_template("error.html", message="Incorrect Add/Remove data recieved")
+
         if add_or_remove == "add":
             if team_info:
                 return render_template("error.html", message=f"{new_teacher} is already on {client_name}'s team")
-
-            # add selected teacher to selected Client's team
-            db.execute("INSERT INTO teams (clientID, staffID) VALUES(?,?)", (client_info["clientID"], staff_info["staffID"]))
+            else:
+                # add selected teacher to selected Client's team
+                db.execute("INSERT INTO teams (clientID, staffID) VALUES(?,?)", (client_info["clientID"], staff_info["staffID"]))
 
         if add_or_remove == "remove":
             if not team_info:
                 return render_template("error.html", message=f"No removal necessary, {new_teacher} and {client_name} are not on the same team")
-
-            # remove selected teacher from selected Client's team
-            db.execute("DELETE FROM teams WHERE clientID=? and staffID=?", (client_info["clientID"], staff_info["staffID"]))
+            else:
+                # remove selected teacher from selected Client's team
+                db.execute("DELETE FROM teams WHERE clientID=? and staffID=?", (client_info["clientID"], staff_info["staffID"]))
 
     # commit changes and return success message
     conn.commit()
