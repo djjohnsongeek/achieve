@@ -10,6 +10,7 @@ from SQL import db_connect
 
 # NOTE: need to replace single error page with ui feedback
 # NOTE: need to make sure that POST requests with AJAX for the difference forms (Add, Remove, Update)
+# NOTE: ensure sure times are "valid"
 
 DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 
@@ -193,7 +194,7 @@ def update_client():
         # ensure proper data format
         time = re.compile(r"[012][0-9]:[0-5][0-9]")
         if not time.match(client_hours_end) or not time.match(client_hours_start):
-            return render_template("error.html", message="Start-time and End-time data was not formatted correctly")
+            return render_template("error.html", message="Incorrect time format")
 
         client_hours = client_hours_start + "-" + client_hours_end
         db.execute("UPDATE clients SET hours=? WHERE name=?", (client_hours, client_name))
@@ -202,16 +203,16 @@ def update_client():
     if request.form.get("absent"):
         # ensure proper data format
         absent = request.form.get("absent")
-        if absent.isdigit():
+        try:
             absent = int(absent)
-        else:
+        except ValueError:
             return render_template("error.html", message="Absent field must be a digit")
 
-        if absent == 1 or 0:
+        if absent == 1 or absent == 0:
             # update client
             db.execute("UPDATE clients SET absent=? WHERE name=?", (absent, client_name))
         else:
-            return render_template("error.html", message="Absent field must be a 1 or a 0")
+            return render_template("error.html", message="Incorrect value for Absent/Present Radio Button")
 
     # get team placement
     new_teacher = request.form.get("new_teacher")
@@ -276,22 +277,44 @@ def staff():
         return render_template("error.html", message="Please provide staff's name")
     staff_name = request.form.get("staff_name").strip()
 
-    # check if RBT field is filled out
+    # check if RBT field is filled out correctly
     if not request.form.get("RBT"):
         rbt_status = 0
     else:
-        rbt_status = int(request.form.get("RBT"))
+        try:
+            rbt_status = int(request.form.get("RBT"))
+        except ValueError:
+            return render_template("error.html", message="Incorrect value for RBT checkbox")
+
+        if rbt_status != 1:
+            return render_template("error.html", message="Incorrect value for RBT checkbox")
+    
     
     # check Tier field is filled out
     if not request.form.get("Tier"):
         rbt_tier = 1
+
     else:
-        rbt_tier = int(request.form.get("Tier"))
+        try:
+            rbt_tier = int(request.form.get("Tier"))
+        except ValueError:
+            return render_template("error.html", message="Incorrect value entered in to Tier radio button")
+        if rbt_tier != 1 and rbt_tier != 2 and rbt_tier != 3:
+            return render_template("error.html", message="Incorrect number value entered in to Tier radio button")
 
     # check if hours filed is filled out
-    if not request.form.get("staff_hours"):
+    if not request.form.get("staff_hours_start") or not request.form.get("staff_hours_end"):
         return render_template("error.html", message="You must provide staff hours")
-    staff_hours = request.form.get("staff_hours")
+    
+    # check hour data is in the correct format
+    staff_hours_start = request.form.get("staff_hours_start")
+    staff_hours_end = request.form.get("staff_hours_end")
+    time = re.compile(r"[012][0-9]:[0-5][0-9]")
+    if not time.match(staff_hours_start) or not time.match(staff_hours_end):
+        return render_template("error.html", message="Incorrect time format")
+
+    # built final start and end times
+    staff_hours = staff_hours_start + "-" + staff_hours_end
 
     # connect to database
     db, conn = db_connect(DB_URL)
@@ -326,6 +349,10 @@ def remove_staff():
     db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
     staffID = db.fetchone()
 
+    # check if staff name is in the database
+    if not staffID:
+        return render_template("error.html", message=f"{staff_name} is not in the database")
+
     # delete staff info
     db.execute("DELETE FROM staff WHERE name=?", (staff_name,))
 
@@ -352,44 +379,63 @@ def staff_update():
     db.execute("SELECT * FROM staff WHERE name=?", (staff_name,))
     staff_info = db.fetchone()
     if not staff_info:
-        return render_template(f"{staff_name} is not in the database")
+        return render_template("error.html", message=f"{staff_name} is not in the database")
 
-    # if all fields are filled out (shortcut)
-    if request.form.get("rbt_update") and request.form.get("tier_update") and request.form.get("staff_hours_update") and request.form.get("staff_absent"):
-        rbt_status = int(request.form.get("rbt_update"))
-        tier = int(request.form.get("tier_update"))
-        hours = request.form.get("staff_hours_update").strip()
-        absent = int(request.form.get("staff_absent"))
-
-        # submit info in one query
-        db.execute("UPDATE staff SET rbt=?, tier=?, hours=?, absent=? WHERE name=?", (rbt_status, tier, hours, absent, staff_name))
-
-        # close and commit db
-        conn.commit()
-        conn.close()
-        return render_template("error.html", message="Success, short cut")
-        
-    # if RBT is checked
+    # if RBT is checked, validate data and submit
     if request.form.get("rbt_update"):
-        rbt_status = int(request.form.get("rbt_update"))
-        db.execute("UPDATE staff SET rbt=? WHERE name=?", (rbt_status, staff_name))
+        try:
+            rbt_status = int(request.form.get("rbt_update"))
+        except ValueError:
+            return render_template("error.html", message="RBT field must be a digits")
+        
+        if rbt_status == 1:
+            db.execute("UPDATE staff SET rbt=? WHERE name=?", (rbt_status, staff_name))
+        else:
+            return render_template("error.html", message="Incorrect value for RBT field")
 
     # if Tier radio is chosen
     if request.form.get("tier_update"):
-        tier = int(request.form.get("tier_update"))
-        db.execute("UPDATE staff SET tier=? WHERE name=?", (tier, staff_name))
+        try:
+            tier = int(request.form.get("tier_update"))
+        except ValueError:
+            return render_template("error.html", message="Tier field must be a digit")
+        
+        if tier == 1 or tier == 2 or tier == 3:
+            db.execute("UPDATE staff SET tier=? WHERE name=?", (tier, staff_name))
+        else:
+            return render_template("error.html", message="Incorrect value in Tier field")
+
+    # if only one time field is filled out
+    if request.form.get("staff_hours_update_start") and not request.form.get("staff_hours_update_end"):
+        return render_template("error.html", message="Please provide both start and end times")
+
+    if not request.form.get("staff_hours_update_start") and request.form.get("staff_hours_update_end"):
+        return render_template("error.html", message="Please provide both start and end times")
 
     # if hours is filled out
-    if request.form.get("staff_hours_update"):
-        hours = request.form.get("staff_hours_update").strip()
-        # ensure data is formatted correctly
-            # (TODO)
-        db.execute("UPDATE staff SET hours=? WHERE name=?", (hours, staff_name))
-    
+    if request.form.get("staff_hours_update_start") and request.form.get("staff_hours_update_end"):
+
+        hours_start = request.form.get("staff_hours_update_start")
+        hours_end = request.form.get("staff_hours_update_end")
+
+        time = re.compile(r"[012][0-9]:[0-5][0-9]")
+        if time.match(hours_start) and time.match(hours_end):
+            hours = hours_start + "-" + hours_end
+            db.execute("UPDATE staff SET hours=? WHERE name=?", (hours, staff_name))
+        else:
+            return render_template("error.html", message="Incorrect time format")
+
     # if absent is chosen
     if request.form.get("staff_absent"):
-        absent = int(request.form.get("staff_absent"))
-        db.execute("UPDATE staff SET absent=? WHERE name=?", (absent, staff_name))
+        try:
+            absent = int(request.form.get("staff_absent"))
+        except ValueError:
+            return render_template("error.html", message="Absent/Present field must be a digit")
+
+        if absent == 1 or absent == 0:  
+            db.execute("UPDATE staff SET absent=? WHERE name=?", (absent, staff_name))
+        else:
+            return render_template("error.html", message="Incorrect value in Absent/Present field")
 
     # close database and save changes
     conn.commit()
