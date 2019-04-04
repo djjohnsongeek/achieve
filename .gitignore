@@ -1,0 +1,12 @@
+# Don't track the following folders
+.vscode/
+__pycache__/
+venv/
+static/
+
+# Dont't track the following files
+achieve.db
+TODO.txt
+djlib.py
+
+
