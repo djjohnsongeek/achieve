@@ -11,7 +11,11 @@
         <form id="form_add_client" name="form_add_client" method="POST" action="/clients">
             <fieldset>
                 <legend>Add a Client</legend>
-                <input type="text" id="client_name" name="client_name" placeholder="Client Name" required><br/>
+                <input type="text" id="client_name" name="client_name" placeholder="Client Name" required>
+                <label for="client_hours_start" class="form_titles">Start Time:</label>
+                <input type="time" name="client_hours_start" id="client_hours_start" placeholder="hh:mm (24hr)">
+                <label for="client_hours_end" class="form_titles">End Time:</label>
+                <input type="time" name="client_hours_end" id="client_hours_end" placeholder="hh:mm (24hr)"><br/>
                 <span class="form_titles">Assign Teachers to Team:</span><br/>
                 <select name="assign_teacher0">
                     <option value="" selected disabled>Select Staff</option>
@@ -37,10 +41,6 @@
                     <option value="{{item['name']}}">{{ item["name"] }}</option>
                     {% endfor %}
                 </select><br/>
-                <label for="client_hours_start" class="form_titles">Start Time:</label>
-                <input type="time" name="client_hours_start" id="client_hours_start" placeholder="hh:mm (24hr)">
-                <label for="client_hours_end" class="form_titles">End Time:</label>
-                <input type="time" name="client_hours_end" id="client_hours_end" placeholder="hh:mm (24hr)"><br/>
                 <button type="submit" id="btn_add_client" class="btn_submit" value="add_client" name="btn_add_client">Add Client</button>
             </fieldset>
         </form>

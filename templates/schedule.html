@@ -4,17 +4,11 @@
 
 {% block main %}
     <div class="description">
-        <header><h1>Schedule</h1></header>
+        <header><h1> Staff Schedule</h1></header>
     </div>
     <div class="div_forms">
-        <h2>Generate Staff Schedule</h2>
-        Forms go here Forms go hereForms go hereForms go hereForms go here Forms go
-        Forms go here Forms go hereForms go hereForms go hereForms go here Forms go here
-        Forms go hereForms go hereForms go hereForms go here Forms go here Forms go here
-        <p>preview button?</p>
-    </div>
-    <div class="div_forms">
-        <h2>Download File</h2>
-        <p>download csv file here</p>
+        <form action="/schedule" method="POST">
+            <button id="btn_generate" name="btn_generate">Generate Schedule</button>
+        </form>
     </div>
 {% endblock %}

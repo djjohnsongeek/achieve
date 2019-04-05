@@ -17,10 +17,10 @@ DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 # initialize app
 app = Flask(__name__, static_folder="C:\\Users\\Johnson\\Documents\\Projects\\Achieve\\static")
 
-# ensure auto reload
+# ensure auto reload, from CS50 staff
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
-# Ensure responses aren't cached
+# Ensure responses aren't cached, from CS50 staff
 @app.after_request
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -442,6 +442,11 @@ def staff_update():
     conn.close()
     return render_template("error.html", message="Success")
 
-@app.route("/schedule")
+@app.route("/schedule", methods=["GET", "POST"])
 def schedule():
-    return render_template("schedule.html")
+    if request.method == "GET":
+        return render_template("schedule.html")
+
+    # if post request is sent
+    print("Generating Schedule")
+    return render_template("error.html", message="DONE")

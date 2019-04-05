@@ -93,10 +93,36 @@ footer
     margin: 10px;
 }
 
+#btn_generate
+{
+    width: 40%;
+    height: 80px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    margin-left: 30%;
+    margin-right: 30%;
+    border-radius: 5px;
+    background-color: lightslategrey;
+    border: solid 1px rgb(128, 128, 128);
+    transition: font-size .5s, background-color .5s;
+}
+
+#btn_generate:hover
+{
+    background-color: rgb(146, 180, 224);
+    border: solid 2px rgb(2, 93, 179);
+    font-size: 108%;
+}
+
 fieldset, .welcome
 {
     padding: 10px;
     margin: 20px;
+}
+
+.list_title
+{
+    margin-left: 20px;
 }
 
 .form_titles
@@ -114,17 +140,17 @@ input, select
 {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
 }
 
 .big_link
 {
     width: 400px;
-    margin: 20px;
+    margin: 15px;
     text-align: center;
     padding: 5px;
     background-color: #7acedc;
     border: solid 2px darkslategrey;
-    
 }
 
 .big_icon
