@@ -2,13 +2,13 @@ import os
 import sqlite3
 import re
 import csv
-import djlib
 
 from flask import Flask
 from flask import render_template, request, session, redirect, Response, jsonify
 from sqlite3 import Error
 from SQL import db_connect
 from random import randrange
+from djlib import insert_t1
 
 # NOTE: need to replace single error page with ui feedback
 # NOTE: need to make sure that POST requests with AJAX for the difference forms (Add, Remove, Update)
@@ -447,63 +447,41 @@ def schedule():
         return render_template("schedule.html")
 
     db, conn = db_connect(DB_URL)
-
     # do we need to make additional tables that store hour by hour information?
      
     # get client, staff, teams data (where client/staff are present, ordered by name)
     db.execute("SELECT * FROM clients WHERE absent=? ORDER BY name", (0,))
     client_data = db.fetchall()
-    
     db.execute("SELECT * FROM staff WHERE absent=? ORDER BY name", (0,))
     staff_data = db.fetchall()
 
-    # db.execute("SELECT clients.name, staff.name FROM teams INNER JOIN clients ON clients.clientID = teams.clientID INNER JOIN staff ON staff.staffID = teams.staffID")
-    # db.execute("SELECT clientID, staff.name FROM teams INNER JOIN staff ON staff.staffID = teams.staffID WHERE clientID = 1")
-    # db.execute("SELECT * FROM teams")
-    # team_data = db.fetchall()    
-
-    # create list of dicts
+    # create schedule dicts for each client
     clients = []
     c_dict = {830: 0, 930: 0, 1030: 0, 1130: 0, 1230: 0, 130: 0, 230: 0}
     clients = [c_dict for row in client_data]
 
-    # while "looking" at each client's dict
+    # update each client's schedule
     client_num = 0
     for client in clients:
         # get client ID and Name
         client_ID = client_data[client_num]["clientID"]
         client_name = client_data[client_num]["name"]
-        # add name and value to dict?
+        # NOTE add name and value to dict?
+
         # get staff members are on this client's team
         db.execute("SELECT clientID, staff.name FROM teams INNER JOIN staff ON staff.staffID = teams.staffID WHERE clientID = ?", (client_ID,))
         team_members = db.fetchall()
-        
         client_team = [staff["name"] for staff in team_members]
-
-        # create list of client team members that are tier 1
-        client_team_t1 = []
-        for staff in client_team:
-            db.execute("SELECT tier FROM staff WHERE name=?", (staff,))
-            staff_tier = db.fetchone()
-
-            if staff_tier["tier"] == 1:
-                client_team_t1.append(staff)
-
-        # check for no t1 staff
-        if client_team_t1:
-            # if multiple pick a random one
-            i = randrange(0, len(client_team_t1))
-            # schedule for 2 hours
-            clients[client_num][830] = client_team_t1[i]
-            clients[client_num][930] = client_team_t1[i]
-            # update staff dict
-        else:
-            # move to next tier
-            print("move to next tier")
-            
+       
+        clientSchedule =  insert_t1(client_name, client_ID, client_team, clients[client_num])
+        if not clientSchedule:
+            print("move to t2 staff")
 
         # check for blank places on client's day
-        values = clients[client_num].values()
+        values = clientSchedule.values()
+        print(clientSchedule)
+        print(values)
+
         if 0 in values:
             # repeat t1 progess
             print("repeat T1 process")
@@ -513,32 +491,16 @@ def schedule():
             # check for staff with no breaks
             # fill blank hours with planning or breaks
 
-        # else
-            # move on to next client
+        else:
+            with open("schedule.csv", "a", newline="") as csvfile:
+                fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, 330]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+                writer.writerow(clientSchedule)
+                continue
              
         client_num += 1
 
-            # which are tier 2?
-                # if any 
-                    # schedule for 2 hours
-                # if not 
-                    # move to next tier
-                # check for blank places on client's day
-                    # if yes
-                        # repeat process
-                    # if no
-                        # move on to next client
-
-            # which are tier 3?
-                # if any 
-                    # schedule for 2 hours
-                # if not 
-                    # move to next tier
-                # check for blank places on client's day
-                    # if yes
-                        # repeat process
-                    # if no
-                        # move on to next client
     conn.close()
     return render_template("error.html", message="Success")
     
