@@ -12,7 +12,7 @@ def db_connect(URL):
         print(e)
         conn.close()
         print("Connection Failed")
-    else:
+    else:  
         return db, conn
 
 
