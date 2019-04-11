@@ -458,8 +458,9 @@ def schedule():
     # create schedule dicts for each client
     clients = []
     c_dict = {830: 0, 930: 0, 1030: 0, 1130: 0, 1230: 0, 130: 0, 230: 0}
-    clients = [c_dict for row in client_data]
+    clients = [c_dict.copy() for row in client_data]
 
+    print(clients)
     # update each client's schedule
     client_num = 0
     for client in clients:
@@ -473,32 +474,33 @@ def schedule():
         team_members = db.fetchall()
         client_team = [staff["name"] for staff in team_members]
        
+        clients[client_num]["Name"] = client_name
+        
         clientSchedule =  insert_t1(client_name, client_ID, client_team, clients[client_num])
-        if not clientSchedule:
+
+        if clientSchedule == None:
             print("move to t2 staff")
 
-        # check for blank places on client's day
-        values = clientSchedule.values()
-        print(clientSchedule)
-        print(values)
-
-        if 0 in values:
-            # repeat t1 progess
-            print("repeat T1 process")
+        # check for blank places on client's day      
+        if 0 in clientSchedule.values():
+            clientSchedule =  insert_t1(client_name, client_ID, client_team, clientSchedule)
+            if clientSchedule == None:
+                print("TODO: move to t2 staff")
+                return render_template("error.html", message="TODO: move to t2 staff")
+            
 
         # if no more clients
             # check for blank staff hours
             # check for staff with no breaks
             # fill blank hours with planning or breaks
 
-        else:
-            with open("schedule.csv", "a", newline="") as csvfile:
-                fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, 330]
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                writer.writeheader()
-                writer.writerow(clientSchedule)
-                continue
-             
+        
+        with open("schedule.csv", "a", newline="") as csvfile:
+            fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, 330, "Name"]
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerow(clientSchedule)
+
         client_num += 1
 
     conn.close()

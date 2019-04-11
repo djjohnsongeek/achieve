@@ -17,11 +17,15 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
         staff_tier = db.fetchone()
         if staff_tier["tier"] == 1:
             client_team_t1.append(staff)
-
+    print("t1 team:", client_team_t1)
     # close connection to database
     conn.close()
-
-    # check 0 tier 1 staff
+    # remove t1 staff who have already been scheduled on the client's team
+    for staff in client_team_t1:
+        if staff in client_sch.values():
+            client_team_t1.remove(staff)
+    print("cleaned", client_team_t1)
+    # return 0 if no t1 teachers left
     if not client_team_t1:
         return None
 
@@ -30,18 +34,19 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
         # randomly select staff from list
         i = randrange(0, len(client_team_t1))
 
-        # find empty hours TODO
+        # find staff's available hours TODO
+
+        # find empty client hours
         items = client_sch.items()
-        open_times = []
-        for item in items:
-            if item[1] == 0:
-                open_times.append(item[0])
-        
+        open_times = [item[0] for item in items if item[1] == 0]
         
         # schedule for 2 hours
         if len(open_times) >= 2:
             client_sch[open_times[0]] = client_team_t1[i]
             client_sch[open_times[1]] = client_team_t1[i]
+
+        if len(open_times) < 2:
+            client_sch[open_times[0]] = client_team_t1[i]
 
         # update staff dict TODO
         return(client_sch)
