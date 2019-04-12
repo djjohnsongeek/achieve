@@ -476,17 +476,20 @@ def schedule():
        
         clients[client_num]["Name"] = client_name
         
+        # schedule two hours
         clientSchedule =  insert_t1(client_name, client_ID, client_team, clients[client_num])
 
+        # check for no available t1 staff on team
         if clientSchedule == None:
             print("move to t2 staff")
+            return render_template("error.html", message="no t1, schedule t2")
 
-        # check for blank places on client's day      
-        if 0 in clientSchedule.values():
+        # check for blank places on client's day, schedule additional hours as needed
+        while 0 in clientSchedule.values():      
             clientSchedule =  insert_t1(client_name, client_ID, client_team, clientSchedule)
             if clientSchedule == None:
                 print("TODO: move to t2 staff")
-                return render_template("error.html", message="TODO: move to t2 staff")
+                break
             
 
         # if no more clients
@@ -496,7 +499,7 @@ def schedule():
 
         
         with open("schedule.csv", "a", newline="") as csvfile:
-            fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, 330, "Name"]
+            fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, "Name"]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerow(clientSchedule)

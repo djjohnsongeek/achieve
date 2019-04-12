@@ -21,9 +21,11 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
     # close connection to database
     conn.close()
     # remove t1 staff who have already been scheduled on the client's team
-    for staff in client_team_t1:
+    dummy_list = client_team_t1.copy()
+    for staff in dummy_list:
         if staff in client_sch.values():
             client_team_t1.remove(staff)
+
     print("cleaned", client_team_t1)
     # return 0 if no t1 teachers left
     if not client_team_t1:
@@ -50,27 +52,3 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
 
         # update staff dict TODO
         return(client_sch)
-        
-
-
-        # which are tier 2?
-                # if any 
-                    # schedule for 2 hours
-                # if not 
-                    # move to next tier
-                # check for blank places on client's day
-                    # if yes
-                        # repeat process
-                    # if no
-                        # move on to next client
-
-            # which are tier 3?
-                # if any 
-                    # schedule for 2 hours
-                # if not 
-                    # move to next tier
-                # check for blank places on client's day
-                    # if yes
-                        # repeat process
-                    # if no
-                        # move on to next client
