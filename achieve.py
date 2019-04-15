@@ -10,9 +10,9 @@ from SQL import db_connect
 from random import randrange
 from djlib import insert_t1
 
-# NOTE: need to replace single error page with ui feedback
-# NOTE: need to make sure that POST requests with AJAX for the difference forms (Add, Remove, Update)
-# NOTE: ensure sure times are "valid"
+# NOTE: need to replace annoying single error page with servier side ui feedback
+# NOTE: need to send POST requests with AJAX
+# NOTE: after full functionality is done, optimize code
 
 DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 
@@ -22,7 +22,7 @@ app = Flask(__name__, static_folder="C:\\Users\\Johnson\\Documents\\Projects\\Ac
 # ensure auto reload, from CS50 staff
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
-# Ensure responses aren't cached, from CS50 staff
+# Ensure responses aren't cached, code used from CS50 staff
 @app.after_request
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -447,7 +447,7 @@ def schedule():
         return render_template("schedule.html")
 
     db, conn = db_connect(DB_URL)
-    # do we need to make additional tables that store hour by hour information?
+    # store hourly staff and client info in database, or in memory each time the program runs?
      
     # get client, staff, teams data (where client/staff are present, ordered by name)
     db.execute("SELECT * FROM clients WHERE absent=? ORDER BY name", (0,))
@@ -460,11 +460,9 @@ def schedule():
     c_dict = {830: 0, 930: 0, 1030: 0, 1130: 0, 1230: 0, 130: 0, 230: 0}
     clients = [c_dict.copy() for row in client_data]
 
-    print(clients)
     # update each client's schedule
     client_num = 0
     for client in clients:
-        # get client ID and Name
         client_ID = client_data[client_num]["clientID"]
         client_name = client_data[client_num]["name"]
         # NOTE add name and value to dict?
@@ -482,7 +480,7 @@ def schedule():
         # check for no available t1 staff on team
         if clientSchedule == None:
             print("move to t2 staff")
-            return render_template("error.html", message="no t1, schedule t2")
+            return render_template("error.html", message="no t1, schedule t2 now")
 
         # check for blank places on client's day, schedule additional hours as needed
         while 0 in clientSchedule.values():      
@@ -490,7 +488,6 @@ def schedule():
             if clientSchedule == None:
                 print("TODO: move to t2 staff")
                 break
-            
 
         # if no more clients
             # check for blank staff hours
