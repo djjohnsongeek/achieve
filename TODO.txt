@@ -1,0 +1,68 @@
+TODO:
+-build bones of website (HTML structure, links) (done, additions may be required)
+    -layout
+    -index
+    -clients 
+    -staff 
+    -schedule
+-beautify with css (initial pass finished)
+    -layout (initial pass finished)
+    -index (initial pass finished)
+    -clients (initial pass finished)
+    -staff (initial pass finished)
+    -schedule (initial pass finished)
+Build functionality (in progress)
+    /clients (in progress)
+        -add client info to client table (server side done)
+            -server side (done)
+            -client side
+                -validate all input fields (ensure incorrect entries cannot be made)
+                -give consumer feedback
+                -send requests through AJAX
+        -assign added client to teams table (server side done)
+            -server side (done)
+            -client side
+                -validate all input fields (ensure incorrect entries cannot be made)
+                -give consumer feedback
+                -send requests through AJAX
+        -remove client from clients and teams table (server side done)
+            -server side (done)
+            -client side
+                -validate all input fields (ensure incorrect entries cannot be made)
+                -give consumer feedback
+                -send requests through AJAX
+        -populate staff select forms with database data (done)
+        -populate client select forms (to remove clients and update) with database data (done)
+        -update client info (server side done)
+            -server side (done)
+            -client side
+                -validate all input fields (ensure incorrect entries cannot be made)
+                -give consumer feedback
+                -send requests through AJAX
+        -add or remove client from teams (server side done)
+            -server side (done)
+            -client side
+                -validate all input fields (ensure incorrect entries cannot be made)
+                -give consumer feedback
+                -send requests through AJAX
+    /staff (server side done)
+    /schedule
+
+
+CURRENT Version Features
+    -add, edit, remove client and staff info from database
+    -only schedule for one day
+    -generate downloadable csv file for the daily schedule
+
+FUTURE Features:
+    -ability to view selected client's or staff's teams, schedule, or info in-general
+    -seperate teams page? (For team management)
+    -view entire schedule online
+    -save, download, and view shedules generated in the past
+    -schedule one week at a time
+    -mobile responsive
+    
+KNOWN BUGS:
+    -logo picture fails to load when rendering error.html template from the /clients/remove route  or the /clients/update route
+    -occaisional infinite loop
+    -still sometimes double books staff

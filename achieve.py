@@ -448,7 +448,11 @@ def schedule():
 
     db, conn = db_connect(DB_URL)
     # store hourly staff and client info in database, or in memory each time the program runs?
-     
+
+    # reset staff-client schedule
+    db.execute('UPDATE staff SET "830"="none", "930"="none", "1030"="none", "1130"="none", "1230"="none", "130"="none", "230"="none"')
+    conn.commit()
+
     # get client, staff, teams data (where client/staff are present, ordered by name)
     db.execute("SELECT * FROM clients WHERE absent=? ORDER BY name", (0,))
     client_data = db.fetchall()
@@ -480,28 +484,44 @@ def schedule():
         # check for no available t1 staff on team
         if clientSchedule == None:
             print("move to t2 staff")
-            return render_template("error.html", message="no t1, schedule t2 now")
+            return render_template("error.html", message="no t1 left, schedule t2 now")
 
         # check for blank places on client's day, schedule additional hours as needed
         while 0 in clientSchedule.values():      
             clientSchedule =  insert_t1(client_name, client_ID, client_team, clientSchedule)
             if clientSchedule == None:
                 print("TODO: move to t2 staff")
-                break
+                return render_template("error.html", message="no t1 left, schedule t2 now")
 
         # if no more clients
             # check for blank staff hours
             # check for staff with no breaks
             # fill blank hours with planning or breaks
 
-        
+        # write client's schedule to csv
         with open("schedule.csv", "a", newline="") as csvfile:
             fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, "Name"]
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
             writer.writeheader()
+            print(clientSchedule)
             writer.writerow(clientSchedule)
 
         client_num += 1
+
+    # get staff's schedule
+    db.execute('SELECT "830", "930", "1030", "1130", "1230", "130", "230", "name" FROM staff')
+    staffstuff = db.fetchall() # NOTE rename this variable
+    
+    for row in staffstuff:
+        staffSchedule = dict(row)
+        # write staff's schedule to csv
+        csvfile = open("schedule.csv", "a", newline="")
+        fieldnames = ['830', '930', '1030', '1130', '1230', '130', '230', "name"]
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        writer.writeheader()
+        writer.writerow(staffSchedule)
+        csvfile.close()
+        
 
     conn.close()
     return render_template("error.html", message="Success")

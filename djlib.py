@@ -35,31 +35,47 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
         
         # find empty client hours
         items = client_sch.items()
-        open_times = [item[0] for item in items if item[1] == 0]
+        client_open_times = [item[0] for item in items if item[1] == 0]
 
-        # check on staff's available hours TODO
-        
-        
+        # check on staff's available hours IN-PROGRESS      
         # get schedule for selected staff memeber
         db.execute('SELECT "830", "930", "1030", "1130", "1230", "130", "230" FROM staff WHERE name=?', (client_team_t1[i],))
         staff_hours = db.fetchone()
-        staff_hours_keys = [int(times) for times in staff_hours.keys()]
-        
-        for time in staff_hours_keys:
-            if time in open_times:
-                print("he is free") # on the right track with this
 
+        staff_sch = dict(staff_hours)
+        
+        # delete items in dictionary where staff is already scheduled
+        dummy_list2 = [item for item in staff_sch.items()]
+        for item in dummy_list2:
+            if item[1] != "none":
+                del staff_sch[item[0]]
+
+        staff_open_times = [int(times) for times in staff_sch.keys()]
+
+        # remove times from the client's open time list if they are not in the staff's open times
+        for time in client_open_times:
+            if time not in staff_open_times:
+                client_open_times.remove(time)
+                
         #   update it as client schedules are updating it
         #   check against it while scheduling
         #   write final content in csv file
 
         # schedule for 2 hours
-        if len(open_times) >= 2:
-            client_sch[open_times[0]] = client_team_t1[i]
-            client_sch[open_times[1]] = client_team_t1[i]
+        if len(client_open_times) >= 2:
+            client_sch[client_open_times[0]] = client_team_t1[i]
+            client_sch[client_open_times[1]] = client_team_t1[i]
 
-        if len(open_times) < 2:
-            client_sch[open_times[0]] = client_team_t1[i]
+            # update staff database NOTE: using formatted strings: is this dangerous since variables are not user generated?
+            db.execute(f'UPDATE staff SET "{client_open_times[0]}"=? WHERE name=?', (client_name, client_team_t1[i]))
+            db.execute(f'UPDATE staff SET "{client_open_times[1]}"=? WHERE name=?', (client_name, client_team_t1[i]))
 
+        elif len(client_open_times) == 1:
+            client_sch[client_open_times[0]] = client_team_t1[i]
+            db.execute(f'UPDATE staff SET "{client_open_times[0]}"=? WHERE name=?', (client_name, client_team_t1[i]))
+        else:
+            print("no one to schedule from t1 team, move on to tier2?")
+            
+        conn.commit()
         conn.close()
         return(client_sch)
