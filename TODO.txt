@@ -47,10 +47,12 @@ Build functionality (in progress)
                 -send requests through AJAX
     /staff (server side done)
     /schedule
-
+NOTE: 
+-need to re-style long IF statements
+-need to re-orginize TODO file
 
 CURRENT Version Features
-    -add, edit, remove client and staff info from database
+    -add, edit, remove client and staff info from database (DONE)
     -only schedule for one day
     -generate downloadable csv file for the daily schedule
 
@@ -66,3 +68,4 @@ KNOWN BUGS:
     -logo picture fails to load when rendering error.html template from the /clients/remove route  or the /clients/update route
     -occaisional infinite loop
     -still sometimes double books staff
+    
