@@ -6,23 +6,28 @@ import csv
 from flask import Flask
 from flask import render_template, request, session, redirect, Response, jsonify
 from sqlite3 import Error
-from SQL import db_connect
 from random import randrange
+
+from SQL import db_connect
 from djlib import insert_t1
 
-# NOTE: need to replace annoying single error page with servier side ui feedback
+# NOTE: need to replace annoying single error page with client side UI feedback
 # NOTE: need to send POST requests with AJAX
 # NOTE: after full functionality is done, optimize code
-
+"""
+Achieve allows users to add, edit and remove staff and client information to and from database.
+From there it can generate a daily schedule and save it as an csv file which can be downloaded.
+(The 'generate schedule' and 'download csv file' are still in progress)
+"""
 DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 
 # initialize app
 app = Flask(__name__, static_folder="C:\\Users\\Johnson\\Documents\\Projects\\Achieve\\static")
 
-# ensure auto reload, from CS50 staff
+# ensure auto reload, code from CS50 staff
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
-# Ensure responses aren't cached, code used from CS50 staff
+# Ensure responses aren't cached, code from CS50 staff
 @app.after_request
 def after_request(response):
     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -518,7 +523,7 @@ def schedule():
         writer.writeheader()
         writer.writerow(staffSchedule)
         csvfile.close()
-        
+
     conn.close()
     return render_template("error.html", message="Success")
     

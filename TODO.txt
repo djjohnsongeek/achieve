@@ -34,5 +34,4 @@ FUTURE Features (V2)
     
 KNOWN BUGS:
     -logo picture fails to load when rendering error.html template from the /clients/remove route  or the /clients/update route
-    -occaisional infinite loop (issue: when no t1 team members are left to schedule)
     -still sometimes double books staff

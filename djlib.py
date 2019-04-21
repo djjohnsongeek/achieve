@@ -5,7 +5,15 @@ from random import randrange
 DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 
 def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: dict, t1_processDone):
-    """ Adds Tier 1 staff to the given client's schedule """
+    """ 
+    Adds Tier 1 staff to the given client's schedule, Schedules based on the following logic:
+    -First uses available Team Members (first Tier 1, then 2, then 3) [IN PROGRESS]
+    -Second uses all available teachers (first Tier 1, then 2, then 3) [TODO]
+    -Third uses Program Supervisors [TODO]
+    -Lastly outside of ABC subs [TODO]
+    """
+    # NOTE: need to rename client_team_t1 variable
+    # NOTE: move while lopp to djlib instead of achieve?
 
     # connect to database
     db, conn = db_connect(DB_URL)
@@ -15,7 +23,7 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
     elif t1_processDone == True:
         tier = 2
 
-    # create list of client team members that are tier 1 or tier 2 TODO: re-write this section using one SQLite query and list comprehension
+    # create list of client team members that are tier 1 or tier 2 TODO: re-write this section using one SQLite query and list comprehension?
     client_team_t1 = []
     for staff in client_team:
         db.execute("SELECT tier FROM staff WHERE name=?", (staff,))
@@ -59,10 +67,6 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
         for time in client_open_times:
             if time not in staff_open_times:
                 client_open_times.remove(time)
-                
-        #   update it as client schedules are updating it
-        #   check against it while scheduling
-        #   write final content in csv file
 
         # schedule for 2 hours
         if len(client_open_times) >= 2:
@@ -71,9 +75,7 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
             j = 1
         else:
             print("no one to schedule from t1 team, move on to tier2?")
-            print(type(client_sch))
-            print(client_sch)
-            return client_sch, True # currently this raises an error
+            return client_sch, True
 
         # update staff database NOTE: using formatted strings: is this dangerous since variables are not user generated?
         for k in range(j):
