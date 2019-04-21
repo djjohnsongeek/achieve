@@ -471,24 +471,21 @@ def schedule():
         client_name = client_data[client_num]["name"]
         # NOTE add name and value to dict?
 
-        # get staff members are on this client's team
+        # get staff members are on the client's team
         db.execute("SELECT clientID, staff.name FROM teams INNER JOIN staff ON staff.staffID = teams.staffID WHERE clientID = ?", (client_ID,))
         team_members = db.fetchall()
         client_team = [staff["name"] for staff in team_members]
-       
-        clients[client_num]["Name"] = client_name
-        
-        # schedule two hours
-        clientSchedule =  insert_t1(client_name, client_ID, client_team, clients[client_num])
+        client["Name"] = client_name
 
-        # check for no available t1 staff on team
-        if clientSchedule == None:
-            print("move to t2 staff")
-            return render_template("error.html", message="no t1 left, schedule t2 now")
+        # schedule two hours
+        clientSchedule = client
+        t1_processDone = False
 
         # check for blank places on client's day, schedule additional hours as needed
         while 0 in clientSchedule.values():      
-            clientSchedule =  insert_t1(client_name, client_ID, client_team, clientSchedule)
+            clientSchedule, t1_processDone = insert_t1(client_name, client_ID, client_team, clientSchedule, t1_processDone)
+
+            # check for no available t1 staff on team
             if clientSchedule == None:
                 print("TODO: move to t2 staff")
                 return render_template("error.html", message="no t1 left, schedule t2 now")
@@ -522,7 +519,6 @@ def schedule():
         writer.writerow(staffSchedule)
         csvfile.close()
         
-
     conn.close()
     return render_template("error.html", message="Success")
     

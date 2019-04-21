@@ -4,29 +4,32 @@ from random import randrange
 
 DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 
-def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: dict):
+def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: dict, t1_processDone):
     """ Adds Tier 1 staff to the given client's schedule """
 
     # connect to database
     db, conn = db_connect(DB_URL)
 
-    # create list of client team members that are tier 1
+    if t1_processDone == False:
+        tier = 1
+    elif t1_processDone == True:
+        tier = 2
+
+    # create list of client team members that are tier 1 or tier 2 TODO: re-write this section using one SQLite query and list comprehension
     client_team_t1 = []
     for staff in client_team:
         db.execute("SELECT tier FROM staff WHERE name=?", (staff,))
         staff_tier = db.fetchone()
-        if staff_tier["tier"] == 1:
+        if staff_tier["tier"] == tier:
             client_team_t1.append(staff)
 
     # remove t1 staff who have already been scheduled (This rule prevents a staff member from being scheduled with one client for more then 2 hours a day)
-    dummy_list = client_team_t1.copy()
-    for staff in dummy_list:
-        if staff in client_sch.values():
-            client_team_t1.remove(staff)
+    client_team_t1 = [staff for staff in client_team_t1 if staff not in client_sch.values()]
 
     # return None if no t1 teachers left
     if not client_team_t1:
-        return None
+        print("first return statement: None, True")
+        return None, True
 
     # insert staff in client's schedule
     else:
@@ -45,8 +48,8 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
         staff_sch = dict(staff_hours)
         
         # delete items in dictionary where staff is already scheduled
-        dummy_list2 = [item for item in staff_sch.items()]
-        for item in dummy_list2:
+        dummy_list = [item for item in staff_sch.items()]
+        for item in dummy_list:
             if item[1] != "none":
                 del staff_sch[item[0]]
 
@@ -63,19 +66,20 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
 
         # schedule for 2 hours
         if len(client_open_times) >= 2:
-            client_sch[client_open_times[0]] = client_team_t1[i]
-            client_sch[client_open_times[1]] = client_team_t1[i]
-
-            # update staff database NOTE: using formatted strings: is this dangerous since variables are not user generated?
-            db.execute(f'UPDATE staff SET "{client_open_times[0]}"=? WHERE name=?', (client_name, client_team_t1[i]))
-            db.execute(f'UPDATE staff SET "{client_open_times[1]}"=? WHERE name=?', (client_name, client_team_t1[i]))
-
+            j = 2
         elif len(client_open_times) == 1:
-            client_sch[client_open_times[0]] = client_team_t1[i]
-            db.execute(f'UPDATE staff SET "{client_open_times[0]}"=? WHERE name=?', (client_name, client_team_t1[i]))
+            j = 1
         else:
             print("no one to schedule from t1 team, move on to tier2?")
+            print(type(client_sch))
+            print(client_sch)
+            return client_sch, True # currently this raises an error
+
+        # update staff database NOTE: using formatted strings: is this dangerous since variables are not user generated?
+        for k in range(j):
+            client_sch[client_open_times[k]] = client_team_t1[i]
+            db.execute(f'UPDATE staff SET "{client_open_times[k]}"=? WHERE name=?', (client_name, client_team_t1[i]))
             
         conn.commit()
         conn.close()
-        return(client_sch)
+        return client_sch, False
