@@ -13,7 +13,7 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
     -Lastly outside of ABC subs [TODO]
     """
     # NOTE: need to rename client_team_t1 variable
-    # NOTE: move while lopp to djlib instead of achieve?
+    # NOTE: move while loop to djlib instead of achieve?
 
     # connect to database
     db, conn = db_connect(DB_URL)
@@ -23,7 +23,7 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
     elif t1_processDone == True:
         tier = 2
 
-    # create list of client team members that are tier 1 or tier 2 TODO: re-write this section using one SQLite query and list comprehension?
+    # create list of client team members that are tier 1 or tier 2
     client_team_t1 = []
     for staff in client_team:
         db.execute("SELECT tier FROM staff WHERE name=?", (staff,))
@@ -51,22 +51,22 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
         # check on staff's available hours IN-PROGRESS      
         # get schedule for selected staff memeber
         db.execute('SELECT "830", "930", "1030", "1130", "1230", "130", "230" FROM staff WHERE name=?', (client_team_t1[i],))
-        staff_hours = db.fetchone()
-
-        staff_sch = dict(staff_hours)
+        staff_sch = dict(db.fetchone())
         
         # delete items in dictionary where staff is already scheduled
         dummy_list = [item for item in staff_sch.items()]
+
         for item in dummy_list:
             if item[1] != "none":
-                del staff_sch[item[0]]
-
+                staff_sch.pop(item[0], None)
+                
         staff_open_times = [int(times) for times in staff_sch.keys()]
 
-        # remove times from the client's open time list if they are not in the staff's open times
-        for time in client_open_times:
-            if time not in staff_open_times:
-                client_open_times.remove(time)
+        # remove times from the client's open time list if they are not in the staff's open times (use list comprehension)
+        client_open_times = [time for time in client_open_times if time in staff_open_times]
+        # for time in client_open_times:
+        #    if time not in staff_open_times:
+        #        client_open_times.remove(time)
 
         # schedule for 2 hours
         if len(client_open_times) >= 2:
@@ -81,7 +81,7 @@ def insert_t1(client_name: str, client_ID: int, client_team: list, client_sch: d
         for k in range(j):
             client_sch[client_open_times[k]] = client_team_t1[i]
             db.execute(f'UPDATE staff SET "{client_open_times[k]}"=? WHERE name=?', (client_name, client_team_t1[i]))
+            conn.commit()
             
-        conn.commit()
         conn.close()
         return client_sch, False

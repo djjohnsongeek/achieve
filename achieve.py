@@ -76,7 +76,7 @@ def clients():
     # prepare client info variables as a tuple
     client_info = (client_name, client_hours)
 
-    # check to make sure at least one team member was assigend to client's team
+    # check to make sure at least one team member was assigend to client's team (Line too long, reformat)
     if not request.form.get("assign_teacher0") and not request.form.get("assign_teacher1") and not request.form.get("assign_teacher2") and not request.form.get("assign_teacher3"):
         return render_template("error.html", message=f"Please provide {client_name} with at least one Team Member")
 
@@ -136,7 +136,7 @@ def addclient():
     query = db.fetchone()
     conn.close()
 
-    # return true if name is not there, false if name is already there
+    # return result
     if not query:
         return jsonify(True)
     else:
@@ -494,11 +494,6 @@ def schedule():
             if clientSchedule == None:
                 print("TODO: move to t2 staff")
                 return render_template("error.html", message="no t1 left, schedule t2 now")
-
-        # if no more clients
-            # check for blank staff hours
-            # check for staff with no breaks
-            # fill blank hours with planning or breaks
 
         # write client's schedule to csv
         with open("schedule.csv", "a", newline="") as csvfile:
