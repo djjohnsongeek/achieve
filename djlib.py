@@ -8,14 +8,13 @@ DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 
 def generate_schedules(client_name: str, client_ID: int, client_team: list, client_sch: dict, processDone):
     """ 
-    Adds Tier 1 staff to the given client's schedule, Schedules based on the following logic:
+    Adds staff to the given client's schedule, Schedules based on the following logic:
     -First uses available Team Members (first Tier 1, then 2, then 3) [IN PROGRESS]
     -Second uses all available teachers (first Tier 1, then 2, then 3) [TODO]
     -Third uses Program Supervisors [TODO]
     -Lastly outside of ABC subs [TODO]
     """
-    # NOTE: need to rename tier_client_team variable
-    # NOTE: move while loop to djlib instead of achieve?
+    # NOTE: need to review code, look for oppertunities for list comprehension
 
     # connect to database
     db, conn = db_connect(DB_URL)
@@ -70,10 +69,6 @@ def generate_schedules(client_name: str, client_ID: int, client_team: list, clie
 
         # remove times from the client's open time list if they are not in the staff's open times (use list comprehension)
         client_open_times = [time for time in client_open_times if time in staff_open_times]
-
-        # for time in client_open_times:
-        #    if time not in staff_open_times:
-        #        client_open_times.remove(time)
 
         # schedule for 2 hours
         if len(client_open_times) >= 2:

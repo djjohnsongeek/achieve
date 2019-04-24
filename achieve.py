@@ -13,11 +13,12 @@ from djlib import generate_schedules
 
 # NOTE: need to replace annoying single error page with client side UI feedback
 # NOTE: need to send POST requests with AJAX
-# NOTE: after full functionality is done, optimize code
+# NOTE: need to review code, optimize and improve design and style as well as revamp comments
+
 """
 Achieve allows users to add, edit and remove staff and client information to and from database.
-From there it can generate a daily schedule and save it as an csv file which can be downloaded.
-(The 'generate schedule' and 'download csv file' are still in progress)
+From the '/schedule' route it generates a daily schedule and saves it as an csv file which can be downloaded.
+(The 'generate schedule' is still in progress, and 'download csv file' is yet to be implemented)
 """
 DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 
@@ -51,7 +52,7 @@ def clients():
         conn.close()
         return render_template("clients.html", staff_query=staff_query, client_query=client_query)
 
-    # for POST Requests (adding client info) --
+    # for POST Requests (adding client info)
     # store client's name, check for no value
     
     if not request.form.get("client_name"):
@@ -303,7 +304,7 @@ def staff():
             rbt_tier = int(request.form.get("Tier"))
         except ValueError:
             return render_template("error.html", message="Incorrect value entered in to Tier radio button")
-        if rbt_tier != 1 and rbt_tier != 2 and rbt_tier != 3:
+        if rbt_tier != 1 and rbt_tier != 2 and rbt_tier != 3: # NOTE: test this logic
             return render_template("error.html", message="Incorrect number value entered in to Tier radio button")
 
     # check if hours filed is filled out
@@ -454,15 +455,13 @@ def schedule():
     db, conn = db_connect(DB_URL)
     # store hourly staff and client info in database, or in memory each time the program runs?
 
-    # reset staff-client schedule
+    # reset all staff's schedule
     db.execute('UPDATE staff SET "830"="none", "930"="none", "1030"="none", "1130"="none", "1230"="none", "130"="none", "230"="none"')
     conn.commit()
 
-    # get client, staff, teams data (where client/staff are present, ordered by name)
+    # get client data (where client/staff are present, ordered by name)
     db.execute("SELECT * FROM clients WHERE absent=? ORDER BY name", (0,))
     client_data = db.fetchall()
-    db.execute("SELECT * FROM staff WHERE absent=? ORDER BY name", (0,))
-    staff_data = db.fetchall()
 
     # create schedule dicts for each client
     clients = []
