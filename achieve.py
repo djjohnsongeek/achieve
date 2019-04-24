@@ -9,7 +9,7 @@ from sqlite3 import Error
 from random import randrange
 
 from SQL import db_connect
-from djlib import insert_t1
+from djlib import generate_schedules
 
 # NOTE: need to replace annoying single error page with client side UI feedback
 # NOTE: need to send POST requests with AJAX
@@ -487,38 +487,46 @@ def schedule():
         t1_processDone = False
 
         # check for blank places on client's day, schedule additional hours as needed
-        while 0 in clientSchedule.values():      
-            clientSchedule, t1_processDone = insert_t1(client_name, client_ID, client_team, clientSchedule, t1_processDone)
+        clientSchedule = generate_schedules(client_name, client_ID, client_team, clientSchedule, t1_processDone)\
 
-            # check for no available t1 staff on team
-            if clientSchedule == None:
-                print("TODO: move to t2 staff")
-                return render_template("error.html", message="no t1 left, schedule t2 now")
+        # check for no available t1 staff on team
+        if clientSchedule == None:
+            print("TODO: move to t2 staff")
+            return render_template("error.html", message="no t1 left, schedule t2 now")
 
         # write client's schedule to csv
-        with open("schedule.csv", "a", newline="") as csvfile:
-            fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, "Name"]
-            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
-            print(clientSchedule)
-            writer.writerow(clientSchedule)
+        try:
+            with open("schedule.csv", "a", newline="") as csvfile:
+                fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, "Name"]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+                print(clientSchedule)
+                writer.writerow(clientSchedule)
+        except PermissionError:
+            return render_template("error.html", message="Could not write to file, permission denied (file open)")
 
+        # increment through clients
         client_num += 1
 
     # get staff's schedule
     db.execute('SELECT "830", "930", "1030", "1130", "1230", "130", "230", "name" FROM staff')
-    staffstuff = db.fetchall() # NOTE rename this variable
+    staff_info = db.fetchall()
     
-    for row in staffstuff:
+    for row in staff_info:
         staffSchedule = dict(row)
+
         # write staff's schedule to csv
-        csvfile = open("schedule.csv", "a", newline="")
+        try:
+            csvfile = open("schedule.csv", "a", newline="")
+        except PermissionError:
+            return render_template("error.html", message="Could not write to file, permission denied (file open)")
+
         fieldnames = ['830', '930', '1030', '1130', '1230', '130', '230', "name"]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerow(staffSchedule)
-        csvfile.close()
 
+    csvfile.close()
     conn.close()
     return render_template("error.html", message="Success")
     
