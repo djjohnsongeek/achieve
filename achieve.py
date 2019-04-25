@@ -483,10 +483,9 @@ def schedule():
 
         # schedule two hours
         clientSchedule = client
-        t1_processDone = False
 
         # check for blank places on client's day, schedule additional hours as needed
-        clientSchedule = generate_schedules(client_name, client_ID, client_team, clientSchedule, t1_processDone)\
+        clientSchedule = generate_schedules(client_name, client_ID, client_team, clientSchedule)
 
         # check for no available t1 staff on team
         if clientSchedule == None:

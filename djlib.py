@@ -6,28 +6,42 @@ from SQL import db_connect
 
 DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 
-def generate_schedules(client_name: str, client_ID: int, client_team: list, client_sch: dict, processDone):
+def generate_schedules(client_name: str, client_ID: int, client_team: list, client_sch: dict):
     """ 
     Adds staff to the given client's schedule, Schedules based on the following logic:
-    -First uses available Team Members (first Tier 1, then 2, then 3) [IN PROGRESS]
-    -Second uses all available teachers (first Tier 1, then 2, then 3) [TODO]
+    -First uses available Team Members (first Tier 1, then 2, then 3) [DONE]
+    -Second uses any available teacher except Program Supervisors (first Tier 1, then 2, then 3) [DONE: but disregards tier]
     -Third uses Program Supervisors [TODO]
     -Lastly outside of ABC subs [TODO]
     """
     # NOTE: need to review code, look for oppertunities for list comprehension
+    # NOTE: function needs to check client and teacher's times (does it though? since the algorythm already removes times that don't match)
 
     # connect to database
     db, conn = db_connect(DB_URL)
+    processDone = 0
+
 
     while 0 in client_sch.values():
-        # create list of client team members that are tier 1 or tier 2
-        if processDone == False:
-            tier = 1
-        elif processDone == True:
-            tier = 2
 
+        # create list of client team members that are tier 1 or tier 2
+        if processDone == 0:    # Tier 1 Teachers on the client's team
+            tier = 1
+        elif processDone == 1:  # Tier 2 Teachers on the client's team
+            tier = 2
+        elif processDone == 2:  # Tier 3 Teachers on the client's team
+            tier = 3
+        elif processDone == 3:  # Sub teachers, any tier, any team
+            db.execute('SELECT name FROM staff WHERE NOT tier=4')
+            members = db.fetchall()
+            client_team = [member["name"] for member in members]
+            print(client_team)
+                                
         tier_client_team = []
         for staff in client_team:
+            if processDone == 3:
+                tier_client_team.append(staff)
+                continue
             db.execute("SELECT tier FROM staff WHERE name=?", (staff,))
             staff_tier = db.fetchone()
             if staff_tier["tier"] == tier:
@@ -37,14 +51,14 @@ def generate_schedules(client_name: str, client_ID: int, client_team: list, clie
         tier_client_team = [staff for staff in tier_client_team if staff not in client_sch.values()]
 
         # check for no tier 2 teachers
-        if not tier_client_team and processDone == True:
-            print("There are no available t1 or t2 staff left on this client's team")
+        if not tier_client_team and processDone == 3:
+            print("There are no available t1, t2, t3  or sub staff left on this client's team")
             break
         
-        # if no tier 2 teachers restart with tier 2
+        # if no tier 1 teachers restart with tier 2
         if not tier_client_team:
-            print("There are no t1 teachers left on this client's team")
-            processDone = True
+            print("There are no teachers left on this client's team, move to next group add 1")
+            processDone += 1
             continue
 
         # insert staff in client's schedule (randomly select from list)
@@ -76,12 +90,12 @@ def generate_schedules(client_name: str, client_ID: int, client_team: list, clie
         elif len(client_open_times) == 1:
             j = 1
         else:
-            if processDone == True:
-                print("loop ended, no available tier 1 or tier 2 staff left")
+            if processDone == 3:
+                print("loop ended, no available tier 1, 2, 3 or sub staff left")
                 break
             else:
-                print("There are no available tier 1 staff, move on to tier 2")
-                processDone = True
+                print("There are no available staff at this tier, move up 1")
+                processDone += 1
                 continue
 
         # update staff database NOTE: using formatted strings: is this dangerous since variables are not user generated?
