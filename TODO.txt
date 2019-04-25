@@ -6,6 +6,13 @@ Server Side Functionality (DONE)
     -clients (DONE)
     -staff (DONE)
     -schedule (IN PROGRESS)
+        -schedules t1 (DONE)
+        -schedules t2 (DONE)
+        -schedules t3 (DONE)
+        -schedules subs (DONE - disreguards tiers)
+        -schedules Supervisors
+        -looks at client and staff's daily hours
+        -writes to csv in correct format
     -view staff/clients
     -view schedule
     -Review all code
