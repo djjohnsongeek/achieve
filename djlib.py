@@ -32,17 +32,17 @@ def generate_schedules(client_name: str, client_ID: int, client_team: list, clie
         elif processDone == 2:  # Tier 3 Teachers on the client's team
             tier = 3
         elif processDone == 3:  # Sub teachers, any tier, any team
-            db.execute('SELECT name FROM staff WHERE NOT tier=4')
+            db.execute('SELECT name FROM staff WHERE NOT tier=4 AND absent=0')
             members = db.fetchall()
             client_team = [member["name"] for member in members]
-            print(client_team)
+            print("sublist:", client_team)
                                 
         tier_client_team = []
         for staff in client_team:
             if processDone == 3:
                 tier_client_team.append(staff)
                 continue
-            db.execute("SELECT tier FROM staff WHERE name=?", (staff,))
+            db.execute("SELECT tier FROM staff WHERE name=? AND absent=0", (staff,))
             staff_tier = db.fetchone()
             if staff_tier["tier"] == tier:
                 tier_client_team.append(staff)
@@ -50,12 +50,12 @@ def generate_schedules(client_name: str, client_ID: int, client_team: list, clie
         # remove t1 staff who have already been scheduled (This rule prevents a staff member from being scheduled with one client for more then 2 hours a day)
         tier_client_team = [staff for staff in tier_client_team if staff not in client_sch.values()]
 
-        # check for no tier 2 teachers
+        # check for no sub teachers
         if not tier_client_team and processDone == 3:
             print("There are no available t1, t2, t3  or sub staff left on this client's team")
             break
         
-        # if no tier 1 teachers restart with tier 2
+        # if no teachers restart with next tier
         if not tier_client_team:
             print("There are no teachers left on this client's team, move to next group add 1")
             processDone += 1
@@ -68,7 +68,7 @@ def generate_schedules(client_name: str, client_ID: int, client_team: list, clie
         items = client_sch.items()
         client_open_times = [item[0] for item in items if item[1] == 0]
 
-        # check on staff's available hours IN-PROGRESS      
+        # check on staff's available hours
         # get schedule for selected staff memeber
         db.execute('SELECT "830", "930", "1030", "1130", "1230", "130", "230" FROM staff WHERE name=?', (tier_client_team[i],))
         staff_sch = dict(db.fetchone())
