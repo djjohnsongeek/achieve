@@ -493,15 +493,15 @@ def schedule():
             return render_template("error.html", message="no t1 left, schedule t2 now")
 
         # write client's schedule to csv
-        try:
-            with open("schedule.csv", "a", newline="") as csvfile:
-                fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, "Name"]
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                writer.writeheader()
-                print(clientSchedule)
-                writer.writerow(clientSchedule)
-        except PermissionError:
-            return render_template("error.html", message="Could not write to file, permission denied (file open)")
+        # try:
+        #     with open("schedule.csv", "a", newline="") as csvfile:
+        #         fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, "Name"]
+        #         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+        #         writer.writeheader()
+        #         print(clientSchedule)
+        #         writer.writerow(clientSchedule)
+        # except PermissionError:
+        #     return render_template("error.html", message="Could not write to file, permission denied (file open)")
 
         # increment through clients
         client_num += 1
@@ -509,21 +509,27 @@ def schedule():
     # get staff's schedule
     db.execute('SELECT "830", "930", "1030", "1130", "1230", "130", "230", "name" FROM staff')
     staff_info = db.fetchall()
-    
+
+    # write staff's schedule to csv
+    try:
+        csvfile = open("schedule.csv", "a", newline="")
+    except PermissionError:
+        return render_template("error.html", message="Could not write to file, permission denied (file open)")
+
+    writer = csv.writer(csvfile)
+    writer.writerow(("Name", "Time", "Client"))
     for row in staff_info:
         staffSchedule = dict(row)
-
-        # write staff's schedule to csv
-        try:
-            csvfile = open("schedule.csv", "a", newline="")
-        except PermissionError:
-            return render_template("error.html", message="Could not write to file, permission denied (file open)")
-
-        fieldnames = ['830', '930', '1030', '1130', '1230', '130', '230', "name"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerow(staffSchedule)
-
+        staff_items = list(staffSchedule.items())
+        staff_name = staff_items.pop()
+        first_line = list(staff_items.pop(0))
+        first_line.insert(0, staff_name[1])
+        writer.writerow(first_line)
+        for item in staff_items:
+            item = list(item)
+            item.insert(0, "")
+            writer.writerow(item)
+        writer.writerow("")
     csvfile.close()
     conn.close()
     return render_template("error.html", message="Success")
