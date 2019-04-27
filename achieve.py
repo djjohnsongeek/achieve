@@ -100,7 +100,7 @@ def clients():
     # insert data, or ignore if name is already present
     db.execute("INSERT INTO clients (name, hours) VALUES (?,?)", client_info) #NOTE: Test this site w/o JS to see if this line of code is working
 
-    # Insert client IDs and Staff ID's into the data base
+    # Insert client IDs and Staff ID's into the database
     for staff in unique_members:
         # get staff info
         db.execute("SELECT * FROM staff WHERE name=?", (staff,))
@@ -119,6 +119,18 @@ def clients():
             # TODO check if staff member is already on client's team?
             # insert client and staff ID into teams
             db.execute("INSERT INTO teams (clientID, staffID) VALUES(?,?)", (client_ID["clientID"], staff_info["staffID"]))
+
+    # check for client classification information
+    if request.form.get("color"):
+        try:
+            category = int(request.form.get("color"))
+        except ValueError:
+            return render_template("error.html", message="Incorrect client classification input")
+
+        if category not in {1,2,3}:
+            return render_template("error.html", message="Incorrect client classification input")
+        else:
+            db.execute("UPDATE clients SET color=? WHERE name=?", (category, client_name))
 
     # commit and close database
     conn.commit()
@@ -219,6 +231,18 @@ def update_client():
         else:
             return render_template("error.html", message="Incorrect value for Absent/Present Radio Button")
 
+    # change client's color classification if needed
+    if request.form.get("update_color"):
+        try:
+            update_color = int(request.form.get("update_color"))
+        except ValueError:
+            return render_template("error.html", message="Invalid client classification data")
+
+        if update_color not in {1, 2, 3}:
+            return render_template("error.html", message="Invalid client classification data")
+        else:
+            db.execute("UPDATE clients SET color=? WHERE name=?", (update_color, client_name))
+
     # get team placement
     new_teacher = request.form.get("new_teacher")
     add_or_remove = request.form.get("addOrRemove_teacher")
@@ -304,7 +328,7 @@ def staff():
             rbt_tier = int(request.form.get("Tier"))
         except ValueError:
             return render_template("error.html", message="Incorrect value entered in to Tier radio button")
-        if rbt_tier != 1 and rbt_tier != 2 and rbt_tier != 3: # NOTE: test this logic
+        if rbt_tier not in {1,2,3}: # NOTE: test this logic
             return render_template("error.html", message="Incorrect number value entered in to Tier radio button")
 
     # check if hours filed is filled out
@@ -331,7 +355,7 @@ def staff():
         return render_template("error.html", message=f"{staff_name} is already in the database")
     
     # insert staff info into the database
-    db.execute("INSERT INTO staff (name, rbt, tier, hours) VALUES(?,?,?,?)", (staff_name, rbt_status, rbt_tier, staff_hours))
+    db.execute("INSERT INTO staff (name, rbt, tier, hours, color) VALUES(?,?,?,?,?)", (staff_name, rbt_status, rbt_tier, staff_hours, rbt_tier))
 
     # close database
     conn.commit()
@@ -405,8 +429,8 @@ def staff_update():
         except ValueError:
             return render_template("error.html", message="Tier field must be a digit")
         
-        if tier == 1 or tier == 2 or tier == 3:
-            db.execute("UPDATE staff SET tier=? WHERE name=?", (tier, staff_name))
+        if tier in {1,2,3}:
+            db.execute("UPDATE staff SET tier=?, color=? WHERE name=?", (tier, tier, staff_name))
         else:
             return render_template("error.html", message="Incorrect value in Tier field")
 
@@ -429,6 +453,18 @@ def staff_update():
             db.execute("UPDATE staff SET hours=? WHERE name=?", (hours, staff_name))
         else:
             return render_template("error.html", message="Incorrect time format")
+
+    # staff color category
+    if request.form.get("staff_color"):
+        try:
+            color = int(request.form.get("staff_color"))
+        except ValueError:
+            return render_template("error.html", message="Invalid staff classification value")
+
+        if color not in {1,2,3}:
+            return render_template("error.html", message="Invalid staff classification value")
+        else:
+            db.execute("UPDATE staff SET color=? WHERE name=?", (color, staff_name))
 
     # if absent is chosen
     if request.form.get("staff_absent"):
@@ -456,14 +492,14 @@ def schedule():
     # store hourly staff and client info in database, or in memory each time the program runs?
 
     # reset all staff's schedule
-    db.execute('UPDATE staff SET "830"="none", "930"="none", "1030"="none", "1130"="none", "1230"="none", "130"="none", "230"="none"')
+    db.execute('UPDATE staff SET "830"="", "930"="", "1030"="", "1130"="", "1230"="", "130"="", "230"=""')
     conn.commit()
 
     # get client data (where client/staff are present, ordered by name)
-    db.execute("SELECT * FROM clients WHERE absent=? ORDER BY name", (0,))
+    db.execute("SELECT * FROM clients WHERE absent=0 ORDER BY name")
     client_data = db.fetchall()
 
-    # create schedule dicts for each client
+    # create schedule dicts for each clientc
     clients = []
     c_dict = {830: 0, 930: 0, 1030: 0, 1130: 0, 1230: 0, 130: 0, 230: 0}
     clients = [c_dict.copy() for row in client_data]
@@ -476,7 +512,7 @@ def schedule():
         # NOTE add name and value to dict?
 
         # get staff members are on the client's team
-        db.execute("SELECT clientID, staff.name FROM teams INNER JOIN staff ON staff.staffID = teams.staffID WHERE clientID = ?", (client_ID,))
+        db.execute("SELECT clientID, staff.name FROM teams INNER JOIN staff ON staff.staffID = teams.staffID WHERE clientID = ? AND absent=0", (client_ID,))
         team_members = db.fetchall()
         client_team = [staff["name"] for staff in team_members]
         client["Name"] = client_name
@@ -493,15 +529,15 @@ def schedule():
             return render_template("error.html", message="no t1 left, schedule t2 now")
 
         # write client's schedule to csv
-        # try:
-        #     with open("schedule.csv", "a", newline="") as csvfile:
-        #         fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, "Name"]
-        #         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-        #         writer.writeheader()
-        #         print(clientSchedule)
-        #         writer.writerow(clientSchedule)
-        # except PermissionError:
-        #     return render_template("error.html", message="Could not write to file, permission denied (file open)")
+        try:
+            with open("schedule.csv", "a", newline="") as csvfile:
+                fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, "Name"]
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+                writer.writeheader()
+                print(clientSchedule)
+                writer.writerow(clientSchedule)
+        except PermissionError:
+            return render_template("error.html", message="Could not write to file, permission denied (file open)")
 
         # increment through clients
         client_num += 1
