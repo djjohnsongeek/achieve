@@ -41,6 +41,12 @@
                     <option value="{{item['name']}}">{{ item["name"] }}</option>
                     {% endfor %}
                 </select><br/>
+                <select name="color">
+                    <option value="" selected disabled>Select Client Classification</option>
+                    <option value="1">Green</option>
+                    <option value="2">Yellow</option>
+                    <option value="3">Red</option>
+                </select><br/>
                 <button type="submit" id="btn_add_client" class="btn_submit" value="add_client" name="btn_add_client">Add Client</button>
             </fieldset>
         </form>
@@ -92,12 +98,18 @@
                     <option value ="{{ name['name'] }}">{{ name["name"] }}</option>
                     {% endfor %}
                 </select>
-                    <lable for="new_client_hours_start">Start Time:</lable>
+                    <lable for="new_client_hours_start">New Start Time:</lable>
                     <input type="time" name="new_client_hours_start" id="new_client_hours_start" placeholder="hh:mm">
-                    <lable for="new_client_hours_end">End Time:</lable>
+                    <lable for="new_client_hours_end">New End Time:</lable>
                     <input type="time" name="new_client_hours_end" id="new_client_hours_end" placeholder="hh:mm"><br/>
                     <input type="radio" name="absent" value="1">Absent Today?
                     <input type="radio" name="absent" value="0">Present Today?<br/>
+                    <select name="update_color">
+                        <option value="" disabled selected>New Client Classification</option>
+                        <option value="1">Green</option>
+                        <option value="2">Yellow</option>
+                        <option value="3">Red</option>
+                    </select><br/>
                     <p></p>Add or Remove a Teacher from Selected Client's Team<br/>
                     <select name="new_teacher"><br/>
                         <option disabled selected value="">Staff Name</option>
