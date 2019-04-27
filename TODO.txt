@@ -3,18 +3,20 @@ Basic HTML Structure (DONE)
 Basic CSS Features (DONE)
 
 Server Side Functionality (DONE)
-    -clients (DONE)
-    -staff (DONE)
+    -clients page (DONE)
+    -staff page (DONE)
     -schedule (IN PROGRESS)
         -schedules t1 (DONE)
         -schedules t2 (DONE)
         -schedules t3 (DONE)
-        -schedules subs (DONE - disreguards tiers)
-        -schedules Supervisors
+        -writes to csv in correct format (DONE - mostly, some tweaking required)
+        -schedules subs with color catagories (DONE)
         -looks at client and staff's daily hours
-        -writes to csv in correct format
-    -view staff/clients
-    -view schedule
+        -re-schdules already scheduled staff if available?
+        -schedules Supervisors
+
+    -view staff/clients page
+    -view schedule page
     -Review all code
 
 Client Side Feedback/Search/AJAX
@@ -24,6 +26,13 @@ Client Side Feedback/Search/AJAX
     -view staff/clients
     -view schedule
     -Review all code
+
+HTML and VSS Rework:
+    -index.html
+    -clients.html
+    -staff.html
+    -schedule.html
+    -view staff/clients/schedule.html
 
 CURRENT Version Features
     -add, edit, remove client and staff info from database (DONE)
@@ -41,3 +50,4 @@ FUTURE Features (V2)
     
 KNOWN BUGS:
     -logo picture fails to load when rendering error.html template from the /clients/remove route  or the /clients/update route
+    -there MAY be a bug related to the scheduling algorithm not properly populating the 'subs' group
