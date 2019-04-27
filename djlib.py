@@ -31,10 +31,12 @@ def generate_schedules(client_name: str, client_ID: int, client_team: list, clie
             tier = 2
         elif processDone == 2:  # Tier 3 Teachers on the client's team
             tier = 3
-        elif processDone == 3:  # Sub teachers, any tier, any team
-            db.execute('SELECT name FROM staff WHERE NOT tier=4 AND absent=0')
+        elif processDone == 3:  # Sub teachers: any tier, any team, only if color-class matches
+            db.execute('SELECT color FROM clients WHERE name=?', (client_name,))
+            client_color = db.fetchone()
+            db.execute('SELECT name, color FROM staff WHERE NOT tier=4 AND absent=0')
             members = db.fetchall()
-            client_team = [member["name"] for member in members]
+            client_team = [member["name"] for member in members if member["color"] >= client_color["color"]]
             print("sublist:", client_team)
                                 
         tier_client_team = []
@@ -76,7 +78,7 @@ def generate_schedules(client_name: str, client_ID: int, client_team: list, clie
         # delete items in dictionary where staff is already scheduled
         dummy_list = [item for item in staff_sch.items()]
         for item in dummy_list:
-            if item[1] != "none":
+            if item[1] != "": ###
                 staff_sch.pop(item[0], None)
 
         staff_open_times = [int(times) for times in staff_sch.keys()]
