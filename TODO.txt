@@ -11,7 +11,8 @@ Server Side Functionality (DONE)
         -schedules t3 (DONE)
         -writes to csv in correct format (DONE - mostly, some tweaking required)
         -schedules subs with color catagories (DONE)
-        -looks at client and staff's daily hours
+        -looks at client and staff's daily hours (DONE? Need to test this with new staff/clients)
+            -NOTE: when choosing staff/client times 830 means available 830 - 930
         -re-schdules already scheduled staff if available?
         -schedules Supervisors
 
