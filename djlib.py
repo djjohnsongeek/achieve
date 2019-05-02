@@ -5,6 +5,26 @@ from random import randrange
 from SQL import db_connect
 
 DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
+def create_schhours(start: int, end: int):
+    """ Takes a start and endtime (integers) and creates a list of times seperated by an hour and ending at end """
+
+    hours = []
+    while True:
+        if start > end:
+            break
+        if start <= 1230:
+            hours.append(start)
+        else:
+           hours.append(start - 1200)
+        start += 100
+    
+    print(hours)
+    return hours
+
+def convert_strtime(time_string: str):
+    """ Takes a string with 12hr time information (such as '8:30') and strips away punctuation and returns a int """
+
+    return int("".join(letter for letter in time_string if letter.isdigit()))
 
 def generate_schedules(client_name: str, client_ID: int, client_team: list, client_sch: dict):
     """ 
@@ -14,8 +34,10 @@ def generate_schedules(client_name: str, client_ID: int, client_team: list, clie
     -Third uses Program Supervisors [TODO]
     -Lastly outside of ABC subs [TODO]
     """
-    # NOTE: need to review code, look for oppertunities for list comprehension
+    # NOTE: need to review code, look for oppertunities for list comprehension, general performance improvements
     # NOTE: function needs to check client and teacher's times (does it though? since the algorythm already removes times that don't match)
+    # NOTE: need to schedule starting with the client with the lowest amount of hours
+    # NOTE: need to devise a way to override "two hour only" scheduling
 
     # connect to database
     db, conn = db_connect(DB_URL)
@@ -38,7 +60,8 @@ def generate_schedules(client_name: str, client_ID: int, client_team: list, clie
             members = db.fetchall()
             client_team = [member["name"] for member in members if member["color"] >= client_color["color"]]
             print("sublist:", client_team)
-                                
+
+        # generate a dynamic list of scheduable staff                     
         tier_client_team = []
         for staff in client_team:
             if processDone == 3:
@@ -63,7 +86,7 @@ def generate_schedules(client_name: str, client_ID: int, client_team: list, clie
             processDone += 1
             continue
 
-        # insert staff in client's schedule (randomly select from list)
+        # randomly select staff from list
         i = randrange(0, len(tier_client_team))
 
         # find empty client hours
@@ -72,18 +95,18 @@ def generate_schedules(client_name: str, client_ID: int, client_team: list, clie
 
         # check on staff's available hours
         # get schedule for selected staff memeber
-        db.execute('SELECT "830", "930", "1030", "1130", "1230", "130", "230" FROM staff WHERE name=?', (tier_client_team[i],))
+        db.execute('SELECT "830", "930", "1030", "1130", "1230", "130", "230", "330", "430" FROM staff WHERE name=?', (tier_client_team[i],))
         staff_sch = dict(db.fetchone())
 
         # delete items in dictionary where staff is already scheduled
         dummy_list = [item for item in staff_sch.items()]
         for item in dummy_list:
-            if item[1] != "": ###
+            if item[1] != "":
                 staff_sch.pop(item[0], None)
 
         staff_open_times = [int(times) for times in staff_sch.keys()]
 
-        # remove times from the client's open time list if they are not in the staff's open times (use list comprehension)
+        # remove times from the client's open time list if they are not in the staff's open times
         client_open_times = [time for time in client_open_times if time in staff_open_times]
 
         # schedule for 2 hours

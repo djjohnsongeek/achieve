@@ -9,11 +9,11 @@ from sqlite3 import Error
 from random import randrange
 
 from SQL import db_connect
-from djlib import generate_schedules
+from djlib import generate_schedules, convert_strtime, create_schhours
 
 # NOTE: need to replace annoying single error page with client side UI feedback
 # NOTE: need to send POST requests with AJAX
-# NOTE: need to review code, optimize and improve design and style as well as revamp comments
+# NOTE: need to review code, optimize and improve design and style, use custom fuctions as well as revamp comments
 
 """
 Achieve allows users to add, edit and remove staff and client information to and from database.
@@ -54,7 +54,6 @@ def clients():
 
     # for POST Requests (adding client info)
     # store client's name, check for no value
-    
     if not request.form.get("client_name"):
         return render_template("error.html", message="Please provide the Client's name")
     client_name = request.form.get("client_name").strip()
@@ -71,11 +70,18 @@ def clients():
     if not time.match(client_hours_start) or not time.match(client_hours_end):
         return render_template("error.html", message="Start or End times are formatted incorrectly")
 
+    # build final start and end times, build scheduable hours
+    start = convert_strtime(client_hours_start)
+    end = convert_strtime(client_hours_end)
+  
+    # generate a list of the staff's scheduable hours
+    total_hours = len(create_schhours(start, end)) - 1
+
     # combine start and end times into one variable
     client_hours = client_hours_start + "-" + client_hours_end
 
     # prepare client info variables as a tuple
-    client_info = (client_name, client_hours)
+    client_info = (client_name, client_hours, total_hours)
 
     # check to make sure at least one team member was assigend to client's team (Line too long, reformat)
     if not request.form.get("assign_teacher0") and not request.form.get("assign_teacher1") and not request.form.get("assign_teacher2") and not request.form.get("assign_teacher3"):
@@ -98,7 +104,7 @@ def clients():
         return render_template("error.html", message=f"{client_name} is already in the database")
     
     # insert data, or ignore if name is already present
-    db.execute("INSERT INTO clients (name, hours) VALUES (?,?)", client_info) #NOTE: Test this site w/o JS to see if this line of code is working
+    db.execute("INSERT INTO clients (name, hours, totalhours) VALUES (?,?,?)", client_info) #NOTE: Test this site w/o JS to see if this line of code is working
 
     # Insert client IDs and Staff ID's into the database
     for staff in unique_members:
@@ -213,8 +219,13 @@ def update_client():
         if not time.match(client_hours_end) or not time.match(client_hours_start):
             return render_template("error.html", message="Incorrect time format")
 
+        # get client's total number of hours
+        start = convert_strtime(client_hours_start)
+        end = convert_strtime(client_hours_end)
+        total_hours = len(create_schhours(start, end)) -1
+
         client_hours = client_hours_start + "-" + client_hours_end
-        db.execute("UPDATE clients SET hours=? WHERE name=?", (client_hours, client_name))
+        db.execute("UPDATE clients SET hours=?, totalhours=? WHERE name=?", (client_hours, total_hours, client_name))
 
     # if there is absent data
     if request.form.get("absent"):
@@ -342,8 +353,13 @@ def staff():
     if not time.match(staff_hours_start) or not time.match(staff_hours_end):
         return render_template("error.html", message="Incorrect time format")
 
-    # built final start and end times
+    # built final start and end times, build scheduable hours
     staff_hours = staff_hours_start + "-" + staff_hours_end
+    start = convert_strtime(staff_hours_start)
+    end = convert_strtime(staff_hours_end)
+  
+    # generate a list of the staff's scheduable hours
+    hours = create_schhours(start, end)
 
     # connect to database
     db, conn = db_connect(DB_URL)
@@ -356,6 +372,13 @@ def staff():
     
     # insert staff info into the database
     db.execute("INSERT INTO staff (name, rbt, tier, hours, color) VALUES(?,?,?,?,?)", (staff_name, rbt_status, rbt_tier, staff_hours, rbt_tier))
+
+    # insert staff hours into the database
+    for hour in hours:
+        try:
+            db.execute(f'UPDATE staff SET "{hour}"="" WHERE name=?', (staff_name,))
+        except sqlite3.OperationalError:
+            return render_template("error.html", message=f"{hour} is not a field in the database")
 
     # close database
     conn.commit()
@@ -444,13 +467,31 @@ def staff_update():
     # if hours is filled out
     if request.form.get("staff_hours_update_start") and request.form.get("staff_hours_update_end"):
 
+        # build final start and end times, build scheduable hours
         hours_start = request.form.get("staff_hours_update_start")
         hours_end = request.form.get("staff_hours_update_end")
+        
+        start = convert_strtime(hours_start)
+        end = convert_strtime(hours_end)
+    
+        # generate a list of the staff's scheduable hours
+        hours = create_schhours(start, end)
 
         time = re.compile(r"[012][0-9]:[0-5][0-9]")
         if time.match(hours_start) and time.match(hours_end):
-            hours = hours_start + "-" + hours_end
-            db.execute("UPDATE staff SET hours=? WHERE name=?", (hours, staff_name))
+            staff_hours = hours_start + "-" + hours_end
+            db.execute("UPDATE staff SET hours=? WHERE name=?", (staff_hours, staff_name))
+
+            # reset staff hours
+            db.execute('UPDATE staff SET "830"="UNAVAILABLE", "930"="UNAVAILABLE", "1030"="UNAVAILABLE", "1130"="UNAVAILABLE", "1230"="UNAVAILABLE", "130"="UNAVAILABLE", "230"="UNAVAILABLE", "330"="UNAVAILABLE", "430"="UNAVAILABLE" WHERE name=?', (staff_name,))
+
+            # insert staff hours into the database
+            for hour in hours:
+                try:
+                    db.execute(f'UPDATE staff SET "{hour}"="" WHERE name=?', (staff_name,))
+                except sqlite3.OperationalError:
+                    return render_template("error.html", message=f"{hour} is not a field in the database")
+
         else:
             return render_template("error.html", message="Incorrect time format")
 
@@ -491,25 +532,42 @@ def schedule():
     db, conn = db_connect(DB_URL)
     # store hourly staff and client info in database, or in memory each time the program runs?
 
-    # reset all staff's schedule
-    db.execute('UPDATE staff SET "830"="", "930"="", "1030"="", "1130"="", "1230"="", "130"="", "230"=""')
+    # reset all staff's schedule TODO: change this 
+    db.execute('UPDATE staff SET "830"="", "930"="", "1030"="", "1130"="", "1230"="", "130"="", "230"="", "330"="", "430"=""')
     conn.commit()
 
     # get client data (where client/staff are present, ordered by name)
-    db.execute("SELECT * FROM clients WHERE absent=0 ORDER BY name")
+    db.execute("SELECT * FROM clients WHERE absent=0 ORDER BY totalhours")
     client_data = db.fetchall()
 
-    # create schedule dicts for each clientc
+    # create schedule dicts for each client TODO: change out OUT to ""? or 0 to ""?
     clients = []
-    c_dict = {830: 0, 930: 0, 1030: 0, 1130: 0, 1230: 0, 130: 0, 230: 0}
+    c_dict = {830: "" , 930: "" , 1030: "" , 1130: "" , 1230: "" , 130: "" , 230: "" , 330: "" , 430: ""}
     clients = [c_dict.copy() for row in client_data]
 
     # update each client's schedule
     client_num = 0
     for client in clients:
+
+        # prepare client specific info/variables
         client_ID = client_data[client_num]["clientID"]
         client_name = client_data[client_num]["name"]
-        # NOTE add name and value to dict?
+        print(client_name)
+        client_times = client_data[client_num]["hours"].split('-')
+        start = int("".join(letter for letter in client_times[0] if letter.isdigit()))
+        end = int("".join(letter for letter in client_times[1] if letter.isdigit()))
+
+        # generate a list of the client's scheduable hours
+        times = create_schhours(start, end)
+
+        # update client's scheduling dictionary
+        for time in times:
+            if time in client.keys():
+                client[time] = 0
+        
+        # debug prints
+        print(times)
+        print("final client hours:", client)
 
         # get staff members are on the client's team
         db.execute("SELECT clientID, staff.name FROM teams INNER JOIN staff ON staff.staffID = teams.staffID WHERE clientID = ? AND absent=0", (client_ID,))
@@ -531,7 +589,7 @@ def schedule():
         # write client's schedule to csv
         try:
             with open("schedule.csv", "a", newline="") as csvfile:
-                fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, "Name"]
+                fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, 330, 430, "Name"]
                 writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
                 writer.writeheader()
                 print(clientSchedule)
@@ -558,9 +616,9 @@ def schedule():
         staffSchedule = dict(row)
         staff_items = list(staffSchedule.items())
         staff_name = staff_items.pop()
-        first_line = list(staff_items.pop(0))
-        first_line.insert(0, staff_name[1])
-        writer.writerow(first_line)
+        start_line = list(staff_items.pop(0))
+        start_line.insert(0, staff_name[1])
+        writer.writerow(start_line)
         for item in staff_items:
             item = list(item)
             item.insert(0, "")
