@@ -7,7 +7,8 @@ static/
 # Don't track the following files
 achieve.db
 roster.txt
-schedule.csv
+client_schedule.csv
+staff_schedule.csv
 schedule.ods
 schedule.xlsm
 test.py
