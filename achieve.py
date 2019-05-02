@@ -588,12 +588,21 @@ def schedule():
 
         # write client's schedule to csv
         try:
-            with open("schedule.csv", "a", newline="") as csvfile:
-                fieldnames = [830, 930, 1030, 1130, 1230, 130, 230, 330, 430, "Name"]
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                writer.writeheader()
-                print(clientSchedule)
-                writer.writerow(clientSchedule)
+            with open("client_schedule.csv", "a", newline="") as csvfile:
+                writer = csv.writer(csvfile)
+                if client_num == 0:
+                    first_row = ("Name", "Time", "Staff")
+                    writer.writerow(first_row)
+    
+                client_items = list(clientSchedule.items())
+                client_name = client_items.pop()[1]
+                start_line = (client_name, client_items.pop(0)[0], client_items.pop(0)[1])
+                writer.writerow(start_line)
+                for items in client_items:
+                    row = ("", items[0], items[1])
+                    writer.writerow(row)
+                writer.writerow("")
+
         except PermissionError:
             return render_template("error.html", message="Could not write to file, permission denied (file open)")
 
@@ -606,7 +615,7 @@ def schedule():
 
     # write staff's schedule to csv
     try:
-        csvfile = open("schedule.csv", "a", newline="")
+        csvfile = open("staff_schedule.csv", "a", newline="")
     except PermissionError:
         return render_template("error.html", message="Could not write to file, permission denied (file open)")
 
