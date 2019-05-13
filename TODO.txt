@@ -3,18 +3,21 @@ Basic HTML Structure (DONE)
 Basic CSS Features (DONE)
 
 Server Side Functionality (DONE)
-    -clients page (DONE)
-    -staff page (DONE)
+    -clients page (DONE)     -NOTE: when choosing staff/client times 830 means available 830 - 930
+    -staff page (DONE)       -NOTE: when choosing staff/client times 830 means available 830 - 930
     -schedule (IN PROGRESS)
         -schedules t1 (DONE)
         -schedules t2 (DONE)
         -schedules t3 (DONE)
-        -writes to csv in correct format (DONE - mostly, some tweaking required)
         -schedules subs with color catagories (DONE)
-        -looks at client and staff's daily hours (DONE? Need to test this with new staff/clients)
-            -NOTE: when choosing staff/client times 830 means available 830 - 930
-        -re-schdules already scheduled staff if available?
-        -schedules Supervisors
+        -schedules client with least amount of hours first (DONE)
+        
+        -writes to csv in correct format (DONE)
+        -remove remenants of SQL scheduling (DONE)
+        -backup current master server side master branch as a new branch (DONE)
+        -schedules staff more then just two hours (based upon team size)
+        -re-schedules already scheduled staff if available?
+        -possible optimization: no rebuiliding tier_team_member list EVERY loop
 
     -view staff/clients page
     -view schedule page
