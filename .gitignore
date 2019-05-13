@@ -9,6 +9,8 @@ achieve.db
 roster.txt
 client_schedule.csv
 staff_schedule.csv
+.~lock.client_schedule.csv#
+.~lock.staff_schedule.csv#
 schedule.ods
 schedule.xlsm
 test.py
