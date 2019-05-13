@@ -4,7 +4,7 @@ import re
 import csv
 
 from flask import Flask
-from flask import render_template, request, session, redirect, Response, jsonify
+from flask import render_template, request, session, redirect, Response, jsonify, json
 from sqlite3 import Error
 from random import randrange
 
@@ -75,7 +75,7 @@ def clients():
     end = convert_strtime(client_hours_end)
   
     # generate a list of the staff's scheduable hours
-    total_hours = len(create_schhours(start, end)) - 1
+    total_hours = len(create_schhours(start, end))
 
     # combine start and end times into one variable
     client_hours = client_hours_start + "-" + client_hours_end
@@ -222,7 +222,7 @@ def update_client():
         # get client's total number of hours
         start = convert_strtime(client_hours_start)
         end = convert_strtime(client_hours_end)
-        total_hours = len(create_schhours(start, end)) -1
+        total_hours = len(create_schhours(start, end))
 
         client_hours = client_hours_start + "-" + client_hours_end
         db.execute("UPDATE clients SET hours=?, totalhours=? WHERE name=?", (client_hours, total_hours, client_name))
@@ -355,11 +355,11 @@ def staff():
 
     # built final start and end times, build scheduable hours
     staff_hours = staff_hours_start + "-" + staff_hours_end
-    start = convert_strtime(staff_hours_start)
-    end = convert_strtime(staff_hours_end)
+    # start = convert_strtime(staff_hours_start)
+    # end = convert_strtime(staff_hours_end)
   
     # generate a list of the staff's scheduable hours
-    hours = create_schhours(start, end)
+    # hours = create_schhours(start, end)
 
     # connect to database
     db, conn = db_connect(DB_URL)
@@ -372,13 +372,6 @@ def staff():
     
     # insert staff info into the database
     db.execute("INSERT INTO staff (name, rbt, tier, hours, color) VALUES(?,?,?,?,?)", (staff_name, rbt_status, rbt_tier, staff_hours, rbt_tier))
-
-    # insert staff hours into the database
-    for hour in hours:
-        try:
-            db.execute(f'UPDATE staff SET "{hour}"="" WHERE name=?', (staff_name,))
-        except sqlite3.OperationalError:
-            return render_template("error.html", message=f"{hour} is not a field in the database")
 
     # close database
     conn.commit()
@@ -467,30 +460,15 @@ def staff_update():
     # if hours is filled out
     if request.form.get("staff_hours_update_start") and request.form.get("staff_hours_update_end"):
 
-        # build final start and end times, build scheduable hours
+        # build final start and end times
         hours_start = request.form.get("staff_hours_update_start")
         hours_end = request.form.get("staff_hours_update_end")
-        
-        start = convert_strtime(hours_start)
-        end = convert_strtime(hours_end)
-    
-        # generate a list of the staff's scheduable hours
-        hours = create_schhours(start, end)
 
+        # check for correct time format
         time = re.compile(r"[012][0-9]:[0-5][0-9]")
         if time.match(hours_start) and time.match(hours_end):
             staff_hours = hours_start + "-" + hours_end
             db.execute("UPDATE staff SET hours=? WHERE name=?", (staff_hours, staff_name))
-
-            # reset staff hours
-            db.execute('UPDATE staff SET "830"="UNAVAILABLE", "930"="UNAVAILABLE", "1030"="UNAVAILABLE", "1130"="UNAVAILABLE", "1230"="UNAVAILABLE", "130"="UNAVAILABLE", "230"="UNAVAILABLE", "330"="UNAVAILABLE", "430"="UNAVAILABLE" WHERE name=?', (staff_name,))
-
-            # insert staff hours into the database
-            for hour in hours:
-                try:
-                    db.execute(f'UPDATE staff SET "{hour}"="" WHERE name=?', (staff_name,))
-                except sqlite3.OperationalError:
-                    return render_template("error.html", message=f"{hour} is not a field in the database")
 
         else:
             return render_template("error.html", message="Incorrect time format")
@@ -530,19 +508,21 @@ def schedule():
         return render_template("schedule.html")
 
     db, conn = db_connect(DB_URL)
-    # store hourly staff and client info in database, or in memory each time the program runs?
 
-    # reset all staff's schedule TODO: change this 
-    db.execute('UPDATE staff SET "830"="", "930"="", "1030"="", "1130"="", "1230"="", "130"="", "230"="", "330"="", "430"=""')
-    conn.commit()
+    # build staff schedules with nested dicts
+    db.execute("SELECT name FROM staff where absent=0")
+    staff_data = db.fetchall()
+
+    all_staff_sch = {}
+    for staff in staff_data:
+        all_staff_sch[staff["name"]] = {830: "" , 930: "" , 1030: "" , 1130: "" , 1230: "" , 130: "" , 230: "" , 330: "" , 430: ""} # NOTE: dynamically generate these times?
 
     # get client data (where client/staff are present, ordered by name)
     db.execute("SELECT * FROM clients WHERE absent=0 ORDER BY totalhours")
     client_data = db.fetchall()
 
     # create schedule dicts for each client TODO: change out OUT to ""? or 0 to ""?
-    clients = []
-    c_dict = {830: "" , 930: "" , 1030: "" , 1130: "" , 1230: "" , 130: "" , 230: "" , 330: "" , 430: ""}
+    c_dict = {830: "---" , 930: "---" , 1030: "---" , 1130: "---" , 1230: "---" , 130: "---" , 230: "---" , 330: "---" , 430: "---"}
     clients = [c_dict.copy() for row in client_data]
 
     # update each client's schedule
@@ -552,7 +532,6 @@ def schedule():
         # prepare client specific info/variables
         client_ID = client_data[client_num]["clientID"]
         client_name = client_data[client_num]["name"]
-        print(client_name)
         client_times = client_data[client_num]["hours"].split('-')
         start = int("".join(letter for letter in client_times[0] if letter.isdigit()))
         end = int("".join(letter for letter in client_times[1] if letter.isdigit()))
@@ -564,10 +543,6 @@ def schedule():
         for time in times:
             if time in client.keys():
                 client[time] = 0
-        
-        # debug prints
-        print(times)
-        print("final client hours:", client)
 
         # get staff members are on the client's team
         db.execute("SELECT clientID, staff.name FROM teams INNER JOIN staff ON staff.staffID = teams.staffID WHERE clientID = ? AND absent=0", (client_ID,))
@@ -576,28 +551,24 @@ def schedule():
         client["Name"] = client_name
 
         # schedule two hours
-        clientSchedule = client
+        client_sch = client
 
         # check for blank places on client's day, schedule additional hours as needed
-        clientSchedule = generate_schedules(client_name, client_ID, client_team, clientSchedule)
-
-        # check for no available t1 staff on team
-        if clientSchedule == None:
-            print("TODO: move to t2 staff")
-            return render_template("error.html", message="no t1 left, schedule t2 now")
+        client_sch = generate_schedules(client_name, client_team, client_sch, all_staff_sch)
+        print("client schedule:", client_sch)
 
         # write client's schedule to csv
+        header = ("Name", "Time", "Staff")
         try:
             with open("client_schedule.csv", "a", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 if client_num == 0:
-                    first_row = ("Name", "Time", "Staff")
-                    writer.writerow(first_row)
-    
-                client_items = list(clientSchedule.items())
+                    writer.writerow(header)
+
+                client_items = list(client_sch.items())
                 client_name = client_items.pop()[1]
-                start_line = (client_name, client_items.pop(0)[0], client_items.pop(0)[1])
-                writer.writerow(start_line)
+                first_row = (client_name, client_items[0][0], client_items.pop(0)[1])
+                writer.writerow(first_row)
                 for items in client_items:
                     row = ("", items[0], items[1])
                     writer.writerow(row)
@@ -609,31 +580,28 @@ def schedule():
         # increment through clients
         client_num += 1
 
-    # get staff's schedule
-    db.execute('SELECT "830", "930", "1030", "1130", "1230", "130", "230", "name" FROM staff')
-    staff_info = db.fetchall()
-
-    # write staff's schedule to csv
+   # write staff's schedule to csv NOTE: need to output if alphabetical order
     try:
-        csvfile = open("staff_schedule.csv", "a", newline="")
-    except PermissionError:
-        return render_template("error.html", message="Could not write to file, permission denied (file open)")
+        with open("staff_schedule.csv", "a", newline="") as csvfile2:
+            writer = csv.writer(csvfile2)
+            header = ("Name", "Time", "Client")
+            writer.writerow(header)
 
-    writer = csv.writer(csvfile)
-    writer.writerow(("Name", "Time", "Client"))
-    for row in staff_info:
-        staffSchedule = dict(row)
-        staff_items = list(staffSchedule.items())
-        staff_name = staff_items.pop()
-        start_line = list(staff_items.pop(0))
-        start_line.insert(0, staff_name[1])
-        writer.writerow(start_line)
-        for item in staff_items:
-            item = list(item)
-            item.insert(0, "")
-            writer.writerow(item)
-        writer.writerow("")
-    csvfile.close()
+            for staff in all_staff_sch.items():
+                first_row = (staff[0], 830, staff[1][830])
+                writer.writerow(first_row)
+                counter = 0
+                for key in staff[1].keys():
+                    if counter == 0:
+                        counter += 1
+                        continue
+                    row = ("", key, staff[1][key])
+                    writer.writerow(row)
+                writer.writerow("")
+
+    except PermissionError:
+            return render_template("error.html", message="Could not write to file, permission denied (file open)")
+
     conn.close()
     return render_template("error.html", message="Success")
     
