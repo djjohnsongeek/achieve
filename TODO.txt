@@ -15,10 +15,12 @@ Server Side Functionality (DONE)
         -writes to csv in correct format (DONE)
         -remove remenants of SQL scheduling (DONE)
         -backup current master server side master branch as a new branch (DONE)
-        -schedules staff more then just two hours (based upon team size)
+        -schedules staff more then just two hours (based upon team size) (DONE - experimental)
         -re-schedules already scheduled staff if available?
         -possible optimization: no rebuiliding tier_team_member list EVERY loop
 
+    -login functionality (IN PROGRESS)
+    -download schedules page
     -view staff/clients page
     -view schedule page
     -Review all code
@@ -31,7 +33,7 @@ Client Side Feedback/Search/AJAX
     -view schedule
     -Review all code
 
-HTML and VSS Rework:
+HTML and CSS Rework:
     -index.html
     -clients.html
     -staff.html
@@ -54,4 +56,3 @@ FUTURE Features (V2)
     
 KNOWN BUGS:
     -logo picture fails to load when rendering error.html template from the /clients/remove route  or the /clients/update route
-    -there MAY be a bug related to the scheduling algorithm not properly populating the 'subs' group
