@@ -7,9 +7,11 @@ from flask import Flask
 from flask import render_template, request, session, redirect, Response, jsonify, json
 from sqlite3 import Error
 from random import randrange
+from werkzeug.security import check_password_hash, generate_password_hash
 
 from SQL import db_connect
 from djlib import generate_schedules, convert_strtime, create_schhours
+from server import login_required
 
 # NOTE: need to replace annoying single error page with client side UI feedback
 # NOTE: need to send POST requests with AJAX
@@ -24,6 +26,8 @@ DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 
 # initialize app
 app = Flask(__name__, static_folder="C:\\Users\\Johnson\\Documents\\Projects\\Achieve\\static")
+app.secret_key = "development"
+
 
 # ensure auto reload, code from CS50 staff
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -36,11 +40,85 @@ def after_request(response):
     response.headers["Pragma"] = "no-cache"
     return response
 
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    # remove anyone logged in already
+    session.clear()
+    session["logged_in:"] = False
+
+    if request.method == "POST":
+        # check if all fields are filled out
+        if not request.form.get("username"):
+            return render_template("error.html", message="You must provide a username")
+        if not request.form.get("password"):
+            return render_template("error.html", message="You must provide a password")
+
+        # get user id number
+        db, conn = db_connect(DB_URL)
+        db.execute("SELECT * FROM users WHERE username=?", (request.form.get("username"),))
+        user_id = db.fetchone()
+
+        # check username/password is valid
+        if not user_id or not check_password_hash(user_id["password"], request.form.get("password")):
+            return render_template("error.html", message="Username or Password is not valid")
+
+        # update session
+        session["user_id"] = user_id["userID"]
+        session["logged_in"] = True
+        conn.close()
+
+        # redirect user to index
+        return redirect("/")
+    
+    else:
+        return render_template("login.html")
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    session["logged_in"] = False
+    return redirect("/login")
+
+@app.route("/changepw", methods=["POST", "GET"])
+@login_required
+def changepw():
+
+    if request.method == "GET":
+        return render_template("changepw.html")
+
+    # check if all fields are filled out
+    if not request.form.get("password_new"):
+        return render_template("error.html", message="You must provide a new password")
+    pw_new = request.form.get("password_new")
+
+    if not request.form.get("password_check"):
+        return render_template("error.html", message="You must renter password")
+    pw_check = request.form.get("password_check")
+
+    # check that the two password fields match
+    if pw_check != pw_new:
+        return render_template("error.html", message="Passwords do not match")
+
+    # hash and update password
+    hashed_pw = generate_password_hash(pw_new, method="sha256", salt_length=8)
+    db, conn = db_connect(DB_URL)
+
+    db.execute("SELECT username FROM users WHERE userID=?", (session["user_id"],))
+    user_name = db.fetchone()
+    db.execute("UPDATE users SET password=? WHERE username=?", (hashed_pw, user_name["username"]))
+    conn.commit()
+    conn.close()
+
+    # redirect user to index
+    return redirect("/")
+
 @app.route("/")
+@login_required
 def index():
     return render_template("index.html")
 
 @app.route("/clients", methods=["GET", "POST"])
+@login_required
 def clients():
     # for GET requests
     if request.method == "GET":
@@ -298,6 +376,7 @@ def update_client():
     return render_template("error.html", message="Success")
 
 @app.route("/staff", methods=["POST", "GET"])
+@login_required
 def staff():
     if request.method == "GET":
         # add in auto population of select fields
@@ -339,7 +418,7 @@ def staff():
             rbt_tier = int(request.form.get("Tier"))
         except ValueError:
             return render_template("error.html", message="Incorrect value entered in to Tier radio button")
-        if rbt_tier not in {1,2,3}: # NOTE: test this logic
+        if rbt_tier not in {1,2,3}:
             return render_template("error.html", message="Incorrect number value entered in to Tier radio button")
 
     # check if hours filed is filled out
@@ -355,11 +434,6 @@ def staff():
 
     # built final start and end times, build scheduable hours
     staff_hours = staff_hours_start + "-" + staff_hours_end
-    # start = convert_strtime(staff_hours_start)
-    # end = convert_strtime(staff_hours_end)
-  
-    # generate a list of the staff's scheduable hours
-    # hours = create_schhours(start, end)
 
     # connect to database
     db, conn = db_connect(DB_URL)
@@ -431,7 +505,7 @@ def staff_update():
         try:
             rbt_status = int(request.form.get("rbt_update"))
         except ValueError:
-            return render_template("error.html", message="RBT field must be a digits")
+            return render_template("error.html", message="RBT field must be a digit")
         
         if rbt_status == 1:
             db.execute("UPDATE staff SET rbt=? WHERE name=?", (rbt_status, staff_name))
@@ -503,6 +577,7 @@ def staff_update():
     return render_template("error.html", message="Success")
 
 @app.route("/schedule", methods=["GET", "POST"])
+@login_required
 def schedule():
     if request.method == "GET":
         return render_template("schedule.html")
@@ -521,8 +596,8 @@ def schedule():
     db.execute("SELECT * FROM clients WHERE absent=0 ORDER BY totalhours")
     client_data = db.fetchall()
 
-    # create schedule dicts for each client TODO: change out OUT to ""? or 0 to ""?
-    c_dict = {830: "---" , 930: "---" , 1030: "---" , 1130: "---" , 1230: "---" , 130: "---" , 230: "---" , 330: "---" , 430: "---"}
+    # create schedule dicts for each client
+    c_dict = {830: "---" , 930: "---" , 1030: "---" , 1130: "---" , 1230: "---" , 130: "---" , 230: "---" , 330: "---" , 430: "---"} # NOTE: dynamically generate these times?
     clients = [c_dict.copy() for row in client_data]
 
     # update each client's schedule
@@ -544,7 +619,7 @@ def schedule():
             if time in client.keys():
                 client[time] = 0
 
-        # get staff members are on the client's team
+        # get availible staff members are on the client's team
         db.execute("SELECT clientID, staff.name FROM teams INNER JOIN staff ON staff.staffID = teams.staffID WHERE clientID = ? AND absent=0", (client_ID,))
         team_members = db.fetchall()
         client_team = [staff["name"] for staff in team_members]
@@ -555,7 +630,6 @@ def schedule():
 
         # check for blank places on client's day, schedule additional hours as needed
         client_sch = generate_schedules(client_name, client_team, client_sch, all_staff_sch)
-        print("client schedule:", client_sch)
 
         # write client's schedule to csv
         header = ("Name", "Time", "Staff")
@@ -580,7 +654,7 @@ def schedule():
         # increment through clients
         client_num += 1
 
-   # write staff's schedule to csv NOTE: need to output if alphabetical order
+   # write staff's schedule to csv NOTE: need to output in alphabetical order
     try:
         with open("staff_schedule.csv", "a", newline="") as csvfile2:
             writer = csv.writer(csvfile2)
@@ -604,4 +678,3 @@ def schedule():
 
     conn.close()
     return render_template("error.html", message="Success")
-    

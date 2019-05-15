@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block title %}Change Password{% endblock %}
+
+{% block main %}
+    <header>
+        <h1>Change your Password</h1>
+    </header>
+    <div class="login_form">
+        <form method="POST" action="/changepw">
+            <p><input class="login_input" type="password" name="password_new" placeholder="Password"></p>
+            <p><input class="login_input" type="password" name="password_check" placeholder="Renter Passwrod"></p>
+            <p><button class="login_input" type="submit" id="btn_changepw">Submit</button></p>
+        </form>
+    </div>
+{% endblock %} 

@@ -16,8 +16,7 @@ nav{
 .nav_links{
     text-decoration: none;
     color: #212962;
-    font-size: 1.5em;
-    transition: font-size .5s, color .5s;
+    font-size: 1.25em;
     margin-left: 15px;
 }
 
@@ -26,12 +25,13 @@ nav{
     margin-left: 50px;
 }
 
-.nav_links:hover{
-    font-size: 2.3em;
-}
-
 .nav_links:hover, .page_title:hover{
     color: white;
+}
+
+#logout_link, #changepw_link
+{
+    font-size: .85em;
 }
 
 #img_puzzle
@@ -168,4 +168,27 @@ input, select
 {
     text-decoration: none;
     color: darkslategrey;
+}
+
+.login_form
+{
+    display: block;
+    text-align: center;
+    width: 100%;
+    margin: auto;
+    margin-top: 0;
+    background-color: whitesmoke;
+    padding: 10px;
+}
+
+.login_input
+{
+    width: 25%;
+    text-align: center;
+}
+
+#btn_login, #btn_changepw
+{
+    padding-top: 9px;
+    padding-bottom: 9px;
 }
