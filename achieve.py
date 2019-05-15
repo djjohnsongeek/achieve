@@ -10,8 +10,7 @@ from random import randrange
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from SQL import db_connect
-from djlib import generate_schedules, convert_strtime, create_schhours
-from server import login_required
+from server import generate_schedules, convert_strtime, create_schhours, login_required
 
 # NOTE: need to replace annoying single error page with client side UI feedback
 # NOTE: need to send POST requests with AJAX
