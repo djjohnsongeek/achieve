@@ -19,7 +19,7 @@ Server Side Functionality (DONE)
         -re-schedules already scheduled staff if available?
         -possible optimization: no rebuiliding tier_team_member list EVERY loop
 
-    -login functionality (IN PROGRESS)
+    -login functionality (DONE)
     -download schedules page
     -view staff/clients page
     -view schedule page
