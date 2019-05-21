@@ -42,12 +42,12 @@ def convert_strtime(time_string: str):
     return int("".join(letter for letter in time_string if letter.isdigit()))
 
 def shorten_day(day: str):
-    """ Takes a string and retunrs the first three letters as a string """
+    """ Takes a string and returns the first three letters as a string """
 
     container = [day[i] for i in range(3)]
     return "".join(container)
 
-def generate_schedules(client_name: str, client_team: list, client_sch: dict, all_staff_sch: dict):
+def generate_schedules(client_ID: int, client_name: str, client_team: list, client_sch: dict, all_staff_sch: dict, att_day: str):
     """ 
     Adds staff to the given client's schedule, Schedules based on the following logic:
     -First uses available Team Members (first Tier 1, then 2, then 3) [DONE]
@@ -58,11 +58,12 @@ def generate_schedules(client_name: str, client_team: list, client_sch: dict, al
     # NOTE: need to review code, performance improvements: additional loop that does does not regenerate entire t1_client_team list
     # NOTE: times for both clients and staff is static not dynamic
     # NOTE: need to devise a way to override "two hour only" scheduling, schedule based on team size
+    # NOTE: need to update code to interact with new database design
 
     # connect to database, prepare additional client specific variables
     db, conn = db_connect(DB_URL)
 
-    db.execute("SELECT totalhours FROM clients WHERE name=?", (client_name,))
+    db.execute("SELECT totalhours FROM clients WHERE clientID=?", (client_ID,))
     client_data = db.fetchone()
     schedule_var = round(client_data["totalhours"] / len(client_team))
     print(schedule_var) # debug print
@@ -72,9 +73,9 @@ def generate_schedules(client_name: str, client_team: list, client_sch: dict, al
         tier = current_step + 1
 
         if current_step == 3:  # Sub teachers: any tier, any team, only if color-class matches
-            db.execute('SELECT color FROM clients WHERE name=?', (client_name,))
+            db.execute('SELECT color FROM clients WHERE clientID=?', (client_ID,))
             client_color = db.fetchone()
-            db.execute('SELECT name, color FROM staff WHERE NOT tier=4 AND absent=0')
+            db.execute(f'SELECT name, color FROM staff WHERE NOT tier=4 AND {att_day}=1')
             members = db.fetchall()
             client_team = [member["name"] for member in members if member["color"] >= client_color["color"]]
 
@@ -85,7 +86,7 @@ def generate_schedules(client_name: str, client_team: list, client_sch: dict, al
                 tier_client_team.append(staff)
                 continue
 
-            db.execute("SELECT tier FROM staff WHERE name=? AND absent=0", (staff,))
+            db.execute(f"SELECT tier FROM staff WHERE name=? AND {att_day}=1", (staff,))
             staff_tier = db.fetchone()
             if staff_tier["tier"] == tier:
                 tier_client_team.append(staff)

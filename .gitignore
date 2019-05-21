@@ -3,6 +3,7 @@
 __pycache__/
 venv/
 static/
+protected
 
 # Don't track the following files
 achieve.db

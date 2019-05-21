@@ -654,16 +654,29 @@ def schedule():
 
     # check that a day is selected
     if request.form.get("schedule_day") not in {"monday", "tuesday", "wednesday", "thursday", "friday"}:
-        return render_template("error.html", message="Please choose a valid day to generate the schedule")
-
-    # current_day = request.form.get("schedule_day")
-    # update current hours for all clients
+        return render_template("error.html", message="Please choose a valid day to generate the schedule for")
+    
+    current_day = request.form.get("schedule_day")
+    curr_att_day = shorten_day(current_day)
 
     # when user generates a schedule
     db, conn = db_connect(DB_URL)
 
+    # update total hours for all clients
+    db.execute(f"SELECT {current_day}, clientID from clienthours")
+    staff_hours = db.fetchall()
+    for hours in staff_hours:
+        if hours[current_day] is None:
+            total_hours = 0
+        else:
+            times = hours[current_day].split('-')
+            total_hours = len(create_schhours(convert_strtime(times[0]), convert_strtime(times[1])))
+
+        db.execute("UPDATE clients SET totalhours=? WHERE clientID=?", (total_hours, hours["clientID"]))
+    conn.commit()
+    
     # build staff schedules with nested dicts
-    db.execute("SELECT name FROM staff where absent=0")
+    db.execute(f"SELECT name FROM staff where {curr_att_day}=1")
     staff_data = db.fetchall()
 
     all_staff_sch = {}
@@ -671,7 +684,8 @@ def schedule():
         all_staff_sch[staff["name"]] = {830: "" , 930: "" , 1030: "" , 1130: "" , 1230: "" , 130: "" , 230: "" , 330: "" , 430: ""} # NOTE: dynamically generate these times?
 
     # get client data (where client/staff are present, ordered color and total hours)
-    db.execute("SELECT * FROM clients WHERE absent=0 ORDER BY color DESC, totalhours DESC") # sort selection by color (highest first) then by number of hours (highest first)
+    # sort selection by color (highest first) then by number of hours (highest first)
+    db.execute(f"SELECT * FROM clients WHERE {curr_att_day}=1 ORDER BY color DESC, totalhours DESC") 
     client_data = db.fetchall()
 
     # create schedule dicts for each client
@@ -684,15 +698,12 @@ def schedule():
 
         # prepare client specific info/variables
         client_ID = client_data[client_num]["clientID"]
-        client_name = client_data[client_num]["name"]
-
-        # NOTE: get client times based on the current_day
-        client_times = client_data[client_num]["hours"].split('-')
-        start = int("".join(letter for letter in client_times[0] if letter.isdigit()))
-        end = int("".join(letter for letter in client_times[1] if letter.isdigit()))
-
+        client_name = unscramble(client_data[client_num]["name"])
+        db.execute(f"SELECT {current_day} FROM clienthours WHERE clientID=?", (client_ID,))
+        client_hours = db.fetchone()[current_day].split("-")
+        
         # generate a list of the client's scheduable hours
-        times = create_schhours(start, end)
+        times = create_schhours(convert_strtime(client_hours[0]), convert_strtime(client_hours[1]))
 
         # update client's scheduling dictionary
         for time in times:
@@ -700,7 +711,7 @@ def schedule():
                 client[time] = 0
 
         # get availible staff members are on the client's team
-        db.execute("SELECT clientID, staff.name FROM teams INNER JOIN staff ON staff.staffID = teams.staffID WHERE clientID = ? AND absent=0", (client_ID,))
+        db.execute(f"SELECT clientID, staff.name FROM teams INNER JOIN staff ON staff.staffID = teams.staffID WHERE clientID = ? AND {curr_att_day}=1", (client_ID,))
         team_members = db.fetchall()
         client_team = [staff["name"] for staff in team_members]
         client["Name"] = client_name
@@ -708,8 +719,8 @@ def schedule():
         # schedule two hours
         client_sch = client
 
-        # check for blank places on client's day, schedule additional hours as needed
-        client_sch = generate_schedules(client_name, client_team, client_sch, all_staff_sch)
+        # generate current client's schedule
+        client_sch = generate_schedules(client_ID, client_name, client_team, client_sch, all_staff_sch, curr_att_day)
 
         # write client's schedule to csv
         header = ("Name", "Time", "Staff")

@@ -14,7 +14,7 @@ Server Side Functionality (DONE)
         -writes to csv in correct format (DONE)
         -remove remenants of SQL scheduling (DONE)
         -backup current master server side master branch as a new branch (DONE)
-        -schedules staff more then just two hours (based upon team size) (DONE - experimental)
+        -schedules staff more then just two hours (based upon team size) (DONE - requires further testing)
         -schedule by color and largest amount of hours (TEST)
         -mon-fri profile system for staff and client's
             -write basic html for clients, staff (DONE)
@@ -23,7 +23,8 @@ Server Side Functionality (DONE)
                 -staff add, remove (DONE)
                 -staff update (DONE)
             -implement client name cryptogrophy (DONE)
-            -update scheduling (decode hashed client names, update sql queries)
+            -update scheduling (decode hashed client names, update sql queries) (DONE, requires further testing)
+
         -class rooms (preffered subs for class) start with classrooms first
         -re-schedules already scheduled staff if available?
         -possible optimization: no rebuiliding tier_team_member list EVERY loop
