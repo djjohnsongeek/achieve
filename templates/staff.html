@@ -17,7 +17,15 @@
                 <lable class="form_titles" for="staff_hours_start">Start Time:</lable>
                 <input type="time" name="staff_hours_start" id="staff_hours_start"placeholder="hh:mm (24hr)">
                 <lable class="form_titles" for="staff_hours_end">End Time:</lable>
-                <input type="time" name="staff_hours_end" id="staff_hours_end" placeholder="hh:mm (24hr)"><br/>
+                <input type="time" name="staff_hours_end" id="staff_hours_end" placeholder="hh:mm (24hr)">
+                Days Present:
+                <ul class="lst_client_days">
+                    <li class="chbx_staff_days"><input type="checkbox" name="monday" value="monday">Monday</li>
+                    <li class="chbx_staff_days"><input type="checkbox" name="tuesday" value="tuesday">Tuesday</li>
+                    <li class="chbx_staff_days"><input type="checkbox" name="wednesday" value="wednesday">Wednesday</li>
+                    <li class="chbx_staff_days"><input type="checkbox" name="thursday" value="thursday">Thursday</li>
+                    <li class="chbx_staff_days"><input type="checkbox" name="friday" value="friday">Friday</li>
+                </ul><br/>
                 <input type="checkbox" value="1" name="RBT">RBT?
                 <input type="radio" value="1" name="Tier">Tier 1
                 <input type="radio" value="2" name="Tier">Tier 2
@@ -43,16 +51,59 @@
         <form id="form_update_staff" action="/staff/update" method="POST">
             <fieldset>
                 <legend>Update Staff Info</legend>
-                <select id="slct_staff_update" name="slct_staff_update">
-                    <option disabled selected>Staff Name</option>
-                    {% for name in staff_names %}
-                    <option value="{{ name['name'] }}">{{ name['name'] }}</option>
-                    {% endfor %}
-                </select>
+                <p>
+                    Select Staff:<br/>
+                    <select id="slct_staff_update" name="slct_staff_update">
+                        <option disabled selected>Staff Name</option>
+                        {% for name in staff_names %}
+                        <option value="{{ name['name'] }}">{{ name['name'] }}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+                <p style="display: inline;">
+                    Update Staff Hours:<br/>
                     <label for="staff_hours_update_start">Start Time:</label>
                     <input type="time" name="staff_hours_update_start" id="staff_hours_update_start" placeholder="hh:mm (24hr)">
                     <label for="staff_hours_update_end">End Time:</label>
-                    <input type="time" name="staff_hours_update_end" id="staff_hours_update_end" placeholder="hh:mm (24hr)"><br/>
+                    <input type="time" name="staff_hours_update_end" id="staff_hours_update_end" placeholder="hh:mm (24hr)">
+                    <ul class="lst_client_days">
+                        <li class="chbx_staff_days"><input type="checkbox" name="monday" value="monday">Monday</li>
+                        <li class="chbx_staff_days"><input type="checkbox" name="tuesday" value="tuesday">Tuesday</li>
+                        <li class="chbx_staff_days"><input type="checkbox" name="wednesday" value="wednesday">Wednesday</li>
+                        <li class="chbx_staff_days"><input type="checkbox" name="thursday" value="thursday">Thursday</li>
+                        <li class="chbx_staff_days"><input type="checkbox" name="friday" value="friday">Friday</li>
+                    </ul>
+                </p>
+                <p>
+                    Update Staff Attendance:<br/>
+                    <select name="mon">
+                        <option value="" selected disabled>Monday</option>
+                        <option value="1">Present</option>
+                        <option value="0">Absent</option>
+                    </select>
+                    <select name="tue">
+                        <option value="" selected disabled>Tuesday</option>
+                        <option value="1">Present</option>
+                        <option value="0">Absent</option>
+                    </select>
+                    <select name="wed">
+                        <option value="" selected disabled>Wednesday</option>
+                        <option value="1">Present</option>
+                        <option value="0">Absent</option>
+                    </select>
+                    <select name="thu">
+                        <option value="" selected disabled>Thursday</option>
+                        <option value="1">Present</option>
+                        <option value="0">Absent</option>
+                    </select>
+                    <select name="fri">
+                        <option value="" selected disabled>Friday</option>
+                        <option value="1">Present</option>
+                        <option value="0">Absent</option>
+                    </select>
+                </p>
+                <p>
+                    Update Staff Credentials:<br/>
                     <input type="checkbox" value="1" name="rbt_update">RBT?
                     <input type="radio" value="1" name="tier_update">Tier 1
                     <input type="radio" value="2" name="tier_update">Tier 2
@@ -62,11 +113,9 @@
                         <option value="1">Green</option>
                         <option value="2">Yellow</option>
                         <option value="3">Red</option>
-                    </select><br/>
                     </select>
-                    <input type="radio" name="staff_absent" value="1">Absent Today?
-                    <input type="radio" name="staff_absent" value="0">Present Today?<br/>
-                    <button type="submit" class="btn_submit">Update Info</button>
+                </p>
+                <button type="submit" class="btn_submit">Update Info</button>
             </fieldset>
         </form>
     </div>

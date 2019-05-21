@@ -41,6 +41,12 @@ def convert_strtime(time_string: str):
 
     return int("".join(letter for letter in time_string if letter.isdigit()))
 
+def shorten_day(day: str):
+    """ Takes a string and retunrs the first three letters as a string """
+
+    container = [day[i] for i in range(3)]
+    return "".join(container)
+
 def generate_schedules(client_name: str, client_team: list, client_sch: dict, all_staff_sch: dict):
     """ 
     Adds staff to the given client's schedule, Schedules based on the following logic:

@@ -11,16 +11,28 @@ Server Side Functionality (DONE)
         -schedules t3 (DONE)
         -schedules subs with color catagories (DONE)
         -schedules client with least amount of hours first (DONE)
-        
         -writes to csv in correct format (DONE)
         -remove remenants of SQL scheduling (DONE)
         -backup current master server side master branch as a new branch (DONE)
         -schedules staff more then just two hours (based upon team size) (DONE - experimental)
+        -schedule by color and largest amount of hours (TEST)
+        -mon-fri profile system for staff and client's
+            -write basic html for clients, staff (DONE)
+            -write backend sql commits, adn deletions for removing of clients/staff (DONE)
+                -client add,remove, update (DONE)
+                -staff add, remove (DONE)
+                -staff update (DONE)
+            -implement client name cryptogrophy (DONE)
+            -update scheduling (decode hashed client names, update sql queries)
+        -class rooms (preffered subs for class) start with classrooms first
         -re-schedules already scheduled staff if available?
         -possible optimization: no rebuiliding tier_team_member list EVERY loop
 
     -login functionality (DONE)
-    -download schedules page
+    -download schedules page (IN PROGRESS)
+        -better download page and navigation
+        -file encryption, decryption (IN PROGRESS)
+
     -view staff/clients page
     -view schedule page
     -Review all code
@@ -34,11 +46,13 @@ Client Side Feedback/Search/AJAX
     -Review all code
 
 HTML and CSS Rework:
+    -layout.html
     -index.html
     -clients.html
     -staff.html
     -schedule.html
     -view staff/clients/schedule.html
+    -dowload.html
 
 CURRENT Version Features
     -add, edit, remove client and staff info from database (DONE)

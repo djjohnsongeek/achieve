@@ -93,27 +93,6 @@ footer
     margin: 10px;
 }
 
-#btn_generate
-{
-    width: 40%;
-    height: 80px;
-    margin-top: 20px;
-    margin-bottom: 20px;
-    margin-left: 30%;
-    margin-right: 30%;
-    border-radius: 5px;
-    background-color: lightslategrey;
-    border: solid 1px rgb(128, 128, 128);
-    transition: font-size .5s, background-color .5s;
-}
-
-#btn_generate:hover
-{
-    background-color: rgb(146, 180, 224);
-    border: solid 2px rgb(2, 93, 179);
-    font-size: 108%;
-}
-
 fieldset, .welcome
 {
     padding: 10px;
@@ -135,6 +114,8 @@ input, select
     padding: 10px 10px;
     margin: 10px;
 }
+
+/* ################################################### HOMEPAGE BIG BUTTONS ###################################################################### */
 
 #container
 {
@@ -170,6 +151,8 @@ input, select
     color: darkslategrey;
 }
 
+/* ################################################### LOGIN PAGE ############################################################################### */
+
 .login_form
 {
     display: block;
@@ -191,4 +174,45 @@ input, select
 {
     padding-top: 9px;
     padding-bottom: 9px;
+}
+
+/* ################################################### WEEK DAY CHECK BOXES ###################################################################### */
+
+.lst_client_days
+{
+    display: inline-block;
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.chbx_client_days, .chbx_staff_days
+{
+    display: inline-block;
+}
+
+/* ################################################### SCHEDULE PAGE ############################################################################ */
+
+#slct_schedule_day
+{
+    width: 200px;
+}
+
+#btn_generate
+{
+    width: 40%;
+    height: 80px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    background-color: lightslategrey;
+    border: solid 1px rgb(128, 128, 128);
+    transition: font-size .1s, background-color .5s;
+}
+
+#btn_generate:hover
+{
+    background-color: rgb(146, 180, 224);
+    border: solid 2px rgb(2, 93, 179);
+    font-size: 108%;
 }

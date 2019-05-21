@@ -2,15 +2,18 @@ import os
 import sqlite3
 import re
 import csv
+import pyAesCrypt
 
 from flask import Flask
-from flask import render_template, request, session, redirect, Response, jsonify, json
+from flask import render_template, request, session, redirect, Response, jsonify, json, send_from_directory
 from sqlite3 import Error
 from random import randrange
 from werkzeug.security import check_password_hash, generate_password_hash
+from jinja2 import Environment, FileSystemLoader
 
 from SQL import db_connect
-from server import generate_schedules, convert_strtime, create_schhours, login_required
+from server import generate_schedules, convert_strtime, create_schhours, login_required, shorten_day
+from cypher import scramble, unscramble
 
 # NOTE: need to replace annoying single error page with client side UI feedback
 # NOTE: need to send POST requests with AJAX
@@ -22,11 +25,11 @@ From the '/schedule' route it generates a daily schedule and saves it as an csv 
 (The 'generate schedule' is still in progress, and 'download csv file' is yet to be implemented)
 """
 DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
+KEY_TEXT = "rkjfawtphxuoievokbanzmycaksjdgoql"
 
 # initialize app
-app = Flask(__name__, static_folder="C:\\Users\\Johnson\\Documents\\Projects\\Achieve\\static")
+app = Flask(__name__, instance_path="C:\\Users\\Johnson\\Documents\\Projects\\Achieve\\protected")
 app.secret_key = "development"
-
 
 # ensure auto reload, code from CS50 staff
 app.config["TEMPLATES_AUTO_RELOAD"] = True
@@ -127,7 +130,7 @@ def clients():
         db.execute("SELECT name FROM clients")
         client_query = db.fetchall()
         conn.close()
-        return render_template("clients.html", staff_query=staff_query, client_query=client_query)
+        return render_template("clients.html", staff_query=staff_query, client_query=client_query, unscramble=unscramble)
 
     # for POST Requests (adding client info)
     # store client's name, check for no value
@@ -137,7 +140,7 @@ def clients():
    
     # store client hours, check for no value
     if not request.form.get("client_hours_start") or not request.form.get("client_hours_end"):
-        return render_template("error.html", message=f"Please provide the {client_name}'s start and end times")
+        return render_template("error.html", message=f"Please provide {client_name}'s start and end times")
     
     client_hours_start = request.form.get("client_hours_start")
     client_hours_end = request.form.get("client_hours_end")
@@ -158,9 +161,27 @@ def clients():
     client_hours = client_hours_start + "-" + client_hours_end
 
     # prepare client info variables as a tuple
-    client_info = (client_name, client_hours, total_hours)
+    client_name = scramble(client_name)
+    client_info = [client_name, total_hours]
 
-    # check to make sure at least one team member was assigend to client's team (Line too long, reformat)
+    # store client attendance days, and hours
+    client_attendance = []
+    client_hours_list = []
+    for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
+
+        if request.form.get(day) != day and request.form.get(day) != None:
+            return render_template("error.html", message="Invalid day data submitted")
+        
+        if request.form.get(day) == day:
+            client_attendance.append(1)
+            client_hours_list.append(client_hours)
+        else:
+            client_attendance.append(0)
+            client_hours_list.append(None)
+
+    client_info = client_info + client_attendance
+
+    # check to make sure at least one team member was assigned to client's team (Line too long, reformat)
     if not request.form.get("assign_teacher0") and not request.form.get("assign_teacher1") and not request.form.get("assign_teacher2") and not request.form.get("assign_teacher3"):
         return render_template("error.html", message=f"Please provide {client_name} with at least one Team Member")
 
@@ -176,32 +197,24 @@ def clients():
     db, conn = db_connect(DB_URL)
 
     # check if client's name is already in the database
-    db.execute("SELECT * FROM clients WHERE name=?", (client_name,))
-    if db.fetchall():
-        return render_template("error.html", message=f"{client_name} is already in the database")
-    
-    # insert data, or ignore if name is already present
-    db.execute("INSERT INTO clients (name, hours, totalhours) VALUES (?,?,?)", client_info) #NOTE: Test this site w/o JS to see if this line of code is working
+    db.execute("SELECT clientID FROM clients WHERE name=?", (client_name,))
+    if db.fetchone():
+        return render_template("error.html", message=f"{client_name} is already in the database. If you want to edit Client information please use the Update Client Info form")
 
-    # Insert client IDs and Staff ID's into the database
-    for staff in unique_members:
-        # get staff info
-        db.execute("SELECT * FROM staff WHERE name=?", (staff,))
-        staff_info = db.fetchone()
+    print(client_info)
+    # insert client info, uses default color 
+    db.execute("INSERT INTO clients (name, totalhours, mon, tue, wed, thu, fri) VALUES (?,?,?,?,?,?,?)", client_info) #NOTE: Test this site w/o JS to see if this line of code is working
+    conn.commit()
 
-        # if no staff into is found, return error
-        if not staff_info:
-            return render_template("error.html", message=f"{staff} was not found in the staff database. New Client was not added")
+    # get client ID (that now should exist)
+    db.execute("SELECT clientID FROM clients WHERE name=?", (client_name,))
+    client_info = db.fetchone()
 
-        # insert staff ID and client ID into table "teams"
-        else:
-            # get client ID
-            db.execute("SELECT clientID FROM clients WHERE name=?", (client_name,))
-            client_ID = db.fetchone()
+    # add on client ID to client hours list
+    client_hours_list.insert(0, client_info["clientID"])
 
-            # TODO check if staff member is already on client's team?
-            # insert client and staff ID into teams
-            db.execute("INSERT INTO teams (clientID, staffID) VALUES(?,?)", (client_ID["clientID"], staff_info["staffID"]))
+    # insert client schedule data into data base
+    db.execute("INSERT INTO clienthours (clientID, monday, tuesday, wednesday, thursday, friday) VALUES(?,?,?,?,?,?)", client_hours_list)
 
     # check for client classification information
     if request.form.get("color"):
@@ -213,7 +226,22 @@ def clients():
         if category not in {1,2,3}:
             return render_template("error.html", message="Incorrect client classification input")
         else:
-            db.execute("UPDATE clients SET color=? WHERE name=?", (category, client_name))
+            db.execute("UPDATE clients SET color=? WHERE clientID=?", (category, client_info["clientID"]))
+
+    # Insert teams data
+    for staff in unique_members:
+        # get staff info
+        db.execute("SELECT staffID FROM staff WHERE name=?", (staff,)) #bug?
+        staff_info = db.fetchone()
+
+        # check to make sure staff exists
+        if not staff_info:
+            return render_template("error.html", message=f"{staff} was not found in the staff database. New Client was not added to any team")
+
+        # insert staff ID and client ID into table "teams"
+        else:
+            # insert client and staff ID into teams
+            db.execute("INSERT INTO teams (clientID, staffID) VALUES(?,?)", (client_info["clientID"], staff_info["staffID"]))
 
     # commit and close database
     conn.commit()
@@ -242,7 +270,7 @@ def addclient():
 def remove_client():
     # validate remove_client form
     if not request.form.get("slct_client"):
-        return render_template("error.html", message="Please provide the client name to be removed the database")
+        return render_template("error.html", message="Please provide the client name to be removed")
     client_name = request.form.get("slct_client")
 
     # connect to database
@@ -256,7 +284,8 @@ def remove_client():
 
     # delete client's team assignments, delete client
     db.execute("DELETE FROM teams where clientID=?", (query["clientID"],))
-    db.execute("DELETE FROM clients WHERE name=?", (client_name,))
+    db.execute("DELETE FROM clients WHERE clientID=?", (query["clientID"],))
+    db.execute("DELETE FROM clienthours WHERE clientID=?", (query["clientID"],))
 
     # commit changes and close the connection, return success
     conn.commit()
@@ -266,6 +295,7 @@ def remove_client():
 @app.route("/clients/update", methods=["POST"])
 def update_client():
     
+    # ensure client name is filled out
     if not request.form.get("update_client"):
         return render_template("error.html", message="Please provide the Client's name")
 
@@ -280,14 +310,9 @@ def update_client():
     if not client_info:
         return render_template("error.html", message=f"{client_name} was not found in the database")
 
-    # check for incomplete hours data
-    if not request.form.get("new_client_hours_start") and request.form.get("new_client_hours_end"):
-        return render_template("error.html", message="Pleave provide both start and end times")
-    if request.form.get("new_client_hours_start") and not request.form.get("new_client_hours_end"):
-        return render_template("error.html", message="Pleave provide both start and end times")
-
     # get and insert new hours data
     if request.form.get("new_client_hours_start") and request.form.get("new_client_hours_end"):
+
         client_hours_start = request.form.get("new_client_hours_start")
         client_hours_end = request.form.get("new_client_hours_end")
 
@@ -297,27 +322,43 @@ def update_client():
             return render_template("error.html", message="Incorrect time format")
 
         # get client's total number of hours
-        start = convert_strtime(client_hours_start)
-        end = convert_strtime(client_hours_end)
-        total_hours = len(create_schhours(start, end))
-
+        total_hours = len(create_schhours(convert_strtime(client_hours_start), convert_strtime(client_hours_end)))
         client_hours = client_hours_start + "-" + client_hours_end
-        db.execute("UPDATE clients SET hours=?, totalhours=? WHERE name=?", (client_hours, total_hours, client_name))
 
-    # if there is absent data
-    if request.form.get("absent"):
-        # ensure proper data format
-        absent = request.form.get("absent")
+        # store client hours
+        client_days = []
+        for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
+            # validate day data
+            if request.form.get(day) != day and request.form.get(day) != None:
+                return render_template("error.html", message="Invalid day data submitted")
+
+            if request.form.get(day) == day:
+                client_days.append(day)
+            
+        db.execute("UPDATE clients SET totalhours=? WHERE clientID=?", (total_hours, client_info["clientID"]))
+        for item in client_days:
+            db.execute(f"UPDATE clienthours SET {item}=? WHERE clientID=?", (client_hours, client_info["clientID"]))
+
+    # get and insert new attendance data
+    client_att = []
+    for day in ["mon", "tue", "wed", "thu", "fri"]:
         try:
-            absent = int(absent)
+            if request.form.get(day) != None and int(request.form.get(day)) not in {0, 1}:
+                return render_template("error.html", message="Invalid attendance data submitted")
         except ValueError:
-            return render_template("error.html", message="Absent field must be a digit")
+            return render_template("error.html", message="Invalid attendance data submitted")
 
-        if absent == 1 or absent == 0:
-            # update client
-            db.execute("UPDATE clients SET absent=? WHERE name=?", (absent, client_name))
-        else:
-            return render_template("error.html", message="Incorrect value for Absent/Present Radio Button")
+        # check for None
+        if not request.form.get(day):
+            continue
+
+        if int(request.form.get(day)) == 1:
+            client_att.append((day, 1))
+        if int(request.form.get(day)) == 0:
+            client_att.append((day, 0))
+
+    for tuples in client_att:
+        db.execute(f"UPDATE clients SET {tuples[0]}=? WHERE clientID=?", (tuples[1], client_info["clientID"]))
 
     # change client's color classification if needed
     if request.form.get("update_color"):
@@ -378,7 +419,6 @@ def update_client():
 @login_required
 def staff():
     if request.method == "GET":
-        # add in auto population of select fields
         # connect to database
         db, conn = db_connect(DB_URL)
 
@@ -420,7 +460,7 @@ def staff():
         if rbt_tier not in {1,2,3}:
             return render_template("error.html", message="Incorrect number value entered in to Tier radio button")
 
-    # check if hours filed is filled out
+    # check if hours field is filled out
     if not request.form.get("staff_hours_start") or not request.form.get("staff_hours_end"):
         return render_template("error.html", message="You must provide staff hours")
     
@@ -431,20 +471,41 @@ def staff():
     if not time.match(staff_hours_start) or not time.match(staff_hours_end):
         return render_template("error.html", message="Incorrect time format")
 
-    # built final start and end times, build scheduable hours
+    # built final start and end times
     staff_hours = staff_hours_start + "-" + staff_hours_end
+
+    #build staff attendance/hours
+    staff_att = []
+    staff_hours_list = []
+    for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
+        if request.form.get(day) != day and request.form.get(day) != None:
+            return render_template("error.html", message="Invalid day data submitted")
+
+        if request.form.get(day) == day:
+            staff_hours_list.append(staff_hours)
+            staff_att.append(1)
+
+        else:
+            staff_hours_list.append(None)
+            staff_att.append(0)
+
 
     # connect to database
     db, conn = db_connect(DB_URL)
 
     # check if staff is in the database
-    db.execute("SELECT * FROM staff WHERE name=?", (staff_name,))
-    staff_info = db.fetchone()
-    if staff_info:
+    db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
+    if db.fetchone():
         return render_template("error.html", message=f"{staff_name} is already in the database")
     
     # insert staff info into the database
-    db.execute("INSERT INTO staff (name, rbt, tier, hours, color) VALUES(?,?,?,?,?)", (staff_name, rbt_status, rbt_tier, staff_hours, rbt_tier))
+    staff_info = [staff_name, rbt_status, rbt_tier, rbt_tier] + staff_att
+    db.execute("INSERT INTO staff (name, rbt, tier, color, mon, tue, wed, thu, fri) VALUES(?,?,?,?,?,?,?,?,?)", (staff_info))
+    db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
+    staff_ID = db.fetchone()
+    staff_hours_list.insert(0, staff_ID["staffID"])
+    print(staff_hours)
+    db.execute("INSERT INTO staffhours (staffID, monday, tuesday, wednesday, thursday, friday) VALUES(?,?,?,?,?,?)", staff_hours_list)
 
     # close database
     conn.commit()
@@ -463,19 +524,16 @@ def remove_staff():
     # connect to database
     db, conn = db_connect(DB_URL)
 
-    # get staffID
+    # get staffID, check to make sure it is in the database
     db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
-    staffID = db.fetchone()
-
-    # check if staff name is in the database
-    if not staffID:
+    staff_ID = db.fetchone()
+    if not staff_ID:
         return render_template("error.html", message=f"{staff_name} is not in the database")
 
     # delete staff info
-    db.execute("DELETE FROM staff WHERE name=?", (staff_name,))
-
-    # delete teams info related to selected staff
-    db.execute("DELETE FROM teams WHERE staffID=?", (staffID["staffID"],))
+    db.execute("DELETE FROM staff WHERE staffID=?", (staff_ID["staffID"],))
+    db.execute("DELETE FROM teams WHERE staffID=?", (staff_ID["staffID"],))
+    db.execute("DELETE FROM staffhours WHERE staffID=?", (staff_ID["staffID"],))
 
     # commit changes and close database
     conn.commit()
@@ -494,7 +552,7 @@ def staff_update():
     db, conn = db_connect(DB_URL)
 
     # check if staff name is in database
-    db.execute("SELECT * FROM staff WHERE name=?", (staff_name,))
+    db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
     staff_info = db.fetchone()
     if not staff_info:
         return render_template("error.html", message=f"{staff_name} is not in the database")
@@ -507,7 +565,7 @@ def staff_update():
             return render_template("error.html", message="RBT field must be a digit")
         
         if rbt_status == 1:
-            db.execute("UPDATE staff SET rbt=? WHERE name=?", (rbt_status, staff_name))
+            db.execute("UPDATE staff SET rbt=? WHERE staffID=?", (rbt_status, staff_info["staffID"]))
         else:
             return render_template("error.html", message="Incorrect value for RBT field")
 
@@ -519,18 +577,11 @@ def staff_update():
             return render_template("error.html", message="Tier field must be a digit")
         
         if tier in {1,2,3}:
-            db.execute("UPDATE staff SET tier=?, color=? WHERE name=?", (tier, tier, staff_name))
+            db.execute("UPDATE staff SET tier=?, color=? WHERE staffID=?", (tier, tier, staff_info["staffID"]))
         else:
             return render_template("error.html", message="Incorrect value in Tier field")
 
-    # if only one time field is filled out
-    if request.form.get("staff_hours_update_start") and not request.form.get("staff_hours_update_end"):
-        return render_template("error.html", message="Please provide both start and end times")
-
-    if not request.form.get("staff_hours_update_start") and request.form.get("staff_hours_update_end"):
-        return render_template("error.html", message="Please provide both start and end times")
-
-    # if hours is filled out
+    # if build hours variable
     if request.form.get("staff_hours_update_start") and request.form.get("staff_hours_update_end"):
 
         # build final start and end times
@@ -540,8 +591,18 @@ def staff_update():
         # check for correct time format
         time = re.compile(r"[012][0-9]:[0-5][0-9]")
         if time.match(hours_start) and time.match(hours_end):
+
             staff_hours = hours_start + "-" + hours_end
-            db.execute("UPDATE staff SET hours=? WHERE name=?", (staff_hours, staff_name))
+            staff_days = []
+            for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
+                if request.form.get(day) != day and request.form.get(day) != None:
+                    return render_template("error.html", message="Invalid day data")
+
+                if request.form.get(day) == day:
+                    staff_days.append(day)
+
+            for items in staff_days:
+                db.execute(f"UPDATE staffhours SET {items}=? WHERE staffID=?", (staff_hours, staff_info["staffID"]))
 
         else:
             return render_template("error.html", message="Incorrect time format")
@@ -556,19 +617,28 @@ def staff_update():
         if color not in {1,2,3}:
             return render_template("error.html", message="Invalid staff classification value")
         else:
-            db.execute("UPDATE staff SET color=? WHERE name=?", (color, staff_name))
+            db.execute("UPDATE staff SET color=? WHERE staffID=?", (color, staff_info["staffID"]))
 
-    # if absent is chosen
-    if request.form.get("staff_absent"):
+    # --------------------------------------------------------------------------------------------------------- #
+    staff_att = []
+    for day in ["mon", "tue", "wed", "thu", "fri"]:
         try:
-            absent = int(request.form.get("staff_absent"))
+            if request.form.get(day) != None and int(request.form.get(day)) not in {0,1}:
+                return render_template("error.html", message="Invalid day data")
         except ValueError:
-            return render_template("error.html", message="Absent/Present field must be a digit")
+            return render_template("error.html", message="Invalid day data")
 
-        if absent == 1 or absent == 0:  
-            db.execute("UPDATE staff SET absent=? WHERE name=?", (absent, staff_name))
+        if not request.form.get(day):
+            continue
+        
+        if int(request.form.get(day)) == 1:
+            staff_att.append((day, 1))
         else:
-            return render_template("error.html", message="Incorrect value in Absent/Present field")
+            staff_att.append((day, 0))
+
+    for tuples in staff_att:
+        db.execute(f"UPDATE staff SET {tuples[0]}=? WHERE staffID=?", (tuples[1], staff_info["staffID"]))
+    # --------------------------------------------------------------------------------------------------------- #
 
     # close database and save changes
     conn.commit()
@@ -578,9 +648,18 @@ def staff_update():
 @app.route("/schedule", methods=["GET", "POST"])
 @login_required
 def schedule():
+    # when user navigatest to schedule route
     if request.method == "GET":
         return render_template("schedule.html")
 
+    # check that a day is selected
+    if request.form.get("schedule_day") not in {"monday", "tuesday", "wednesday", "thursday", "friday"}:
+        return render_template("error.html", message="Please choose a valid day to generate the schedule")
+
+    # current_day = request.form.get("schedule_day")
+    # update current hours for all clients
+
+    # when user generates a schedule
     db, conn = db_connect(DB_URL)
 
     # build staff schedules with nested dicts
@@ -591,8 +670,8 @@ def schedule():
     for staff in staff_data:
         all_staff_sch[staff["name"]] = {830: "" , 930: "" , 1030: "" , 1130: "" , 1230: "" , 130: "" , 230: "" , 330: "" , 430: ""} # NOTE: dynamically generate these times?
 
-    # get client data (where client/staff are present, ordered by name)
-    db.execute("SELECT * FROM clients WHERE absent=0 ORDER BY totalhours")
+    # get client data (where client/staff are present, ordered color and total hours)
+    db.execute("SELECT * FROM clients WHERE absent=0 ORDER BY color DESC, totalhours DESC") # sort selection by color (highest first) then by number of hours (highest first)
     client_data = db.fetchall()
 
     # create schedule dicts for each client
@@ -606,6 +685,8 @@ def schedule():
         # prepare client specific info/variables
         client_ID = client_data[client_num]["clientID"]
         client_name = client_data[client_num]["name"]
+
+        # NOTE: get client times based on the current_day
         client_times = client_data[client_num]["hours"].split('-')
         start = int("".join(letter for letter in client_times[0] if letter.isdigit()))
         end = int("".join(letter for letter in client_times[1] if letter.isdigit()))
@@ -633,7 +714,7 @@ def schedule():
         # write client's schedule to csv
         header = ("Name", "Time", "Staff")
         try:
-            with open("client_schedule.csv", "a", newline="") as csvfile:
+            with open(os.path.join(app.instance_path, "client_schedule.csv"), "a", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 if client_num == 0:
                     writer.writerow(header)
@@ -655,7 +736,7 @@ def schedule():
 
    # write staff's schedule to csv NOTE: need to output in alphabetical order
     try:
-        with open("staff_schedule.csv", "a", newline="") as csvfile2:
+        with open(os.path.join(app.instance_path, "staff_schedule.csv"), "a", newline="") as csvfile2:
             writer = csv.writer(csvfile2)
             header = ("Name", "Time", "Client")
             writer.writerow(header)
@@ -676,4 +757,27 @@ def schedule():
             return render_template("error.html", message="Could not write to file, permission denied (file open)")
 
     conn.close()
-    return render_template("error.html", message="Success")
+    # encrypt files, removed unencyprted files
+    # files = {"staff_schedule.csv", "client_schedule.csv"}
+    # buffer = 64 * 1024
+    # key = "abcofnc1!"
+    # TODO: manage file names
+    # for f in files:
+    #    pyAesCrypt.encryptFile(os.path.join(app.instance_path, f), os.path.join(app.instance_path, f.join(".aes")), key, buffer)
+    #    os.remove(os.path.join(app.instance_path, f))
+
+    # redirect to downloads page
+    return redirect("/download")
+
+@app.route("/download")
+@login_required
+def downloadpage():
+    return render_template("downloads.html")
+
+@app.route("/download/<path:filename>")
+@login_required
+def download(filename):
+    try:
+        return send_from_directory(os.path.join(app.instance_path, ''), filename)
+    except:
+        return render_template("error.html", message="No such file to download")
