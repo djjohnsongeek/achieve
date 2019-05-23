@@ -30,19 +30,19 @@ Server Side Functionality (DONE)
         -possible optimization: no rebuiliding tier_team_member list EVERY loop
 
     -login functionality (DONE)
-    -download schedules page (IN PROGRESS)
-        -better download page and navigation
-        -file encryption, decryption (IN PROGRESS)
+    -download schedules page (DONE)
+        -file encryption, decryption (DONE)
+        -file deletion (DONE, but not securly)
 
-    -view staff/clients page
-    -view schedule page
+    -generate staff/clients/teams table
+    -generate schedule table
     -Review all code
 
 Client Side Feedback/Search/AJAX
     -clients
     -staff
     -schedule
-    -view staff/clients
+    -view staff/clients/teams
     -view schedule
     -Review all code
 
@@ -53,7 +53,7 @@ HTML and CSS Rework:
     -staff.html
     -schedule.html
     -view staff/clients/schedule.html
-    -dowload.html
+    -better download page and navigation
 
 CURRENT Version Features
     -add, edit, remove client and staff info from database (DONE)

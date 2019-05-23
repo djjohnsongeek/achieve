@@ -2,7 +2,6 @@
 .vscode/
 __pycache__/
 venv/
-static/
 protected
 
 # Don't track the following files
@@ -15,5 +14,9 @@ staff_schedule.csv
 schedule.ods
 schedule.xlsm
 test.py
+clienticon.png
+logo.png
+scheduleicon.png
+stafficon.png
 
 

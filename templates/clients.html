@@ -11,18 +11,18 @@
         <form id="form_add_client" name="form_add_client" method="POST" action="/clients">
             <fieldset>
                 <legend>Add a Client</legend>
-                <input type="text" id="client_name" name="client_name" placeholder="Client Name" required>
+                <input type="text" id="client_name" name="client_name" placeholder="Client Name">
                 <label for="client_hours_start" class="form_titles">Start Time:</label>
                 <input type="time" name="client_hours_start" id="client_hours_start" placeholder="hh:mm (24hr)">
                 <label for="client_hours_end" class="form_titles">End Time:</label>
                 <input type="time" name="client_hours_end" id="client_hours_end" placeholder="hh:mm (24hr)">
                 Days Present:
                 <ul class="lst_client_days">
-                    <li class="chbx_client_days"><input type="checkbox" name="monday" value="monday">Monday</li>
-                    <li class="chbx_client_days"><input type="checkbox" name="tuesday" value="tuesday">Tuesday</li>
-                    <li class="chbx_client_days"><input type="checkbox" name="wednesday" value="wednesday">Wednesday</li>
-                    <li class="chbx_client_days"><input type="checkbox" name="thursday" value="thursday">Thursday</li>
-                    <li class="chbx_client_days"><input type="checkbox" name="friday" value="friday">Friday</li>
+                    <li class="chbx_client_days"><input type="checkbox" id="monday1" name="monday" value="monday">Monday</li>
+                    <li class="chbx_client_days"><input type="checkbox" id="tuesday1" name="tuesday" value="tuesday">Tuesday</li>
+                    <li class="chbx_client_days"><input type="checkbox" id="wednesday1" name="wednesday" value="wednesday">Wednesday</li>
+                    <li class="chbx_client_days"><input type="checkbox" id="thursday1" name="thursday" value="thursday">Thursday</li>
+                    <li class="chbx_client_days"><input type="checkbox" id="friday1" name="friday" value="friday">Friday</li>
                 </ul><br/>
                 <span class="form_titles">Assign Teachers to Team:</span><br/>
                 <select name="assign_teacher0">
@@ -58,35 +58,12 @@
                 <button type="submit" id="btn_add_client" class="btn_submit" value="add_client" name="btn_add_client">Add Client</button>
             </fieldset>
         </form>
-        <script>
-            // store client first and last name in variable
-            var client_name = document.getElementById("client_name");
-
-            //Listen for the button being clicked
-            document.getElementById("btn_add_client").addEventListener("click", function(event){
-
-            //prevent form submission
-                event.preventDefault();
-                console.log("prevented submission");
-                //send GET request with clientname
-                $.get("/addclient?clientname=" + client_name.value, function(data){
-                    console.log(data);
-                    if (data == true)
-                    {
-                        document.getElementById("form_add_client").submit();
-                    }
-                    else
-                    {
-                        alert("Client Name already Exists")
-                    }
-                });
-            });
-        </script>
+        <script src="../static/addCLient.js"></script>
         <form id="form_remove_client" name="form_remove_client" action="/clients/remove" method="POST">
             <fieldset>
                 <legend>Remove a Client</legend>
-                <select id="slct_clietn" name="slct_client">
-                    <option disabled selected>Client Name</option>
+                <select id="slct_client" name="slct_client">
+                    <option disabled selected value="">Client Name</option>
                     {% for name in client_query %}
                     <option value ="{{ name['name'] }}">{{ unscramble(name["name"]) }}</option>
                     {% endfor %}
@@ -94,6 +71,7 @@
                 <button type="submit" id="btn_remove_client" class="btn_submit">Remove Client</button>
             </fieldset>
         </form>
+        <script src="../static/removeClient.js"></script>
     </div>
     <div class="div_forms">
     <h2>Update Client Info</h2>

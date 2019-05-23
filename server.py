@@ -9,10 +9,7 @@ from SQL import db_connect
 DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
     
 def login_required(f):
-    """
-    decorates routes to require login
-    """
-
+    """ decorates routes to require login """
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if session.get("user_id") is None:
@@ -58,7 +55,6 @@ def generate_schedules(client_ID: int, client_name: str, client_team: list, clie
     # NOTE: need to review code, performance improvements: additional loop that does does not regenerate entire t1_client_team list
     # NOTE: times for both clients and staff is static not dynamic
     # NOTE: need to devise a way to override "two hour only" scheduling, schedule based on team size
-    # NOTE: need to update code to interact with new database design
 
     # connect to database, prepare additional client specific variables
     db, conn = db_connect(DB_URL)
@@ -66,9 +62,8 @@ def generate_schedules(client_ID: int, client_name: str, client_team: list, clie
     db.execute("SELECT totalhours FROM clients WHERE clientID=?", (client_ID,))
     client_data = db.fetchone()
     schedule_var = round(client_data["totalhours"] / len(client_team))
-    print(schedule_var) # debug print
+    
     current_step = 0
-
     while 0 in client_sch.values():
         tier = current_step + 1
 
@@ -144,8 +139,6 @@ def generate_schedules(client_ID: int, client_name: str, client_team: list, clie
                 print("There are no available staff at this tier, move up 1")
                 current_step += 1
                 continue
-
-        # NOTE: client hours/team size?
         
         # update client and staff schedule dictionaries
         for k in range(j):

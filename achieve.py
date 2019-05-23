@@ -25,7 +25,6 @@ From the '/schedule' route it generates a daily schedule and saves it as an csv 
 (The 'generate schedule' is still in progress, and 'download csv file' is yet to be implemented)
 """
 DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
-KEY_TEXT = "rkjfawtphxuoievokbanzmycaksjdgoql"
 
 # initialize app
 app = Flask(__name__, instance_path="C:\\Users\\Johnson\\Documents\\Projects\\Achieve\\protected")
@@ -183,7 +182,7 @@ def clients():
 
     # check to make sure at least one team member was assigned to client's team (Line too long, reformat)
     if not request.form.get("assign_teacher0") and not request.form.get("assign_teacher1") and not request.form.get("assign_teacher2") and not request.form.get("assign_teacher3"):
-        return render_template("error.html", message=f"Please provide {client_name} with at least one Team Member")
+        return render_template("error.html", message=f"Please provide {unscramble(client_name)} with at least one Team Member")
 
     # create list of team members, remove variables that have no data
     t_members = [request.form.get("assign_teacher0"), request.form.get("assign_teacher1"), request.form.get("assign_teacher2"),
@@ -199,7 +198,7 @@ def clients():
     # check if client's name is already in the database
     db.execute("SELECT clientID FROM clients WHERE name=?", (client_name,))
     if db.fetchone():
-        return render_template("error.html", message=f"{client_name} is already in the database. If you want to edit Client information please use the Update Client Info form")
+        return render_template("error.html", message=f"{unscramble(client_name)} is already in the database. If you want to edit Client information please use the Update Client Info form")
 
     print(client_info)
     # insert client info, uses default color 
@@ -250,7 +249,7 @@ def clients():
 
 @app.route("/addclient", methods=["GET"])
 def addclient():
-    clientname = request.args.get("clientname").strip()
+    clientname = scramble(request.args.get("clientname").strip())
     
     # connect to database
     db, conn = db_connect(DB_URL)
@@ -728,6 +727,7 @@ def schedule():
             with open(os.path.join(app.instance_path, "client_schedule.csv"), "a", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 if client_num == 0:
+                    writer.writerow((current_day.capitalize(),))
                     writer.writerow(header)
 
                 client_items = list(client_sch.items())
@@ -750,6 +750,7 @@ def schedule():
         with open(os.path.join(app.instance_path, "staff_schedule.csv"), "a", newline="") as csvfile2:
             writer = csv.writer(csvfile2)
             header = ("Name", "Time", "Client")
+            writer.writerow((current_day.capitalize(),))
             writer.writerow(header)
 
             for staff in all_staff_sch.items():
@@ -768,14 +769,15 @@ def schedule():
             return render_template("error.html", message="Could not write to file, permission denied (file open)")
 
     conn.close()
-    # encrypt files, removed unencyprted files
-    # files = {"staff_schedule.csv", "client_schedule.csv"}
-    # buffer = 64 * 1024
-    # key = "abcofnc1!"
-    # TODO: manage file names
-    # for f in files:
-    #    pyAesCrypt.encryptFile(os.path.join(app.instance_path, f), os.path.join(app.instance_path, f.join(".aes")), key, buffer)
-    #    os.remove(os.path.join(app.instance_path, f))
+
+    # encrypt files, removed unencrypted files
+    files = {"staff_schedule.csv", "client_schedule.csv"}
+    buffer = 64 * 1024
+    key = "abcofnc1!"
+    
+    for f in files:
+       pyAesCrypt.encryptFile(os.path.join(app.instance_path, f), os.path.join(app.instance_path, (f + ".aes")), key, buffer)
+       os.remove(os.path.join(app.instance_path, f))
 
     # redirect to downloads page
     return redirect("/download")
@@ -788,7 +790,22 @@ def downloadpage():
 @app.route("/download/<path:filename>")
 @login_required
 def download(filename):
-    try:
-        return send_from_directory(os.path.join(app.instance_path, ''), filename)
-    except:
-        return render_template("error.html", message="No such file to download")
+    buffer = 64 * 1024
+    key = "abcofnc1!"
+
+    # prepare file names, decrypt file
+    encrypted_path = os.path.join(app.instance_path, (filename + ".aes"))
+    path = os.path.join(app.instance_path, filename)
+    pyAesCrypt.decryptFile(encrypted_path, path, key, buffer)
+
+    # server file from memory, delete file
+    # code from: https://stackoverflow.com/questions/40853201/remove-file-after-flask-serves-it?rq=1, by davidism
+    def generate():
+        with open(path) as f:
+            yield from f
+
+        os.remove(path)
+    
+    r = app.response_class(generate(), mimetype="text/csv")
+    r.headers.set("Content-Disposition", "attachment", filename=filename)
+    return r
