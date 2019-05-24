@@ -216,3 +216,22 @@ input, select
     border: solid 2px rgb(2, 93, 179);
     font-size: 108%;
 }
+
+/* ################################################### FLASK FLASHED MESSAGES ############################################################################ */
+.alert
+{
+    background-color: green;
+    border-top: 1px solid grey;
+    text-align: center;
+    padding: 15px;
+    font-size: 1.25em;
+}
+
+.error
+{
+    background-color: red;
+    border-top: 1px solid grey;
+    text-align: center;
+    padding: 15px;
+    font-size: 1.25em;
+}

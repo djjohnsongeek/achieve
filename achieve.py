@@ -5,7 +5,7 @@ import csv
 import pyAesCrypt
 
 from flask import Flask
-from flask import render_template, request, session, redirect, Response, jsonify, json, send_from_directory
+from flask import render_template, request, session, redirect, Response, jsonify, json, send_from_directory, flash
 from sqlite3 import Error
 from random import randrange
 from werkzeug.security import check_password_hash, generate_password_hash
@@ -43,16 +43,27 @@ def after_request(response):
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
+        
+    if request.method == "GET":
+        return render_template("login.html")
+
     # remove anyone logged in already
     session.clear()
-    session["logged_in:"] = False
+    session["logged_in"] = False
 
     if request.method == "POST":
+
+        # setup feedback for errors
+        session["error"] = 1
+
         # check if all fields are filled out
         if not request.form.get("username"):
-            return render_template("error.html", message="You must provide a username")
+            flash("You must provide a username")
+            return redirect("/login")
+
         if not request.form.get("password"):
-            return render_template("error.html", message="You must provide a password")
+            flash("You must provide a password")
+            return redirect("/login")
 
         # get user id number
         db, conn = db_connect(DB_URL)
@@ -61,23 +72,25 @@ def login():
 
         # check username/password is valid
         if not user_id or not check_password_hash(user_id["password"], request.form.get("password")):
-            return render_template("error.html", message="Username or Password is not valid")
+            flash("Username or Password is not valid")
+            return redirect("/login")
 
         # update session
         session["user_id"] = user_id["userID"]
         session["logged_in"] = True
         conn.close()
 
-        # redirect user to index
+        # redirect user to index, setup feedback for info
+        session["error"] = 0
+        flash("Logged In")
         return redirect("/")
-    
-    else:
-        return render_template("login.html")
 
 @app.route("/logout")
 def logout():
     session.clear()
     session["logged_in"] = False
+    session["error"] = 0
+    flash("Logged Out")
     return redirect("/login")
 
 @app.route("/changepw", methods=["POST", "GET"])
@@ -87,18 +100,26 @@ def changepw():
     if request.method == "GET":
         return render_template("changepw.html")
 
+    # setup feedback for errors
+    session["error"] = 1
+
     # check if all fields are filled out
     if not request.form.get("password_new"):
-        return render_template("error.html", message="You must provide a new password")
+        flash("You must provide a new password")
+        return redirect("/changepw")
+
     pw_new = request.form.get("password_new")
 
     if not request.form.get("password_check"):
-        return render_template("error.html", message="You must renter password")
+        flash("You must re-enter your new password")
+        return redirect("/changepw")
+    
     pw_check = request.form.get("password_check")
 
     # check that the two password fields match
     if pw_check != pw_new:
-        return render_template("error.html", message="Passwords do not match")
+        flash("Passwords do not match")
+        return redirect("/changepw")
 
     # hash and update password
     hashed_pw = generate_password_hash(pw_new, method="sha256", salt_length=8)
@@ -110,7 +131,9 @@ def changepw():
     conn.commit()
     conn.close()
 
-    # redirect user to index
+    # redirect user to index, change feedback from errors to info
+    session["error"] = 0
+    flash("Password Changed")
     return redirect("/")
 
 @app.route("/")
@@ -133,21 +156,27 @@ def clients():
 
     # for POST Requests (adding client info)
     # store client's name, check for no value
+    session["error"] = 1
+
     if not request.form.get("client_name"):
-        return render_template("error.html", message="Please provide the Client's name")
+        flash("Please provide the Client's name")
+        return redirect("/clients")
+
     client_name = request.form.get("client_name").strip()
    
     # store client hours, check for no value
     if not request.form.get("client_hours_start") or not request.form.get("client_hours_end"):
-        return render_template("error.html", message=f"Please provide {client_name}'s start and end times")
+        flash(f"Please provide {client_name}'s start and end times")
+        return redirect("/clients")
     
     client_hours_start = request.form.get("client_hours_start")
     client_hours_end = request.form.get("client_hours_end")
 
     # validate both times with regular expresssions:
-    time = re.compile(r"[012][0-9]:[0-5][0-9]")
+    time = re.compile(r"[012][0-9]:30")
     if not time.match(client_hours_start) or not time.match(client_hours_end):
-        return render_template("error.html", message="Start or End times are formatted incorrectly")
+        flash("Start or End times are formatted incorrectly")
+        return redirect("/clients")
 
     # build final start and end times, build scheduable hours
     start = convert_strtime(client_hours_start)
@@ -169,7 +198,8 @@ def clients():
     for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
 
         if request.form.get(day) != day and request.form.get(day) != None:
-            return render_template("error.html", message="Invalid day data submitted")
+            flash("Invalid day data submitted")
+            return redirect("/clients")
         
         if request.form.get(day) == day:
             client_attendance.append(1)
@@ -182,7 +212,8 @@ def clients():
 
     # check to make sure at least one team member was assigned to client's team (Line too long, reformat)
     if not request.form.get("assign_teacher0") and not request.form.get("assign_teacher1") and not request.form.get("assign_teacher2") and not request.form.get("assign_teacher3"):
-        return render_template("error.html", message=f"Please provide {unscramble(client_name)} with at least one Team Member")
+        flash(f"Please provide {unscramble(client_name)} with at least one Team Member")
+        return redirect("/clients")
 
     # create list of team members, remove variables that have no data
     t_members = [request.form.get("assign_teacher0"), request.form.get("assign_teacher1"), request.form.get("assign_teacher2"),
@@ -198,11 +229,13 @@ def clients():
     # check if client's name is already in the database
     db.execute("SELECT clientID FROM clients WHERE name=?", (client_name,))
     if db.fetchone():
-        return render_template("error.html", message=f"{unscramble(client_name)} is already in the database. If you want to edit Client information please use the Update Client Info form")
+        flash(f"{unscramble(client_name)} is already in the database. If you want to edit Client information please use the Update Client Info form")
+        return redirect("/clients")
 
     print(client_info)
-    # insert client info, uses default color 
-    db.execute("INSERT INTO clients (name, totalhours, mon, tue, wed, thu, fri) VALUES (?,?,?,?,?,?,?)", client_info) #NOTE: Test this site w/o JS to see if this line of code is working
+    # insert client info, uses default color
+    # NOTE: Test this site w/o JS to see if this line of code is working
+    db.execute("INSERT INTO clients (name, totalhours, mon, tue, wed, thu, fri) VALUES (?,?,?,?,?,?,?)", client_info) 
     conn.commit()
 
     # get client ID (that now should exist)
@@ -220,10 +253,12 @@ def clients():
         try:
             category = int(request.form.get("color"))
         except ValueError:
-            return render_template("error.html", message="Incorrect client classification input")
+            flash("Incorrect client classification input")
+            return redirect("/clients")
 
         if category not in {1,2,3}:
-            return render_template("error.html", message="Incorrect client classification input")
+            flash("Incorrect client classification input")
+            return redirect("/clients")
         else:
             db.execute("UPDATE clients SET color=? WHERE clientID=?", (category, client_info["clientID"]))
 
@@ -235,7 +270,8 @@ def clients():
 
         # check to make sure staff exists
         if not staff_info:
-            return render_template("error.html", message=f"{staff} was not found in the staff database. New Client was not added to any team")
+            flash(f"{staff} was not found in the staff database. New Client was not added to their team")
+            return redirect("/clients")
 
         # insert staff ID and client ID into table "teams"
         else:
@@ -245,7 +281,11 @@ def clients():
     # commit and close database
     conn.commit()
     conn.close()
-    return render_template("error.html", message="Success")
+
+    # provide user feedback
+    session["error"] = 0
+    flash("Client Successfully Added")
+    return redirect("/clients")
 
 @app.route("/addclient", methods=["GET"])
 def addclient():
@@ -266,10 +306,15 @@ def addclient():
         return jsonify(False)
 
 @app.route("/clients/remove", methods=["POST"])
-def remove_client():
+def remove_client():\
+    # setup feedback as error
+    session["error"] = 1
+
     # validate remove_client form
     if not request.form.get("slct_client"):
-        return render_template("error.html", message="Please provide the client name to be removed")
+        flash("Please provide the client name to be removed")
+        return redirect("/clients")
+
     client_name = request.form.get("slct_client")
 
     # connect to database
@@ -279,7 +324,8 @@ def remove_client():
     db.execute("SELECT clientID FROM clients WHERE name=?", (client_name,))
     query = db.fetchone()
     if not query:
-        return render_template("error.html", message=f"{client_name} was not found in the database")
+        flash(f"{unscramble(client_name)} was not found in the database")
+        return redirect("/clients")
 
     # delete client's team assignments, delete client
     db.execute("DELETE FROM teams where clientID=?", (query["clientID"],))
@@ -289,14 +335,21 @@ def remove_client():
     # commit changes and close the connection, return success
     conn.commit()
     conn.close()
-    return render_template("error.html", message="Success")
+
+    # change feed back to info
+    session["error"] = 1
+    flash(f"{unscramble(client_name)} has been deleted")
+    return redirect("clients")
 
 @app.route("/clients/update", methods=["POST"])
 def update_client():
-    
+    # setup feedback for errors
+    session["error"] = 1
+
     # ensure client name is filled out
     if not request.form.get("update_client"):
-        return render_template("error.html", message="Please provide the Client's name")
+        flash("Please provide a client's name")
+        return redirect("/clients")
 
     client_name = request.form.get("update_client")
 
@@ -304,10 +357,11 @@ def update_client():
     db, conn = db_connect(DB_URL)
 
     # check if client is in the data base
-    db.execute("SELECT * FROM clients WHERE name=?", (client_name,))
+    db.execute("SELECT clientID FROM clients WHERE name=?", (client_name,))
     client_info = db.fetchone()
     if not client_info:
-        return render_template("error.html", message=f"{client_name} was not found in the database")
+        flash(f"{unscramble(client_name)} was not found in the database")
+        return redirect("/clients")
 
     # get and insert new hours data
     if request.form.get("new_client_hours_start") and request.form.get("new_client_hours_end"):
@@ -316,9 +370,10 @@ def update_client():
         client_hours_end = request.form.get("new_client_hours_end")
 
         # ensure proper data format
-        time = re.compile(r"[012][0-9]:[0-5][0-9]")
+        time = re.compile(r"[012][0-9]:30")
         if not time.match(client_hours_end) or not time.match(client_hours_start):
-            return render_template("error.html", message="Incorrect time format")
+            flash("Invalid time format")
+            return redirect("/clients")
 
         # get client's total number of hours
         total_hours = len(create_schhours(convert_strtime(client_hours_start), convert_strtime(client_hours_end)))
@@ -329,7 +384,8 @@ def update_client():
         for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
             # validate day data
             if request.form.get(day) != day and request.form.get(day) != None:
-                return render_template("error.html", message="Invalid day data submitted")
+                flash("Invalid day data")
+                return redirect("/clients")
 
             if request.form.get(day) == day:
                 client_days.append(day)
@@ -343,9 +399,11 @@ def update_client():
     for day in ["mon", "tue", "wed", "thu", "fri"]:
         try:
             if request.form.get(day) != None and int(request.form.get(day)) not in {0, 1}:
-                return render_template("error.html", message="Invalid attendance data submitted")
+                flash("Invalid attendance data")
+                return redirect("/clients")
         except ValueError:
-            return render_template("error.html", message="Invalid attendance data submitted")
+            flash("Invalid attendance data")
+            return redirect("/clients")
 
         # check for None
         if not request.form.get(day):
@@ -364,10 +422,12 @@ def update_client():
         try:
             update_color = int(request.form.get("update_color"))
         except ValueError:
-            return render_template("error.html", message="Invalid client classification data")
+            flash("Invalid client classification data")
+            return redirect("/clients")
 
         if update_color not in {1, 2, 3}:
-            return render_template("error.html", message="Invalid client classification data")
+            flash("Invalid client classification data")
+            return redirect("/clients")
         else:
             db.execute("UPDATE clients SET color=? WHERE name=?", (update_color, client_name))
 
@@ -382,7 +442,8 @@ def update_client():
         db.execute("SELECT * FROM staff WHERE name=?", (new_teacher,))
         staff_info = db.fetchone()
         if not staff_info:
-            return render_template("error.html", message=f"{new_teacher} was not found in the database")
+            flash(f"{new_teacher} was not found in the database")
+            return redirect("/clients")
         
         # check if teacher is already on client's team
         db.execute("SELECT * FROM teams WHERE clientID=? AND staffID=?", (client_info["clientID"], staff_info["staffID"]))
@@ -393,26 +454,32 @@ def update_client():
         result = regex.match(add_or_remove)
 
         if not result:
-            return render_template("error.html", message="Incorrect Add/Remove data recieved")
+            flash("Invalid Add or Remove data")
+            return redirect("/clients")
 
         if add_or_remove == "add":
             if team_info:
-                return render_template("error.html", message=f"{new_teacher} is already on {client_name}'s team")
+                flash(f"{new_teacher} is already on {unscramble(client_name)}'s team")
+                return redirect("/clients")
             else:
                 # add selected teacher to selected Client's team
                 db.execute("INSERT INTO teams (clientID, staffID) VALUES(?,?)", (client_info["clientID"], staff_info["staffID"]))
 
         if add_or_remove == "remove":
             if not team_info:
-                return render_template("error.html", message=f"No removal necessary, {new_teacher} and {client_name} are not on the same team")
+                flash(f"No removal necessary: {new_teacher} and {unscramble(client_name)} are not on the same team")
+                return redirect("/clients")
             else:
                 # remove selected teacher from selected Client's team
                 db.execute("DELETE FROM teams WHERE clientID=? and staffID=?", (client_info["clientID"], staff_info["staffID"]))
 
-    # commit changes and return success message
+    # commit changes, change feedback to info
     conn.commit()
     conn.close()
-    return render_template("error.html", message="Success")
+
+    session["error"] = 0
+    flash(f"{unscramble(client_name)}'s info has been updated")
+    return redirect("/clients")
 
 @app.route("/staff", methods=["POST", "GET"])
 @login_required
@@ -429,9 +496,15 @@ def staff():
         conn.close()
         return render_template("staff.html", staff_names=staff_names)
     
+    # process POST data
+    # setup feedback for errors
+    session["error"] = 1
+
     # check if staff field is filled out
     if not request.form.get("staff_name"):
-        return render_template("error.html", message="Please provide staff's name")
+        flash("Please provide staff's name")
+        return redirect("/staff")
+
     staff_name = request.form.get("staff_name").strip()
 
     # check if RBT field is filled out correctly
@@ -441,34 +514,38 @@ def staff():
         try:
             rbt_status = int(request.form.get("RBT"))
         except ValueError:
-            return render_template("error.html", message="Incorrect value for RBT checkbox")
+            flash("Incorrect value for RBT checkbox")
+            return redirect("/staff")
 
         if rbt_status != 1:
-            return render_template("error.html", message="Incorrect value for RBT checkbox")
-    
+            flash("Incorrect value for RBT checkbox")
+            return redirect("/staff")
     
     # check Tier field is filled out
     if not request.form.get("Tier"):
         rbt_tier = 1
-
     else:
         try:
             rbt_tier = int(request.form.get("Tier"))
         except ValueError:
-            return render_template("error.html", message="Incorrect value entered in to Tier radio button")
+            flash("Incorrect value entered in to Tier radio button")
+            return redirect("/staff")
         if rbt_tier not in {1,2,3}:
-            return render_template("error.html", message="Incorrect number value entered in to Tier radio button")
+            flash("Incorrect value entered in to Tier radio button")
+            return redirect("/staff")
 
     # check if hours field is filled out
     if not request.form.get("staff_hours_start") or not request.form.get("staff_hours_end"):
-        return render_template("error.html", message="You must provide staff hours")
+        flash("You must provide staff start and end times")
+        return redirect("/staff")
     
     # check hour data is in the correct format
     staff_hours_start = request.form.get("staff_hours_start")
     staff_hours_end = request.form.get("staff_hours_end")
-    time = re.compile(r"[012][0-9]:[0-5][0-9]")
+    time = re.compile(r"[012][0-9]:30")
     if not time.match(staff_hours_start) or not time.match(staff_hours_end):
-        return render_template("error.html", message="Incorrect time format")
+        flash("Incorrect time format")
+        return redirect("/staff")
 
     # built final start and end times
     staff_hours = staff_hours_start + "-" + staff_hours_end
@@ -478,7 +555,8 @@ def staff():
     staff_hours_list = []
     for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
         if request.form.get(day) != day and request.form.get(day) != None:
-            return render_template("error.html", message="Invalid day data submitted")
+            flash("Invalid day data")
+            return redirect("/staff")
 
         if request.form.get(day) == day:
             staff_hours_list.append(staff_hours)
@@ -488,36 +566,45 @@ def staff():
             staff_hours_list.append(None)
             staff_att.append(0)
 
-
     # connect to database
     db, conn = db_connect(DB_URL)
 
     # check if staff is in the database
     db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
     if db.fetchone():
-        return render_template("error.html", message=f"{staff_name} is already in the database")
+        flash(f"{staff_name} is already in the database")
+        return redirect("/staff")
     
     # insert staff info into the database
     staff_info = [staff_name, rbt_status, rbt_tier, rbt_tier] + staff_att
     db.execute("INSERT INTO staff (name, rbt, tier, color, mon, tue, wed, thu, fri) VALUES(?,?,?,?,?,?,?,?,?)", (staff_info))
+
+    # get staffID to save staff hours
     db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
     staff_ID = db.fetchone()
     staff_hours_list.insert(0, staff_ID["staffID"])
-    print(staff_hours)
     db.execute("INSERT INTO staffhours (staffID, monday, tuesday, wednesday, thursday, friday) VALUES(?,?,?,?,?,?)", staff_hours_list)
 
-    # close database
+    # commit and close database
     conn.commit()
     conn.close()
 
-    # return success
-    return render_template("error.html", message="Success")
+    # return success, update feedback to info
+    session["error"] = 0
+    flash(f"{staff_name} Succesfully Added")
+    return redirect("/staff")
 
 @app.route("/staff/remove", methods=["POST"])
 def remove_staff():
+
+    # prepare feedback for errors
+    session["error"] = 1
+
     # check if staff name is filled out
     if not request.form.get("slct_staff_remove"):
-        return render_template("error.html", message="Please choose a staff member to remove from the database")
+        flash("Please choose a staff member to remove from the database")
+        return redirect("/staff")
+
     staff_name = request.form.get("slct_staff_remove")
 
     # connect to database
@@ -527,7 +614,8 @@ def remove_staff():
     db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
     staff_ID = db.fetchone()
     if not staff_ID:
-        return render_template("error.html", message=f"{staff_name} is not in the database")
+        flash(f"{staff_name} is not in the database")
+        return redirect("/staff")
 
     # delete staff info
     db.execute("DELETE FROM staff WHERE staffID=?", (staff_ID["staffID"],))
@@ -537,14 +625,22 @@ def remove_staff():
     # commit changes and close database
     conn.commit()
     conn.close()
-
-    return render_template("error.html", message="Success")
+    
+    # change feedback to info
+    session["error"] = 0
+    flash(f"{staff_name} has been deleted")
+    return redirect("/staff")
 
 @app.route("/staff/update", methods=["POST"])
 def staff_update():
+    # prepare feedback for errors
+    session["error"] = 1
+
     # check that staff name is filled out
     if not request.form.get("slct_staff_update"):
-        return render_template("error.html", message="Please provide staff's name")
+        flash("Please provide a staff member's name")
+        return redirect("/staff")
+
     staff_name = request.form.get("slct_staff_update")
     
     # connect to db
@@ -554,31 +650,36 @@ def staff_update():
     db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
     staff_info = db.fetchone()
     if not staff_info:
-        return render_template("error.html", message=f"{staff_name} is not in the database")
+        flash(f"{staff_name} is not in the database")
+        return redirect("/staff")
 
     # if RBT is checked, validate data and submit
     if request.form.get("rbt_update"):
         try:
             rbt_status = int(request.form.get("rbt_update"))
         except ValueError:
-            return render_template("error.html", message="RBT field must be a digit")
+            flash("RBT field must be a digit")
+            return redirect("/staff")
         
         if rbt_status == 1:
             db.execute("UPDATE staff SET rbt=? WHERE staffID=?", (rbt_status, staff_info["staffID"]))
         else:
-            return render_template("error.html", message="Incorrect value for RBT field")
+            flash("Incorrect value for RBT field")
+            return redirect("/staff")
 
     # if Tier radio is chosen
     if request.form.get("tier_update"):
         try:
             tier = int(request.form.get("tier_update"))
         except ValueError:
-            return render_template("error.html", message="Tier field must be a digit")
+            flash("Teacher tier field must be a digit")
+            return redirect("/staff")
         
         if tier in {1,2,3}:
             db.execute("UPDATE staff SET tier=?, color=? WHERE staffID=?", (tier, tier, staff_info["staffID"]))
         else:
-            return render_template("error.html", message="Incorrect value in Tier field")
+            flash("Invalid teacher tier data")
+            return redirect("/staff")
 
     # if build hours variable
     if request.form.get("staff_hours_update_start") and request.form.get("staff_hours_update_end"):
@@ -588,14 +689,15 @@ def staff_update():
         hours_end = request.form.get("staff_hours_update_end")
 
         # check for correct time format
-        time = re.compile(r"[012][0-9]:[0-5][0-9]")
+        time = re.compile(r"[012][0-9]:30[0-9]")
         if time.match(hours_start) and time.match(hours_end):
 
             staff_hours = hours_start + "-" + hours_end
             staff_days = []
             for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
                 if request.form.get(day) != day and request.form.get(day) != None:
-                    return render_template("error.html", message="Invalid day data")
+                    flash("Invalid day data")
+                    return redirect("/staff")
 
                 if request.form.get(day) == day:
                     staff_days.append(day)
@@ -604,17 +706,20 @@ def staff_update():
                 db.execute(f"UPDATE staffhours SET {items}=? WHERE staffID=?", (staff_hours, staff_info["staffID"]))
 
         else:
-            return render_template("error.html", message="Incorrect time format")
+            flash("Invalid time format")
+            return redirect("/staff")
 
     # staff color category
     if request.form.get("staff_color"):
         try:
             color = int(request.form.get("staff_color"))
         except ValueError:
-            return render_template("error.html", message="Invalid staff classification value")
+            flash("Invalid staff classification value")
+            return redirect("/staff")
 
         if color not in {1,2,3}:
-            return render_template("error.html", message="Invalid staff classification value")
+            flash("Invalid staff classification value")
+            return redirect("/staff")
         else:
             db.execute("UPDATE staff SET color=? WHERE staffID=?", (color, staff_info["staffID"]))
 
@@ -623,9 +728,12 @@ def staff_update():
     for day in ["mon", "tue", "wed", "thu", "fri"]:
         try:
             if request.form.get(day) != None and int(request.form.get(day)) not in {0,1}:
-                return render_template("error.html", message="Invalid day data")
+                flash("Invalid attendance data")
+                return redirect("/staff")
+
         except ValueError:
-            return render_template("error.html", message="Invalid day data")
+            flash("Invalid attendance data")
+            return redirect("/staff")
 
         if not request.form.get(day):
             continue
@@ -642,7 +750,11 @@ def staff_update():
     # close database and save changes
     conn.commit()
     conn.close()
-    return render_template("error.html", message="Success")
+
+    # prepare feedback info
+    session["error"] = 0
+    flash(f"{staff_name}'s info successfully updated")
+    return redirect("/staff")
 
 @app.route("/schedule", methods=["GET", "POST"])
 @login_required
@@ -651,9 +763,14 @@ def schedule():
     if request.method == "GET":
         return render_template("schedule.html")
 
+    # for POST requests
+    # prepare feedback for errors
+    session["error"] = 1
+
     # check that a day is selected
     if request.form.get("schedule_day") not in {"monday", "tuesday", "wednesday", "thursday", "friday"}:
-        return render_template("error.html", message="Please choose a valid day to generate the schedule for")
+        flash("Please choose a valid day to generate the schedule for")
+        return redirect("/schedule")
     
     current_day = request.form.get("schedule_day")
     curr_att_day = shorten_day(current_day)
@@ -740,7 +857,8 @@ def schedule():
                 writer.writerow("")
 
         except PermissionError:
-            return render_template("error.html", message="Could not write to file, permission denied (file open)")
+            flash("Could not write schedule to file, permission was denied")
+            return redirect("/schedule")
 
         # increment through clients
         client_num += 1
@@ -766,7 +884,8 @@ def schedule():
                 writer.writerow("")
 
     except PermissionError:
-            return render_template("error.html", message="Could not write to file, permission denied (file open)")
+        flash("Could not write schedule to file, permission was denied")
+        return redirect("/schedule")
 
     conn.close()
 
@@ -779,7 +898,9 @@ def schedule():
        pyAesCrypt.encryptFile(os.path.join(app.instance_path, f), os.path.join(app.instance_path, (f + ".aes")), key, buffer)
        os.remove(os.path.join(app.instance_path, f))
 
-    # redirect to downloads page
+    # redirect to downloads page, prepare feedback for info
+    session["error"] = 0
+    flash("Success")
     return redirect("/download")
 
 @app.route("/download")

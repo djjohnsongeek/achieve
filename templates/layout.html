@@ -30,7 +30,18 @@
             </div>
             {% endif %}
         </nav>
-        
+        {% if get_flashed_messages() %}
+            {% if session.error == 1 %}
+            <div class="error">
+                {{ get_flashed_messages() | join(" ") }}
+            </div>
+            {% else %}
+            <div class="alert">
+                {{ get_flashed_messages() | join(" ") }}
+            </div>
+            {% endif %}
+        {% endif %}
+
         <main>{% block main %}{% endblock %}</main>
         <footer>
             Website Design and Implementation by Daniel Johnson

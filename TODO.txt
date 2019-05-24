@@ -32,9 +32,19 @@ Server Side Functionality (DONE)
     -login functionality (DONE)
     -download schedules page (DONE)
         -file encryption, decryption (DONE)
-        -file deletion (DONE, but not securly)
+        -file deletion (DONE, but not completely securely)
 
-    -generate staff/clients/teams table
+    -Update server error messages to use flash() (IN PROGRESS)
+        -clients (DONE)
+        -login (DONE)
+        -logout (DONE)
+        -staff.add (DONE)
+        -staff.remove (DONE)
+        -staff.update (DONE)
+        -schedule (DONE)
+
+
+    -generate staff/clients/teams information table
     -generate schedule table
     -Review all code
 
