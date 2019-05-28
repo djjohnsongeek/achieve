@@ -210,16 +210,16 @@ def clients():
 
     client_info = client_info + client_attendance
 
-    # check to make sure at least one team member was assigned to client's team (Line too long, reformat)
-    if not request.form.get("assign_teacher0") and not request.form.get("assign_teacher1") and not request.form.get("assign_teacher2") and not request.form.get("assign_teacher3"):
-        flash(f"Please provide {unscramble(client_name)} with at least one Team Member")
-        return redirect("/clients")
-
     # create list of team members, remove variables that have no data
     t_members = [request.form.get("assign_teacher0"), request.form.get("assign_teacher1"), request.form.get("assign_teacher2"),
       request.form.get("assign_teacher3")]
     t_members[:] = [member for member in t_members if member]
-   
+
+    # check to make sure at least one team member was assigned to client's team 
+    if len(t_members) == 0:
+        flash(f"Please provide {unscramble(client_name)} with at least one Team Member")
+        return redirect("/clients")
+
     # remove duplicates
     unique_members = set(t_members)
     
@@ -289,18 +289,18 @@ def clients():
 
 @app.route("/addclient", methods=["GET"])
 def addclient():
-    clientname = scramble(request.args.get("clientname").strip())
+    clientname = scramble(request.args.get("clientname"))
     
     # connect to database
     db, conn = db_connect(DB_URL)
 
     # check if client name is already in the database
-    db.execute("SELECT name FROM clients WHERE name=?", (clientname,))
+    db.execute("SELECT clientID FROM clients WHERE name=?", (clientname,))
     query = db.fetchone()
     conn.close()
 
     # return result
-    if not query:
+    if query:
         return jsonify(True)
     else:
         return jsonify(False)
@@ -337,7 +337,7 @@ def remove_client():\
     conn.close()
 
     # change feed back to info
-    session["error"] = 1
+    session["error"] = 0
     flash(f"{unscramble(client_name)} has been deleted")
     return redirect("clients")
 

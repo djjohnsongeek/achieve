@@ -7,7 +7,7 @@
         <header><h1> Staff Schedule</h1></header>
     </div>
     <div class="login_form">
-        <form action="/schedule" method="POST">
+        <form id="schedule_day" action="/schedule" method="POST">
             <select name="schedule_day" id="slct_schedule_day">
                     <option value="" disabled selected>Select Week Day</option>
                     <option value="monday">Monday</option>
@@ -18,5 +18,6 @@
                 </select><br/>
             <button id="btn_generate" name="btn_generate">Generate Schedule</button>
         </form>
+        <script src="../static/schedule.js"></script>
     </div>
 {% endblock %}

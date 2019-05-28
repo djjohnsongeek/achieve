@@ -13,7 +13,7 @@
         <form id="form_add_staff" action="/staff" method="POST">
             <fieldset>
                 <legend>Add Staff</legend>
-                <input type="text" name="staff_name" placeholder="First and Last Name">
+                <input type="text" id="staff_name" name="staff_name" placeholder="First and Last Name">
                 <lable class="form_titles" for="staff_hours_start">Start Time:</lable>
                 <input type="time" name="staff_hours_start" id="staff_hours_start"placeholder="hh:mm (24hr)">
                 <lable class="form_titles" for="staff_hours_end">End Time:</lable>
@@ -37,12 +37,12 @@
             <fieldset>
                 <legend>Remove Staff</legend>
                 <select id="slct_staff_remove" name="slct_staff_remove">
-                    <option disabled selected>Staff Name</option>
+                    <option disabled selected value="">Staff Name</option>
                     {% for name in staff_names %}
                     <option value="{{ name['name'] }}">{{ name['name'] }}</option>
                     {% endfor %}
                 </select>
-                <button type="submit" class="btn_submit">Remove Staff</button>
+                <button id="btn_remove_staff" type="submit" class="btn_submit">Remove Staff</button>
             </fieldset>
         </form>
     </div>
@@ -54,7 +54,7 @@
                 <p>
                     Select Staff:<br/>
                     <select id="slct_staff_update" name="slct_staff_update">
-                        <option disabled selected>Staff Name</option>
+                        <option disabled selected value="">Staff Name</option>
                         {% for name in staff_names %}
                         <option value="{{ name['name'] }}">{{ name['name'] }}</option>
                         {% endfor %}
@@ -115,8 +115,9 @@
                         <option value="3">Red</option>
                     </select>
                 </p>
-                <button type="submit" class="btn_submit">Update Info</button>
+                <button id="btn_update_staff" type="submit" class="btn_submit">Update Info</button>
             </fieldset>
         </form>
+        <script src="../static/staff.js"></script>
     </div>
 {% endblock %}

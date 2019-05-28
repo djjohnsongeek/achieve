@@ -86,6 +86,10 @@ footer
     padding: 1px;
 }
 
+#div_teacher_team
+{
+    display: inline-block;
+}
 .btn_submit
 {
     width: 120px;
@@ -234,4 +238,13 @@ input, select
     text-align: center;
     padding: 15px;
     font-size: 1.25em;
+}
+
+.info 
+{
+    display: none;
+    color: red;
+    text-align: center;
+    font-size: 1em;
+    background-color: whitesmoke;
 }

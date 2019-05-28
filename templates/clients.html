@@ -8,7 +8,7 @@
     </div> 
     <div class="div_forms">
         <h2>Add or Remove Clients</h2>
-        <form id="form_add_client" name="form_add_client" method="POST" action="/clients">
+        <form nonvalidate id="form_add_client" name="form_add_client" method="POST" action="/clients">
             <fieldset>
                 <legend>Add a Client</legend>
                 <input type="text" id="client_name" name="client_name" placeholder="Client Name">
@@ -25,30 +25,33 @@
                     <li class="chbx_client_days"><input type="checkbox" id="friday1" name="friday" value="friday">Friday</li>
                 </ul><br/>
                 <span class="form_titles">Assign Teachers to Team:</span><br/>
-                <select name="assign_teacher0">
-                    <option value="" selected disabled>Select Staff</option>
-                    {% for item in staff_query %}
-                    <option value="{{item['name']}}">{{ item["name"] }}</option>
-                    {% endfor %}
-                </select>
-                <select name="assign_teacher1">
-                    <option value="" selected disabled>Select Staff</option>
-                    {% for item in staff_query %}
-                    <option value="{{item['name']}}">{{ item["name"] }}</option>
-                    {% endfor %}
-                </select>
-                <select name="assign_teacher2">
-                    <option value="" selected disabled>Select Staff</option>
-                    {% for item in staff_query %}
-                    <option value="{{item['name']}}">{{ item["name"] }}</option>
-                    {% endfor %}
-                </select>
-                <select name="assign_teacher3">
-                    <option value="" selected disabled>Select Staff</option>
-                    {% for item in staff_query %}
-                    <option value="{{item['name']}}">{{ item["name"] }}</option>
-                    {% endfor %}
-                </select><br/>
+                <div id="div_teacher_team">
+                    <select id="assign_teacher0" name="assign_teacher0">
+                        <option value="" selected disabled>Select Staff</option>
+                        {% for item in staff_query %}
+                        <option value="{{item['name']}}">{{ item["name"] }}</option>
+                        {% endfor %}
+                    </select>
+                    <select id="assign_teacher1" name="assign_teacher1">
+                        <option value="" selected disabled>Select Staff</option>
+                        {% for item in staff_query %}
+                        <option value="{{item['name']}}">{{ item["name"] }}</option>
+                        {% endfor %}
+                    </select>
+                    <select id="assign_teacher2" name="assign_teacher2">
+                        <option value="" selected disabled>Select Staff</option>
+                        {% for item in staff_query %}
+                        <option value="{{item['name']}}">{{ item["name"] }}</option>
+                        {% endfor %}
+                    </select>
+                    <select id="assign_teacher3" name="assign_teacher3">
+                        <option value="" selected disabled>Select Staff</option>
+                        {% for item in staff_query %}
+                        <option value="{{item['name']}}">{{ item["name"] }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <br/>
                 <select name="color">
                     <option value="" selected disabled>Select Client Classification</option>
                     <option value="1">Green</option>
@@ -58,7 +61,6 @@
                 <button type="submit" id="btn_add_client" class="btn_submit" value="add_client" name="btn_add_client">Add Client</button>
             </fieldset>
         </form>
-        <script src="../static/addCLient.js"></script>
         <form id="form_remove_client" name="form_remove_client" action="/clients/remove" method="POST">
             <fieldset>
                 <legend>Remove a Client</legend>
@@ -71,7 +73,6 @@
                 <button type="submit" id="btn_remove_client" class="btn_submit">Remove Client</button>
             </fieldset>
         </form>
-        <script src="../static/removeClient.js"></script>
     </div>
     <div class="div_forms">
     <h2>Update Client Info</h2>
@@ -81,7 +82,7 @@
                 <p>
                     Select Client Name:<br/>
                     <select id="slct_update_client" name="update_client">
-                        <option disabled selected>Client Name</option>
+                        <option disabled selected value="">Client Name</option>
                         {% for name in client_query %}
                         <option value ="{{ name['name'] }}">{{ unscramble(name["name"]) }}</option>
                         {% endfor %}
@@ -103,27 +104,27 @@
                 </p>
                 <p>
                     Update Client Attendance:<br/>
-                    <select name="mon">
+                    <select id="mon" name="mon">
                         <option value="" selected disabled>Monday</option>
                         <option value="1">Present</option>
                         <option value="0">Absent</option>
                     </select>
-                    <select name="tue">
+                    <select id="tue" name="tue">
                         <option value="" selected disabled>Tuesday</option>
                         <option value="1">Present</option>
                         <option value="0">Absent</option>
                     </select>
-                    <select name="wed">
+                    <select id="wed" name="wed">
                         <option value="" selected disabled>Wednesday</option>
                         <option value="1">Present</option>
                         <option value="0">Absent</option>
                     </select>
-                    <select name="thu">
+                    <select id="thu" name="thu">
                         <option value="" selected disabled>Thursday</option>
                         <option value="1">Present</option>
                         <option value="0">Absent</option>
                     </select>
-                    <select name="fri">
+                    <select id="fri" name="fri">
                         <option value="" selected disabled>Friday</option>
                         <option value="1">Present</option>
                         <option value="0">Absent</option>
@@ -152,5 +153,6 @@
                 </p>
             </fieldset>
         </form>
+        <script src="../static/clients.js"></script>
     </div>
 {% endblock %}
