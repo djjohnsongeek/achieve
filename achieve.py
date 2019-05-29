@@ -305,6 +305,50 @@ def addclient():
     else:
         return jsonify(False)
 
+@app.route("/clients/view-client-info")
+@login_required
+def view_clients():
+    db, conn = db_connect(DB_URL)
+
+    # get basic client info
+    db.execute("SELECT name, totalhours, color FROM clients ORDER BY name")
+    client_info = [dict(row) for row in db.fetchall()]
+
+
+    # update number data with text, decrypt client name
+    for row in client_info:
+        if row["color"] == 1:
+            row["color"] = "Green"
+        elif row["color"] == 2:
+            row["color"] = "Yellow"
+        else:
+            row["color"] = "Red"
+
+        row["name"] = unscramble(row["name"])
+
+    # get client attendance data, decrypt client name
+    db.execute("SELECT name, mon, tue, wed, thu, fri FROM clients ORDER BY name")
+    client_att = [dict(row) for row in db.fetchall()]
+
+    for row in client_att:
+        for day in ["mon", "tue", "wed", "thu", "fri"]:
+            if row[day] == 1:
+                row[day] = "Present"
+            else:
+                row[day] = "OUT"
+
+        row["name"] = unscramble(row["name"])
+
+    # get client hours, decrypt client name
+    db.execute("SELECT clients.name, monday, tuesday, wednesday, thursday, friday FROM clienthours JOIN clients ON clienthours.clientID = clients.clientID ORDER BY clients.name")
+    client_hours = [dict(row) for row in db.fetchall()]
+    for row in client_hours:
+        row["name"] = unscramble(row["name"])
+
+    # close database and render client tables
+    conn.close()
+    return render_template("view-clients.html", client_info = client_info, client_att = client_att, client_hours = client_hours)
+
 @app.route("/clients/remove", methods=["POST"])
 def remove_client():\
     # setup feedback as error
@@ -533,7 +577,12 @@ def staff():
         if rbt_tier not in {1,2,3}:
             flash("Incorrect value entered in to Tier radio button")
             return redirect("/staff")
-
+    
+    if rbt_status == 0:
+        rbt_tier = 0
+        color = 1
+    else:
+        color = rbt_tier
     # check if hours field is filled out
     if not request.form.get("staff_hours_start") or not request.form.get("staff_hours_end"):
         flash("You must provide staff start and end times")
@@ -576,7 +625,7 @@ def staff():
         return redirect("/staff")
     
     # insert staff info into the database
-    staff_info = [staff_name, rbt_status, rbt_tier, rbt_tier] + staff_att
+    staff_info = [staff_name, rbt_status, rbt_tier, color] + staff_att
     db.execute("INSERT INTO staff (name, rbt, tier, color, mon, tue, wed, thu, fri) VALUES(?,?,?,?,?,?,?,?,?)", (staff_info))
 
     # get staffID to save staff hours
@@ -594,27 +643,46 @@ def staff():
     flash(f"{staff_name} Succesfully Added")
     return redirect("/staff")
 
-@app.route("/staff/view-staff-list")
+@app.route("/staff/view-staff-info")
 @login_required
 def view_staff():
     db, conn = db_connect(DB_URL)
 
-    db.execute("SELECT name, rbt, tier, color FROM staff")
-    staff_info = db.fetchall()
-    # for row in staff_info:
-    #     if row["color"] == 1:
-    #         row["color"] = "Green"
-    #     elif row["color"] == 2:
-    #         row["color"] = "Yellow"
-    #     else:
-    #         row["color"] = "Red"
+    # Get basic staff info
+    db.execute("SELECT name, rbt, tier, color FROM staff ORDER BY name")
+    staff_info = [dict(row) for row in db.fetchall()]
 
-    db.execute("SELECT staff.name, monday, tuesday, wednesday, thursday, friday FROM staffhours JOIN staff ON staffhours.staffID = staff.staffID")
+    # replace numbers with text
+    for row in staff_info:
+        if row["color"] == 1:
+            row["color"] = "Green"
+        elif row["color"] == 2:
+            row["color"] = "Yellow"
+        else:
+            row["color"] = "Red"
+
+        if row["rbt"] == 1:
+            row["rbt"] = "Yes"
+        else:
+            row["rbt"] = "No"
+
+    # get staff hours
+    db.execute("SELECT staff.name, monday, tuesday, wednesday, thursday, friday FROM staffhours JOIN staff ON staffhours.staffID = staff.staffID ORDER BY staff.name")
     staff_hours = db.fetchall()
 
-    db.execute("SELECT name, mon, tue, wed, thu, fri FROM staff")
-    staff_att = db.fetchall()
+    # get staff attendance
+    db.execute("SELECT name, mon, tue, wed, thu, fri FROM staff ORDER BY name")
+    staff_att = [dict(row) for row in db.fetchall()]
 
+    # replace numbers with text
+    for row in staff_att:
+        for day in row.keys():
+            if row[day] == 1:
+                row[day] = "Present"
+            if row[day] == 0:
+                row[day] = "OUT"
+
+    # close database, render staff tables
     conn.close()
     return render_template("view-staff.html", staff_info = staff_info, staff_hours = staff_hours, staff_att=staff_att)
 

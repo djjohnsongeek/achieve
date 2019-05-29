@@ -1,56 +1,55 @@
 {% extends "layout.html" %}
 
-{% block title %}View Staff Info{% endblock %}
+{% block title %}View Client Info{% endblock %}
 
 {% block main %}
     <table>
-        <caption>Staff Info</caption>
+        <caption>Client Info</caption>
         <tr>
-            <th>Staff Name</th>
-            <th>RBT</th>
-            <th>Tier</th>
+            <th>Name</th>
+            <th>Total Hours</th>
             <th>Color</th>
         </tr>
-        {% for row in staff_info %}
+        {% for row in client_info %}
         <tr>
-            {% for items in row.values() %}
-            <td>{{ items }}</td>
+            {% for data in row.values() %}
+            <td>{{ data }}</td>
             {% endfor %}
         </tr>
         {% endfor %}
     </table>
     <table>
-        <caption>Staff Hours</caption>
+        <caption>Client Attendance</caption>
         <tr>
-            <th>Staff Name</th>
+            <th>Name</th>
             <th>Monday</th>
             <th>Tuesday</th>
             <th>Wednesday</th>
             <th>Thursday</th>
             <th>Friday</th>
         </tr>
-        {% for data in staff_hours %}
+        {% for row in client_att %}
         <tr>
-            {% for cells in data %}
-            <td>{{ cells }}</td>
+            {% for data in row.values() %}
+            <td>{{ data }}</td>
             {% endfor %}
         </tr>
         {% endfor %}
     </table>
     <table>
-        <caption>Staff Attendance</caption>
+        <caption>Client Hours</caption>
         <tr>
-            <th>Staff Name</th>
+            <th>Name</th>
             <th>Monday</th>
             <th>Tuesday</th>
             <th>Wednesday</th>
             <th>Thursday</th>
             <th>Friday</th>
         </tr>
-        {% for info in staff_att %}
+        {% for row in client_hours %}
         <tr>
-            {% for hours in info.values() %}
-            <td>{{ hours }}</td>
+            {% for data in row.values() %}
+            <td>{{ data }}</td>
             {% endfor %}
         </tr>
         {% endfor %}

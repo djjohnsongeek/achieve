@@ -44,8 +44,14 @@ Server Side Functionality (UNFINISHED)
         -schedule (DONE)
 
 
-    -generate staff/clients/teams/scheudule information templates
-    -generate schedule table
+    -generate information templates
+        -staff (BASIC DONE)
+        -clients (BASIC DONE)
+        -client teams
+        -staff teams
+        -staff schedule
+        -client schedule
+        
     -Review all code
 
 Client Side Functionality
