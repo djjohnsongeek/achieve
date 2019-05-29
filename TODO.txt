@@ -2,7 +2,7 @@ TODO:
 Basic HTML Structure (DONE)
 Basic CSS Features (DONE)
 
-Server Side Functionality (DONE)
+Server Side Functionality (UNFINISHED)
     -clients page (DONE)     -NOTE: when choosing staff/client times 830 means available 830 - 930
     -staff page (DONE)       -NOTE: when choosing staff/client times 830 means available 830 - 930
     -schedule (IN PROGRESS)
@@ -32,9 +32,9 @@ Server Side Functionality (DONE)
     -login functionality (DONE)
     -download schedules page (DONE)
         -file encryption, decryption (DONE)
-        -file deletion (DONE, but not completely securely)
+        -file deletion (DONE, but not completely secure)
 
-    -Update server error messages to use flash() (IN PROGRESS)
+    -Update server error messages to use flash() (DONE)
         -clients (DONE)
         -login (DONE)
         -logout (DONE)
@@ -44,17 +44,30 @@ Server Side Functionality (DONE)
         -schedule (DONE)
 
 
-    -generate staff/clients/teams information table
+    -generate staff/clients/teams/scheudule information templates
     -generate schedule table
     -Review all code
 
-Client Side Feedback/Search/AJAX
-    -clients
-    -staff
-    -schedule
-    -view staff/clients/teams
-    -view schedule
-    -Review all code
+Client Side Functionality
+    -Basic Client Side feedback (DONE)
+        -clients (DONE)
+        -login (DONE)
+        -staff (DONE)
+        -change pw (DONE)
+        -schedule (DONE)
+
+
+    -In-depth client Side Feedback/Search/AJAX
+        -clients
+            -better error feedback
+            -ajax requests for all client name fields
+        -staff
+            -better error feedback
+            -ajax requests for all staff name fields
+        -schedule
+            -better error feedback
+        -view staff/clients/teams/schedule
+            -searchable tables
 
 HTML and CSS Rework:
     -layout.html

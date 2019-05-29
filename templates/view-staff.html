@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+{% block title %}Vew Staff{% endblock %}
+
+{% block main %}
+    <table>
+        <caption>Staff Info</caption>
+        <tr>
+            <th>Staff Name</th>
+            <th>RBT</th>
+            <th>Tier</th>
+            <th>Color</th>
+        </tr>
+        {% for row in staff_info %}
+        <tr>
+            {% for items in row %}
+            <td>{{ items }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <table>
+        <caption>Staff Hours</caption>
+        <tr>
+            <th>Staff Name</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+        </tr>
+        {% for data in staff_hours %}
+        <tr>
+            {% for cells in data %}
+            <td>{{ cells }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <table>
+        <caption>Staff Attendance</caption>
+        <tr>
+            <th>Staff Name</th>
+            <th>Monday</th>
+            <th>Tuesday</th>
+            <th>Wednesday</th>
+            <th>Thursday</th>
+            <th>Friday</th>
+        </tr>
+        {% for info in staff_att %}
+        <tr>
+            {% for hours in info %}
+            <td>{{ hours }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

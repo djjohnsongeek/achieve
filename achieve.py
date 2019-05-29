@@ -594,6 +594,30 @@ def staff():
     flash(f"{staff_name} Succesfully Added")
     return redirect("/staff")
 
+@app.route("/staff/view-staff-list")
+@login_required
+def view_staff():
+    db, conn = db_connect(DB_URL)
+
+    db.execute("SELECT name, rbt, tier, color FROM staff")
+    staff_info = db.fetchall()
+    # for row in staff_info:
+    #     if row["color"] == 1:
+    #         row["color"] = "Green"
+    #     elif row["color"] == 2:
+    #         row["color"] = "Yellow"
+    #     else:
+    #         row["color"] = "Red"
+
+    db.execute("SELECT staff.name, monday, tuesday, wednesday, thursday, friday FROM staffhours JOIN staff ON staffhours.staffID = staff.staffID")
+    staff_hours = db.fetchall()
+
+    db.execute("SELECT name, mon, tue, wed, thu, fri FROM staff")
+    staff_att = db.fetchall()
+
+    conn.close()
+    return render_template("view-staff.html", staff_info = staff_info, staff_hours = staff_hours, staff_att=staff_att)
+
 @app.route("/staff/remove", methods=["POST"])
 def remove_staff():
 
@@ -689,7 +713,7 @@ def staff_update():
         hours_end = request.form.get("staff_hours_update_end")
 
         # check for correct time format
-        time = re.compile(r"[012][0-9]:30[0-9]")
+        time = re.compile(r"[012][0-9]:30")
         if time.match(hours_start) and time.match(hours_end):
 
             staff_hours = hours_start + "-" + hours_end

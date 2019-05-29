@@ -15,18 +15,26 @@
             <div id="nav">
                 <image id="img_puzzle" src="static/logo.png" alt="puzzle logo"></image>
                 <a class="page_title" href="/">Achieve</a>
-                <span><a id="staff_link" class="nav_links" href="/staff">Staff</a></span>
-                <a class="nav_links" href="/clients">Clients</a>
-                <span><a class="nav_links" href="/schedule">Schedule</a></span>
-                <span class="nav_links">|</span>
-                <span><a class="nav_links" id="logout_link" href="/logout">Log Out</a></span>
-                <span><a class="nav_links" id="changepw_link" href="/changepw">Change Password</a></span>
             </div>
+            <ul id="nav_list">
+                <li class="dropdown">
+                    <a href="javascript:void(0)" class="dropbtn">Staff</a>
+                    <div class="dropdown_content">
+                        <a href="/staff">Manage Staff</a>
+                        <a href="/staff/view-staff-list">View Staff</a>
+                        <a href="/staff/view-schedule">View Staff Schedule</a>
+                    </div>
+                </li>
+                <li><a class="nav_links" href="/clients">Clients</a></li>
+                <li><a class="nav_links" href="/schedule">Schedule</a></li>
+                <li>|</li>
+                <li><a class="nav_links" id="logout_link" href="/logout">Log Out</a></li>
+                <li><a class="nav_links" id="changepw_link" href="/changepw">Change Password</a></li>
+            </ul>
             {% else %}
             <div id="nav">
                 <image id="img_puzzle" src="static/logo.png" alt="puzzle logo"></image>
                 <a class="page_title" href="/">Achieve</a>
-                <span><a class="nav_links" href="/login">Login</a></span>
             </div>
             {% endif %}
         </nav>
@@ -41,7 +49,6 @@
             </div>
             {% endif %}
         {% endif %}
-
         <main>{% block main %}{% endblock %}</main>
         <footer>
             Website Design and Implementation by Daniel Johnson

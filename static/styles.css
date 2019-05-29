@@ -2,36 +2,9 @@ body{
     background-color: #212962;
 }
 
-nav{
-    background-color: #7acedc;
-}
-
 .page_title{
     font-size: 9em;
-    text-decoration: none;
-    color: #212962;
     transition: color .25s;
-}
-
-.nav_links{
-    text-decoration: none;
-    color: #212962;
-    font-size: 1.25em;
-    margin-left: 15px;
-}
-
-#staff_link
-{
-    margin-left: 50px;
-}
-
-.nav_links:hover, .page_title:hover{
-    color: white;
-}
-
-#logout_link, #changepw_link
-{
-    font-size: .85em;
 }
 
 #img_puzzle
@@ -62,13 +35,6 @@ h2
     border: solid 2px darkslategrey;
     margin-left: 20px;
     margin-right: 20px;
-}
-
-#server_error
-{
-    text-align: center;
-    background-color: #a52228;
-    font-weight: bold;
 }
 
 footer
@@ -118,7 +84,80 @@ input, select
     padding: 10px 10px;
     margin: 10px;
 }
+/* ################################################### NAVIGATION STRIP ########################################################################## */
+.nav_links, .page_title
+{
+    text-decoration: none;
+    color: #212962;
+}
 
+.nav_links:hover, .page_title:hover{
+    color: white;
+}
+
+#logout_link, #changepw_link
+{
+    font-size: .85em;
+}
+
+#nav_list
+{
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #7acedc;
+}
+
+#nav_list > li
+{
+    float: left;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+#nav_list a, .dropbtn
+{
+    color: #212962;
+    font-size: 1.1em;
+    text-decoration: none;
+    padding: 10px 12px;
+}
+
+#nav_list a:hover, .dropdown:hover .dropbtn
+{
+    background-color: whitesmoke;
+}
+
+.dropdown_content
+{
+    display: none;
+    position: absolute;
+    background-color: rgb(228, 228, 228);
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.dropdown_content a
+{
+    display: block;
+    text-align: left;
+}
+
+.dropdown_content a:hover
+{
+    background-color: rgb(185, 195, 204);
+}
+.dropdown:hover .dropdown_content
+{
+    display: block;
+}
+
+#nav
+{
+    background-color: #7acedc;
+}
 /* ################################################### HOMEPAGE BIG BUTTONS ###################################################################### */
 
 #container
@@ -247,4 +286,18 @@ input, select
     text-align: center;
     font-size: 1em;
     background-color: whitesmoke;
+}
+
+/* ################################################### ALL TABLES ############################################################################ */
+
+table, th, td, caption
+{
+    border: 1px solid black;
+    border-collapse: collapse;
+    background-color: whitesmoke;
+}
+
+th, td
+{
+    padding: 5px;
 }
