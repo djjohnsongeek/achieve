@@ -4,7 +4,7 @@ Basic CSS Features (DONE)
 
 Server Side Functionality (UNFINISHED)
     -clients page (DONE)     -NOTE: when choosing staff/client times 830 means available 830 - 930
-    -staff page (DONE)       -NOTE: when choosing staff/client times 830 means available 830 - 930
+    -staff page (DONE)
     -schedule (IN PROGRESS)
         -schedules t1 (DONE)
         -schedules t2 (DONE)
@@ -14,18 +14,29 @@ Server Side Functionality (UNFINISHED)
         -writes to csv in correct format (DONE)
         -remove remenants of SQL scheduling (DONE)
         -backup current master server side master branch as a new branch (DONE)
-        -schedules staff more then just two hours (based upon team size) (DONE - requires further testing)
+        -schedules staff more then just two hours (based upon team size) (DONE)
         -schedule by color and largest amount of hours (TEST)
-        -mon-fri profile system for staff and client's
+        -mon-fri profile system for staff and client's (DONE)
             -write basic html for clients, staff (DONE)
             -write backend sql commits, adn deletions for removing of clients/staff (DONE)
                 -client add,remove, update (DONE)
                 -staff add, remove (DONE)
                 -staff update (DONE)
             -implement client name cryptogrophy (DONE)
-            -update scheduling (decode hashed client names, update sql queries) (DONE, requires further testing)
+            -update scheduling (decode hashed client names, update sql queries) (DONE)
 
-        -class rooms (preffered subs for class) start with classrooms first
+
+        
+        Priority:
+        -TEST schedule generation with new week settings, with teamsize scheduling hours
+            -check the client's team lenghth BEFORE devideing
+        -generate classroom schedule
+        -securly remove unencrypted fields
+        -hash names differently?
+        -schedule for classes first (preffered subs for class)
+        -does not allow staff or clients to be present on days they have no hours
+
+        Backburner:
         -re-schedules already scheduled staff if available?
         -possible optimization: no rebuiliding tier_team_member list EVERY loop
 
@@ -44,13 +55,13 @@ Server Side Functionality (UNFINISHED)
         -schedule (DONE)
 
 
-    -generate information templates
+    -generate information templates (DONE)
         -staff (BASIC DONE)
         -clients (BASIC DONE)
-        -client teams
-        -staff teams
-        -staff schedule
-        -client schedule
+        -client teams (BASIC DONE)
+        -staff teams (BASIC DONE)
+        -staff schedule (DONE)
+        -client schedule (DONE)
         
     -Review all code
 

@@ -290,7 +290,7 @@ input, select
 
 /* ################################################### ALL TABLES ############################################################################ */
 
-table, th, td, caption
+table, th, td
 {
     border: 1px solid black;
     border-collapse: collapse;
@@ -300,4 +300,15 @@ table, th, td, caption
 th, td
 {
     padding: 5px;
+}
+
+th
+{
+    background-color: grey;
+}
+
+caption{
+    border: 1px solid black;
+    border-collapse: collapse;
+    background-color: #7acedc;
 }

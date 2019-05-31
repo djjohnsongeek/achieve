@@ -311,7 +311,7 @@ def view_clients():
     db, conn = db_connect(DB_URL)
 
     # get basic client info
-    db.execute("SELECT name, totalhours, color FROM clients ORDER BY name")
+    db.execute("SELECT name, totalhours, color FROM clients ORDER BY name DESC")
     client_info = [dict(row) for row in db.fetchall()]
 
 
@@ -327,7 +327,7 @@ def view_clients():
         row["name"] = unscramble(row["name"])
 
     # get client attendance data, decrypt client name
-    db.execute("SELECT name, mon, tue, wed, thu, fri FROM clients ORDER BY name")
+    db.execute("SELECT name, mon, tue, wed, thu, fri FROM clients ORDER BY name DESC")
     client_att = [dict(row) for row in db.fetchall()]
 
     for row in client_att:
@@ -340,14 +340,33 @@ def view_clients():
         row["name"] = unscramble(row["name"])
 
     # get client hours, decrypt client name
-    db.execute("SELECT clients.name, monday, tuesday, wednesday, thursday, friday FROM clienthours JOIN clients ON clienthours.clientID = clients.clientID ORDER BY clients.name")
+    db.execute("SELECT clients.name, monday, tuesday, wednesday, thursday, friday FROM clienthours JOIN clients ON clienthours.clientID = clients.clientID ORDER BY clients.name DESC")
     client_hours = [dict(row) for row in db.fetchall()]
     for row in client_hours:
         row["name"] = unscramble(row["name"])
 
+    # get team information
+    db.execute("SELECT clients.name, staff.name FROM teams JOIN staff ON staff.staffID=teams.staffID JOIN clients ON clients.clientID=teams.clientID ORDER BY clients.name DESC")
+
+    # convert to dictionary of teams by client
+    team = []
+    team_dict = {}
+    for row in db.fetchall():
+        item = list(row)
+        item[0] = unscramble(item[0])
+
+        if item[0] not in team_dict.keys():  
+            team = []
+
+        if item[1] not in team:
+            team.append(item[1])
+            team_dict[item[0]] = team
+    
+    print(team_dict)
+
     # close database and render client tables
     conn.close()
-    return render_template("view-clients.html", client_info = client_info, client_att = client_att, client_hours = client_hours)
+    return render_template("view-clients.html", client_info = client_info, client_att = client_att, client_hours = client_hours, client_teams = team_dict)
 
 @app.route("/clients/remove", methods=["POST"])
 def remove_client():\
@@ -649,7 +668,7 @@ def view_staff():
     db, conn = db_connect(DB_URL)
 
     # Get basic staff info
-    db.execute("SELECT name, rbt, tier, color FROM staff ORDER BY name")
+    db.execute("SELECT name, rbt, tier, color FROM staff ORDER BY name ASC")
     staff_info = [dict(row) for row in db.fetchall()]
 
     # replace numbers with text
@@ -679,12 +698,29 @@ def view_staff():
         for day in row.keys():
             if row[day] == 1:
                 row[day] = "Present"
-            if row[day] == 0:
+            else:
                 row[day] = "OUT"
+
+    # get team information
+    db.execute("SELECT clients.name, staff.name FROM teams JOIN staff ON staff.staffID=teams.staffID JOIN clients ON clients.clientID=teams.clientID ORDER BY staff.name")
+
+    # convert to dictionary, ordered by staff
+    team = []
+    team_dict = {}
+    for row in db.fetchall():
+        item = list(row)
+        item[0] = unscramble(item[0])
+
+        if item[1] not in team_dict.keys():  
+            team = []
+
+        if item[0] not in team:
+            team.append(item[0])
+            team_dict[item[1]] = team
 
     # close database, render staff tables
     conn.close()
-    return render_template("view-staff.html", staff_info = staff_info, staff_hours = staff_hours, staff_att=staff_att)
+    return render_template("view-staff.html", staff_info = staff_info, staff_hours = staff_hours, staff_att=staff_att, staff_teams = team_dict)
 
 @app.route("/staff/remove", methods=["POST"])
 def remove_staff():
@@ -995,6 +1031,52 @@ def schedule():
     flash("Success")
     return redirect("/download")
 
+@app.route("/view-schedule/<string:catagory>")
+@login_required
+def view_schedule(catagory):
+
+    # prepare variables
+    buffer = 64 * 1024
+    key = "abcofnc1!"
+    files = ("client_schedule.csv", "staff_schedule.csv")
+    schedules = []
+
+    # decrypt each schedule file, read each file into a list, remove the decrypted file
+    for f in files:
+        encrypted_path = os.path.join(app.instance_path, (f + ".aes"))
+        path = os.path.join(app.instance_path, f)
+
+        try:
+            pyAesCrypt.decryptFile(encrypted_path, path, key, buffer)
+        except:
+            session["error"] = 1
+            flash("No file found")
+            return redirect("/schedule")
+        try:
+            with open(path, "r", newline="") as csvfile:
+                reader = csv.reader(csvfile)
+                schedule = [row for row in reader]
+                schedules.append(schedule)
+        except csv.Error as e:
+            session["error"] = 1
+            flash(f"Error: {e}")
+            return redirect("/schedule")
+
+        os.remove(path)
+
+    # render schedules tables
+    if catagory == "both":
+        return render_template("view-schedule.html", schedules = schedules)
+    elif catagory == "clients":
+        return render_template("staff-or-client-schedule.html", client_schedule = schedules[0])
+    elif catagory == "staff":
+        return render_template("staff-or-client-schedule.html", staff_schedule = schedules[1])
+    else:
+        session["error"] = 1
+        flash("URL invalid")
+        return redirect("/")
+    
+
 @app.route("/download")
 @login_required
 def downloadpage():
@@ -1009,7 +1091,12 @@ def download(filename):
     # prepare file names, decrypt file
     encrypted_path = os.path.join(app.instance_path, (filename + ".aes"))
     path = os.path.join(app.instance_path, filename)
-    pyAesCrypt.decryptFile(encrypted_path, path, key, buffer)
+    try:
+        pyAesCrypt.decryptFile(encrypted_path, path, key, buffer)
+    except:
+        session["error"] = 1
+        flash("No file found")
+        return redirect("/download")
 
     # server file from memory, delete file
     # code from: https://stackoverflow.com/questions/40853201/remove-file-after-flask-serves-it?rq=1, by davidism

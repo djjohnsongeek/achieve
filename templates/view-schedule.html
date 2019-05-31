@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+
+{% block title %}View Schedules{% endblock %}
+
+{% block main %}
+    <div class="description">
+        <header>
+            <h1>Schedules</h1>
+        </header>
+    </div>
+    <table>
+        <caption>Client Schedule: {{ schedules[0][0] }}</caption>
+        <tr>
+            <th>Client Name</th>
+            <th>Time</th>
+            <th>Staff Name</th>
+        </tr>
+        {% for row in schedules[0] %}
+        <tr>
+            {% for data in row %}
+            <td>{{ data }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <table>
+        <caption>Staff Schedule: {{ schedules[1][0] }}</caption>
+        <tr>
+            <th>Staff Name</th>
+            <th>Time</th>
+            <th>Client Name</th>
+        </tr>
+        {% for row in schedules[1] %}
+        <tr>
+            {% for data in row %}
+            <td>{{ data }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+{% endblock %}

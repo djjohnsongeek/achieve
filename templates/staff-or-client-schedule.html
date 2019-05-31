@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+
+{% block title %}
+    {% if staff_schedule %}
+    Staff Schedule
+    {% elif client_schedule %}
+    Client Schedule
+    {% endif %}
+{% endblock %}
+
+{% block main %}
+    {% if staff_schedule %}
+    <div class="description">
+            <header>
+                <h1>Staff Schedule</h1>
+            </header>
+        </div>
+    <table>
+        <caption>Staff Schedule: {{ staff_schedule[0] }}</caption>
+        <tr>
+            <th>Staff Name</th>
+            <th>Time</th>
+            <th>Client Name</th>
+        </tr>
+        {% for row in staff_schedule %}
+        <tr>
+            {% for data in row %}
+            <td>{{ data }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% elif client_schedule %}
+    <div class="description">
+        <header>
+            <h1>Client Schedule</h1>
+        </header>
+    </div>
+    <table>
+        <caption>Client Schedule: {{ client_schedule[0] }}</caption>
+        <tr>
+            <th>Client Name</th>
+            <th>Time</th>
+            <th>Staff Name</th>
+        </tr>
+        {% for row in client_schedule %}
+        <tr>
+            {% for data in row %}
+            <td>{{ data }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    {% endif %}
+{% endblock %}
