@@ -44,6 +44,19 @@ def shorten_day(day: str):
     container = [day[i] for i in range(3)]
     return "".join(container)
 
+def lengthen_day(day: str):
+    """ Takes a short 'day' string and returns the string as a full day """
+    if day in {"mon", "fri"}:
+        return day + "day"
+    elif day == "tue":
+        return day + "sday"
+    elif day == "wed":
+        return day + "nesday"
+    elif day == "thu":
+        return day + "rsday"
+    else:
+        return None
+
 def generate_schedules(client_ID: int, client_name: str, client_team: list, client_sch: dict, all_staff_sch: dict, att_day: str):
     """ 
     Adds staff to the given client's schedule, Schedules based on the following logic:

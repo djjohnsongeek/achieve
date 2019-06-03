@@ -3,6 +3,7 @@ import sqlite3
 import re
 import csv
 import pyAesCrypt
+# import subprocess
 
 from flask import Flask
 from flask import render_template, request, session, redirect, Response, jsonify, json, send_from_directory, flash
@@ -12,7 +13,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from jinja2 import Environment, FileSystemLoader
 
 from SQL import db_connect
-from server import generate_schedules, convert_strtime, create_schhours, login_required, shorten_day
+from server import generate_schedules, convert_strtime, create_schhours, login_required, shorten_day, lengthen_day
 from cypher import scramble, unscramble
 
 # NOTE: need to replace annoying single error page with client side UI feedback
@@ -468,17 +469,40 @@ def update_client():
             flash("Invalid attendance data")
             return redirect("/clients")
 
-        # check for None
+        # skip over fields with no info seleected
         if not request.form.get(day):
             continue
 
         if int(request.form.get(day)) == 1:
-            client_att.append((day, 1))
+            client_att.append([day, 1])
         if int(request.form.get(day)) == 0:
-            client_att.append((day, 0))
+            client_att.append([day, 0])
 
-    for tuples in client_att:
-        db.execute(f"UPDATE clients SET {tuples[0]}=? WHERE clientID=?", (tuples[1], client_info["clientID"]))
+    # get delete hours checkbox
+    if not request.form.get("del_hours"):
+        del_hours = False
+    else:
+        del_hours = True
+
+    # insert data into database
+    for item in client_att:
+        full_day = lengthen_day(item[0])
+
+        if del_hours and item[1] == 0:
+            db.execute(f"UPDATE clienthours SET {full_day}=Null WHERE clientID=?", (client_info["clientID"],))
+
+        # get client's housr info for each day
+        db.execute(f"SELECT {full_day} FROM clienthours WHERE clientID=?", (client_info["clientID"],))
+        result = db.fetchone()
+
+        # return an error if client is marked present on days where they have no hours
+        if not result[full_day] and item[1] == 1:
+            flash("Client cannot be marked present if they have no scheduable hours for that day")
+            return redirect("/clients")
+
+        # update the data
+        item[0] = shorten_day(item[0])
+        db.execute(f"UPDATE clients SET {item[0]}=? WHERE clientID=?", (item[1], client_info["clientID"]))
 
     # change client's color classification if needed
     if request.form.get("update_color"):
@@ -696,6 +720,8 @@ def view_staff():
     # replace numbers with text
     for row in staff_att:
         for day in row.keys():
+            if day == "name":
+                continue
             if row[day] == 1:
                 row[day] = "Present"
             else:
@@ -809,7 +835,7 @@ def staff_update():
             flash("Invalid teacher tier data")
             return redirect("/staff")
 
-    # if build hours variable
+    # build hours variable
     if request.form.get("staff_hours_update_start") and request.form.get("staff_hours_update_end"):
 
         # build final start and end times
@@ -851,7 +877,7 @@ def staff_update():
         else:
             db.execute("UPDATE staff SET color=? WHERE staffID=?", (color, staff_info["staffID"]))
 
-    # --------------------------------------------------------------------------------------------------------- #
+    # prepare staff attendance variables
     staff_att = []
     for day in ["mon", "tue", "wed", "thu", "fri"]:
         try:
@@ -867,13 +893,35 @@ def staff_update():
             continue
         
         if int(request.form.get(day)) == 1:
-            staff_att.append((day, 1))
+            staff_att.append([day, 1])
         else:
-            staff_att.append((day, 0))
+            staff_att.append([day, 0])
 
-    for tuples in staff_att:
-        db.execute(f"UPDATE staff SET {tuples[0]}=? WHERE staffID=?", (tuples[1], staff_info["staffID"]))
-    # --------------------------------------------------------------------------------------------------------- #
+    # get delete hours checkbox
+    if not request.form.get("del_hours"):
+        del_hours = False
+    else:
+        del_hours = True
+
+    # update database with new attendance data
+    for item in staff_att:
+        full_day = lengthen_day(item[0])
+
+        # remove hours data completely where staff is absent
+        if del_hours and item[1] == 0:
+            db.execute(f"UPDATE staffhours SET {full_day}=Null WHERE staffID=?", (staff_info["staffID"],))
+
+        # check that staff member actually has hours
+        db.execute(f"SELECT {full_day} FROM staffhours WHERE staffID=?", (staff_info["staffID"],))
+        result = db.fetchone()
+
+        # return error if staff is to be marked present on a day they have no hours
+        if not result[full_day] and item[1] == 1:
+            flash("Staff info not updated: Staff cannot be marked present if they have no scheduable hours for that day")
+            return redirect("/staff")
+
+        item[0] = shorten_day(item[0])
+        db.execute(f"UPDATE staff SET {item[0]}=? WHERE staffID=?", (item[1], staff_info["staffID"]))
 
     # close database and save changes
     conn.commit()
@@ -1076,7 +1124,6 @@ def view_schedule(catagory):
         flash("URL invalid")
         return redirect("/")
     
-
 @app.route("/download")
 @login_required
 def downloadpage():
@@ -1103,7 +1150,8 @@ def download(filename):
     def generate():
         with open(path) as f:
             yield from f
-
+        
+        # subprocess.check_call(f"srm {path}")
         os.remove(path)
     
     r = app.response_class(generate(), mimetype="text/csv")

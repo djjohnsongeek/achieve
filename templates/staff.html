@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 
-{% block title %}Clients{% endblock %}
+{% block title %}Staff{% endblock %}
 
 {% block main %}
     <div class="description">
@@ -101,6 +101,7 @@
                         <option value="1">Present</option>
                         <option value="0">Absent</option>
                     </select>
+                    <input type="checkbox" name="del_hours" value="1">Delete hours where Absent?
                 </p>
                 <p>
                     Update Staff Credentials:<br/>

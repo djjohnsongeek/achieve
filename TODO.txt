@@ -25,16 +25,14 @@ Server Side Functionality (UNFINISHED)
             -implement client name cryptogrophy (DONE)
             -update scheduling (decode hashed client names, update sql queries) (DONE)
 
-
-        
         Priority:
         -TEST schedule generation with new week settings, with teamsize scheduling hours
-            -check the client's team lenghth BEFORE devideing
+            -check the client's team lenghth BEFORE deviding
         -generate classroom schedule
         -securly remove unencrypted fields
         -hash names differently?
         -schedule for classes first (preffered subs for class)
-        -does not allow staff or clients to be present on days they have no hours
+        
 
         Backburner:
         -re-schedules already scheduled staff if available?
