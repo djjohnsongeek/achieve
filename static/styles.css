@@ -38,7 +38,7 @@ footer
 {
     background-color: whitesmoke;
     margin-top: 0px;
-    padding: 1px;
+    text-align: center;
 }
 
 .btn_submit
@@ -47,8 +47,21 @@ footer
     margin: 10px;
     width: 20%;
     height: 51px;
+    background-color: rgb(39,171,113);
+    border: none;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    font-weight: bold;
 }
 
+.btn_submit:hover
+{
+    background-color: rgb(79, 190, 142);
+}
+.btn_submit:active
+{
+    border: 1px solid lightgrey;
+    font-size: .8em;
+}
 .fieldset, .welcome
 {
     margin-left: 20px;
@@ -97,7 +110,12 @@ select
     margin-left: 10px;
 }
 
-.tab_add-remove, .tab_update
+.tabs
+{
+    background-color: whitesmoke;
+}
+
+.tab_add-remove, .tab_update, .tab3
 {
     display: inline-block;
     padding: 10px;
@@ -105,13 +123,13 @@ select
     font-weight: bold;
 }
 
-.tab_add-remove a, .tab_update a
+.tab_add-remove a, .tab_update a, .tab3 a
 {
     text-decoration: none;
     color:rgb(39,171,113);
 }
 
-.tab_add-remove:hover, .tab_update:hover
+.tab_add-remove:hover, .tab_update:hover, .tab3:hover
 {
     background-color: rgb(220, 231, 235);
 }
@@ -340,6 +358,11 @@ select
 }
 
 /* ################################################### ALL TABLES ############################################################################ */
+.spacer
+{
+    height: 50px;
+    background-color: whitesmoke;
+}
 th, td
 {
     padding-top: 20px;
@@ -359,6 +382,8 @@ table, th, td
 th
 {
     font-weight: bold;
+    color: rgb(39,171,113);
+    color: #212962;
 }
 
 caption{
@@ -374,6 +399,15 @@ table
     border-style: hidden;
     width: 90%;
     margin: auto;
+}
+
+.sticky-th thead
+{
+    position: sticky;
+    position: -webkit-sticky;
+    top: 0;
+    z-index: 999;
+    background-color: rgb(172, 192, 204);
 }
 
 /* ################################################### SPECIFIC TABLES ######################################################################## */
@@ -418,7 +452,7 @@ table
     overflow-y: auto;
 }
 
-#table_staffinfo
+.table_staffinfo
 {
     overflow-y: auto;
     width: 60%;
@@ -426,10 +460,15 @@ table
     float: left;
 }
 
-#table_staffteams
+.table_staffteams
 {
     overflow-y: auto;
     width: 38%;
     height: 600px;
     float: right;
 }
+ #table_staff_att, #table_staff_hours
+ {
+    overflow-y: auto;
+    height: 600px;
+ }

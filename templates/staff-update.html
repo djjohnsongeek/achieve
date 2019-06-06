@@ -1,12 +1,12 @@
 {% extends "layout.html" %}
 {% block title %} Update Staff Info {% endblock %}
 {% block  main %}
-<div class="description">
-    <header>
+<div class="tabs">
+    <header style="padding: 0;">
         <div class="tab_add-remove">
             <a href="/staff">Add or Remove</a>
         </div><!--
-        --><div style="background-color: rgb(220, 231, 235);"class="tab_update">
+        --><div style="background-color: rgb(220, 231, 235); border: 1px solid lightgrey;border-top: none;"class="tab_update">
             <a style="color:#212962;" href="/staff-update">Update Staff</a>
         </div>
     </header>
@@ -60,7 +60,7 @@
                         <option value="" selected disabled>Fri.</option>
                         <option value="1">Present</option>
                         <option value="0">Absent</option>
-                    </select>
+                    </select><br/>
                     <input type="checkbox" name="del_hours" value="1">Delete hours where Absent?<br/>
                     <lable class="form_titles">Update Staff Credentials</lable><br/>
                     <input type="checkbox" value="1" name="rbt_update">RBT?

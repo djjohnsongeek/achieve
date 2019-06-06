@@ -33,8 +33,6 @@ Server Side Functionality (UNFINISHED)
 
         -remove big links from staff login
 
-        
-
         Backburner:
         -re-schedules already scheduled staff if available?
         -possible optimization: no rebuiliding tier_team_member list EVERY loop
@@ -87,6 +85,8 @@ Client Side Functionality
 
 HTML and CSS Rework:
     -all tables pages
+        -client tables - scroll functionality
+        -client team headers
     -client side scripts for now seperate staff and client form pages
     -login and change password page
 

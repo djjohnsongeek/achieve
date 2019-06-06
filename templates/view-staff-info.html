@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+
+{% block title %}Staff Info{% endblock %}
+
+{% block main %}
+<div class="tabs">
+    <header style="padding: 0;">
+        <div style="background-color: rgb(220, 231, 235); border: 1px solid lightgrey;border-top: none;" class="tab_add-remove">
+            <a style="color:#212962;" href="/staff/view-staff-info">Staff Info</a>
+        </div><!--
+        --><div class="tab_update">
+            <a href="/staff/view-staff-hours">Staff Hours</a>
+        </div><!--
+        --><div class="tab3">
+            <a href="/staff/view-staff-attendance">Staff Att.</a>
+        </div>
+    </header>
+</div>
+<div class="spacer"></div>
+<div class="table_container">
+    <div class="table_staffinfo">
+        <table class="sticky-th">
+            <thead>
+                <tr>
+                    <th>Staff Name</th>
+                    <th>RBT</th>
+                    <th>Tier</th>
+                    <th>Color</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in staff_info %}
+                <tr>
+                    {% for data in row.values() %}
+                    <td>{{ data }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="table_staffteams">
+        <table class="sticky-th">
+            <thead>
+                <tr>
+                    <th>Staff Teams</th>
+                </tr>
+            </thead>
+            {% for item in staff_teams.items() %}
+            <tr>
+                <td class="teams_staffnames">{{ item[0] }}</td>
+            </tr>
+                {% for client in item[1] %}
+                <tr>
+                    <td class="teams_clientnames">{{ client }}</td>
+                </tr>
+                {% endfor %}
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock %}

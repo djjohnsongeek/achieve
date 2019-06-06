@@ -13,7 +13,6 @@
         <nav>
             {% if session.user_id == 0 %}
             <div id="nav">
-                <image id="img_puzzle" src="static/logo.png" alt="puzzle logo"></image>
                 <a class="page_title" href="/">Achieve</a>
                 <ul class="nav_list">
                     <li><a class="nav_links" href="/">Home</a></li>
@@ -50,7 +49,6 @@
             </div>
             {% elif session.user_id == 1 %}
             <div id="nav">
-                <image id="img_puzzle" src="static/logo.png" alt="puzzle logo"></image>
                 <a class="page_title" href="/">Achieve</a>
                 <ul class="nav_list">
                     <li><a class="nav_links" href="/">Home</a></li>
@@ -79,7 +77,6 @@
             </div>
             {% else %}
             <div id="nav">
-                <image id="img_puzzle" src="static/logo.png" alt="puzzle logo"></image>
                 <a class="page_title" href="/">Achieve</a>
             </div>
             {% endif %}

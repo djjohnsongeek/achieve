@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+{% block title %}Client Info{% endblock %}
+{% block main %}
+<div class="tabs">
+    <header style="padding: 0;">
+        <div class="tab_add-remove" style="background-color: rgb(220, 231, 235); border: 1px solid lightgrey;border-top: none;">
+            <a href="/clients/view-client-info" style="color:#212962;">Client Info</a>
+        </div><!--
+        --><div class="tab_update">
+            <a href="/clients/view-client-hours">Client Hours</a>
+        </div><!--
+        --><div class="tab3">
+            <a href="/clients/view-client-att">Client Att.</a>
+        </div>
+    </header>
+</div>
+<div class="spacer"></div>
+<div class="table_container">
+    <div class="table_staffinfo">
+        <table class="sticky-th">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Total Hours</th>
+                    <th>Color</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in client_info %}
+                <tr>
+                    {% for data in row.values() %}
+                    <td>{{ data }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="table_staffteams">
+        <table class="sticky-th">
+            <thead>
+                <tr>
+                    <th>Client Teams</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in client_teams.items() %}
+                <tr>
+                    <td style="text-transform: uppercase; font-weight: bold; text-align: center;">{{ item[0] }}</td>
+                </tr>
+                    {% for staff in item[1] %}
+                    <tr>
+                        <td style="text-align: center;">{{ staff }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

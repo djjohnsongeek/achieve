@@ -321,6 +321,7 @@ def addclient():
 
 @app.route("/clients/view-client-info")
 @login_required
+@admin_required
 def view_clients():
     db, conn = db_connect(DB_URL)
 
@@ -340,25 +341,6 @@ def view_clients():
 
         row["name"] = unscramble(row["name"])
 
-    # get client attendance data, decrypt client name
-    db.execute("SELECT name, mon, tue, wed, thu, fri FROM clients ORDER BY name DESC")
-    client_att = [dict(row) for row in db.fetchall()]
-
-    for row in client_att:
-        for day in ["mon", "tue", "wed", "thu", "fri"]:
-            if row[day] == 1:
-                row[day] = "Present"
-            else:
-                row[day] = "OUT"
-
-        row["name"] = unscramble(row["name"])
-
-    # get client hours, decrypt client name
-    db.execute("SELECT clients.name, monday, tuesday, wednesday, thursday, friday FROM clienthours JOIN clients ON clienthours.clientID = clients.clientID ORDER BY clients.name DESC")
-    client_hours = [dict(row) for row in db.fetchall()]
-    for row in client_hours:
-        row["name"] = unscramble(row["name"])
-
     # get team information
     db.execute("SELECT clients.name, staff.name FROM teams JOIN staff ON staff.staffID=teams.staffID JOIN clients ON clients.clientID=teams.clientID ORDER BY clients.name DESC")
 
@@ -375,12 +357,49 @@ def view_clients():
         if item[1] not in team:
             team.append(item[1])
             team_dict[item[0]] = team
-    
-    print(team_dict)
 
     # close database and render client tables
     conn.close()
-    return render_template("view-clients.html", client_info = client_info, client_att = client_att, client_hours = client_hours, client_teams = team_dict)
+    return render_template("view-client-info.html", client_info = client_info, client_teams = team_dict)
+
+@app.route("/clients/view-client-hours")
+@login_required
+@admin_required
+def view_client_hrs():
+    db, conn = db_connect(DB_URL)
+
+    # get client hours, decrypt client name
+    db.execute("SELECT clients.name, monday, tuesday, wednesday, thursday, friday FROM clienthours JOIN clients ON clienthours.clientID = clients.clientID ORDER BY clients.name DESC")
+    client_hours = [dict(row) for row in db.fetchall()]
+    for row in client_hours:
+        row["name"] = unscramble(row["name"])
+
+    # close database and render client tables
+    conn.close()
+    return render_template("view-client-hours.html", client_hours = client_hours)
+
+@app.route("/clients/view-client-att")
+@login_required
+@admin_required
+def view_client_att():
+    db, conn = db_connect(DB_URL)
+
+    # get client attendance data, decrypt client name
+    db.execute("SELECT name, mon, tue, wed, thu, fri FROM clients ORDER BY name DESC")
+    client_att = [dict(row) for row in db.fetchall()]
+
+    for row in client_att:
+        for day in ["mon", "tue", "wed", "thu", "fri"]:
+            if row[day] == 1:
+                row[day] = "Present"
+            else:
+                row[day] = "OUT"
+
+        row["name"] = unscramble(row["name"])
+
+    # close database and render client tables
+    conn.close()
+    return render_template("view-client-att.html", client_att = client_att)
 
 @app.route("/clients/remove", methods=["POST"])
 def remove_client():\
@@ -717,6 +736,7 @@ def staff_update_form():
 
 @app.route("/staff/view-staff-info")
 @login_required
+@admin_required
 def view_staff():
     db, conn = db_connect(DB_URL)
 
@@ -738,24 +758,6 @@ def view_staff():
         else:
             row["rbt"] = "No"
 
-    # get staff hours
-    db.execute("SELECT staff.name, monday, tuesday, wednesday, thursday, friday FROM staffhours JOIN staff ON staffhours.staffID = staff.staffID ORDER BY staff.name")
-    staff_hours = db.fetchall()
-
-    # get staff attendance
-    db.execute("SELECT name, mon, tue, wed, thu, fri FROM staff ORDER BY name")
-    staff_att = [dict(row) for row in db.fetchall()]
-
-    # replace numbers with text
-    for row in staff_att:
-        for day in row.keys():
-            if day == "name":
-                continue
-            if row[day] == 1:
-                row[day] = "Present"
-            else:
-                row[day] = "OUT"
-
     # get team information
     db.execute("SELECT clients.name, staff.name FROM teams JOIN staff ON staff.staffID=teams.staffID JOIN clients ON clients.clientID=teams.clientID ORDER BY staff.name")
 
@@ -775,7 +777,44 @@ def view_staff():
 
     # close database, render staff tables
     conn.close()
-    return render_template("view-staff.html", staff_info = staff_info, staff_hours = staff_hours, staff_att=staff_att, staff_teams = team_dict)
+    return render_template("view-staff-info.html", staff_info = staff_info, staff_teams = team_dict)
+
+@app.route("/staff/view-staff-hours")
+@login_required
+@admin_required
+def view_staff_hours():
+    db, conn = db_connect(DB_URL)
+
+    # get staff hours
+    db.execute("SELECT staff.name, monday, tuesday, wednesday, thursday, friday FROM staffhours JOIN staff ON staffhours.staffID = staff.staffID ORDER BY staff.name")
+    staff_hours = db.fetchall()
+
+    # close database, render staff tables         
+    conn.close()
+    return render_template("view-staff-hours.html", staff_hours = staff_hours)
+
+@app.route("/staff/view-staff-attendance")
+@login_required
+@admin_required
+def vew_staff_att():
+    db, conn = db_connect(DB_URL)
+
+    # get staff attendance
+    db.execute("SELECT name, mon, tue, wed, thu, fri FROM staff ORDER BY name")
+    staff_att = [dict(row) for row in db.fetchall()]
+
+    # replace numbers with text
+    for row in staff_att:
+        for day in row.keys():
+            if day == "name":
+                continue
+            if row[day] == 1:
+                row[day] = "Present"
+            else:
+                row[day] = "OUT"
+
+    conn.close()
+    return render_template("view-staff-att.html", staff_att=staff_att)
 
 @app.route("/staff/remove", methods=["POST"])
 def remove_staff():
