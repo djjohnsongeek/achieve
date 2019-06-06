@@ -1,6 +1,6 @@
 import sqlite3
 
-from flask import session, request, redirect, render_template
+from flask import session, request, redirect, render_template, flash
 from functools import wraps
 from random import randrange
 
@@ -11,12 +11,23 @@ DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 def login_required(f):
     """ decorates routes to require login """
     @wraps(f)
-    def decorated_function(*args, **kwargs):
+    def login_req(*args, **kwargs):
         if session.get("user_id") is None:
             return redirect("/login")
         return f(*args, **kwargs)
-    return decorated_function
+    return login_req
 
+def admin_required(f):
+    """ decorates route to require admin privlages """
+    @wraps(f)
+    def admin_req(*args, **kwargs):
+        if session.get("user_id") != 0:
+            session["error"] = 1
+            flash("Your account is not permitted to access this page")
+            return redirect("/")
+        return f(*args, **kwargs)
+    return admin_req
+    
 def create_schhours(start: int, end: int):
     """ Takes a start and endtime (integers) and creates a list of times seperated by an hour and ending at end """
     # TODO: deal with times that start on the hour (8:00) as well as times that start halfway through (8:30)
@@ -74,9 +85,14 @@ def generate_schedules(client_ID: int, client_name: str, client_team: list, clie
 
     db.execute("SELECT totalhours FROM clients WHERE clientID=?", (client_ID,))
     client_data = db.fetchone()
-    schedule_var = round(client_data["totalhours"] / len(client_team))
     
+    # decide the number of hours a client should be scheduled at a time, prepare current step
+    schedule_var = round(client_data["totalhours"] / len(client_team))
+    if schedule_var == 1:
+        schedule_var += 1
     current_step = 0
+
+    # generates client schedule
     while 0 in client_sch.values():
         tier = current_step + 1
 
@@ -106,10 +122,10 @@ def generate_schedules(client_ID: int, client_name: str, client_team: list, clie
         if not tier_client_team and current_step == 3:
             print("There are no available t1, t2, t3  or sub staff left on this client's team")
             break
-        
+
         # if no teachers restart with next tier
         if not tier_client_team:
-            print("There are no teachers left on this client's team, move to next group, add 1")
+            print("There are no teachers left on this client's team, move to next group, add 1 :early")
             current_step += 1
             continue
 
@@ -134,13 +150,17 @@ def generate_schedules(client_ID: int, client_name: str, client_team: list, clie
 
         # remove times from the client's open time list if they are not in the staff's open times
         client_open_times = [time for time in client_open_times if time in staff_open_times]
+        length = len(client_open_times)
 
         # schedule for a client defined 'block' of hours, or by one hour
-        if len(client_open_times) >= schedule_var:
+        if length >= schedule_var:
             j = schedule_var
+        elif length < schedule_var and length > 1:
+            j = 2
         elif len(client_open_times) == 1:
             j = 1
         else:
+            # this whole section is VERY confusing
             if current_step == 3:
                 tier_client_team.remove(tier_client_team[i])
                 if not tier_client_team:
@@ -149,7 +169,7 @@ def generate_schedules(client_ID: int, client_name: str, client_team: list, clie
                 else:
                     continue
             else:
-                print("There are no available staff at this tier, move up 1")
+                print("There are no available staff at this tier, move up 1 :late")
                 current_step += 1
                 continue
         

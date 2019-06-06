@@ -1,0 +1,84 @@
+{% extends "layout.html" %}
+{% block title %}Update Client Info{% endblock %}
+{% block main %}
+<div class="description">
+    <header>
+        <div class="tab_add-remove">
+            <a href="/clients">Add or Remove</a>
+        </div><!--
+        --><div style="background-color: rgb(220, 231, 235);"class="tab_update">
+            <a style="color:#212962;" href="/clients-update">Update Client</a>
+        </div>
+    </header>
+</div>
+<div class="div_forms">
+        <form id="form_update_client" name="form_update_client" method="POST" action="/clients/update">
+            <div class="fieldset">
+                <lable class="form_titles">Update Client Information</lable><br/>
+                <select id="slct_update_client" name="update_client">
+                    <option disabled selected value="">Client Name</option>
+                    {% for name in client_query %}
+                    <option value ="{{ name['name'] }}">{{ unscramble(name["name"]) }}</option>
+                    {% endfor %}
+                </select><br/>
+                <lable class="form_titles" for="new_client_hours_start">New Start Time</lable><br/>
+                <input type="time" name="new_client_hours_start" id="new_client_hours_start" placeholder="hh:mm"><br/>
+                <lable class="form_titles" for="new_client_hours_start">New End Time</lable><br/>
+                <input type="time" name="new_client_hours_end" id="new_client_hours_end" placeholder="hh:mm"><br/>
+                <lable class="form_titles">Days Present (check all the apply)</lable><br/>
+                <ul class="lst_client_days">
+                    <li class="chbx_client_days"><input type="checkbox" name="monday" value="monday">Monday</li>
+                    <li class="chbx_client_days"><input type="checkbox" name="tuesday" value="tuesday">Tuesday</li>
+                    <li class="chbx_client_days"><input type="checkbox" name="wednesday" value="wednesday">Wednesday</li>
+                    <li class="chbx_client_days"><input type="checkbox" name="thursday" value="thursday">Thursday</li>
+                    <li class="chbx_client_days"><input type="checkbox" name="friday" value="friday">Friday</li>
+                </ul><br/>
+                <lable class="form_titles">Update Client Attendance</lable><br/>
+                <select class="slct_weekday" id="mon" name="mon">
+                    <option value="" selected disabled>Mon.</option>
+                    <option value="1">Present</option>
+                    <option value="0">Absent</option>
+                </select><!--
+                --><select class="slct_weekday" id="tue" name="tue">
+                    <option value="" selected disabled>Tue.</option>
+                    <option value="1">Present</option>
+                    <option value="0">Absent</option>
+                </select><!--
+                --><select class="slct_weekday" id="wed" name="wed">
+                    <option value="" selected disabled>Wed.</option>
+                    <option value="1">Present</option>
+                    <option value="0">Absent</option>
+                </select><!--
+                --><select class="slct_weekday" id="thu" name="thu">
+                    <option value="" selected disabled>Thur.</option>
+                    <option value="1">Present</option>
+                    <option value="0">Absent</option>
+                </select><!--
+                --><select class="slct_weekday" id="fri" name="fri">
+                    <option value="" selected disabled>Fri.</option>
+                    <option value="1">Present</option>
+                    <option value="0">Absent</option>
+                </select>
+                <input type="checkbox" name="del_hours" value="1">Delete hours where Absent?<br/>
+                <lable class="form_titles">Update Client Classification</lable><br/>
+                <select name="update_color">
+                    <option value="" disabled selected>New Client Classification</option>
+                    <option value="1">Green</option>
+                    <option value="2">Yellow</option>
+                    <option value="3">Red</option>
+                </select><br/>
+                <lable class="form_titles">Update Client's Team</lable><br/>
+                <select name="new_teacher"><br/>
+                    <option disabled selected value="">Staff Name</option>
+                    {% for name in staff_query %}
+                    <option value="{{ name['name'] }}">{{ name["name"] }}</option>
+                    {% endfor %}
+                </select>
+                <input type="radio" name="addOrRemove_teacher" value="add">Add
+                <input type="radio" name="addOrRemove_teacher" value="remove">Remove<br/>
+                <button type="submit" id="btn_update_client" class="btn_submit">Update Info</button>
+            </div>
+        </form>
+        <script src="../static/clients.js"></script>
+    </div>
+{% endblock %}

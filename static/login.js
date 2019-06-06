@@ -4,7 +4,7 @@ document.getElementById("btn_login").addEventListener("click", function(event){
     password = document.getElementById("password")
 
     if (username.value && password.value)
-        document.getElementById("login").submit();
+        document.getElementById("form-login").submit();
 
     if (!username.value)
     {

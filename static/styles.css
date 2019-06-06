@@ -1,25 +1,14 @@
 body{
     background-color: #212962;
-}
-
-.page_title{
-    font-size: 9em;
-    transition: color .25s;
-}
-
-#img_puzzle
-{
-    height: 200px;
-    width: 200px;
-    padding-left: 35px;
-    padding-top: 35px;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
 
 header
 {
     text-align: center;
-    background-color: #a52228;
-    padding: 10px;
+    padding: 1px;
+    font-size: .8em;
+    color:rgb(39,171,113)
 }
 
 .description
@@ -29,10 +18,9 @@ header
 
 h2
 {
-    font-size: 2em;
-    background-color: #7acedc;
+    color: #212962;
+    font-size: 1.25em;
     padding-left: 10px;
-    border: solid 2px darkslategrey;
     margin-left: 20px;
     margin-right: 20px;
 }
@@ -45,6 +33,7 @@ footer
     margin: 10px;
 }
 
+/* ################################################### INPUT FORMS ########################################################################## */
 .div_forms
 {
     background-color: whitesmoke;
@@ -52,21 +41,17 @@ footer
     padding: 1px;
 }
 
-#div_teacher_team
-{
-    display: inline-block;
-}
 .btn_submit
 {
-    width: 120px;
     padding: 10px;
     margin: 10px;
+    width: 20%;
+    height: 51px;
 }
 
-fieldset, .welcome
+.fieldset, .welcome
 {
-    padding: 10px;
-    margin: 20px;
+    margin-left: 20px;
 }
 
 .list_title
@@ -76,6 +61,8 @@ fieldset, .welcome
 
 .form_titles
 {
+    color: #212962;
+    font-size: 1.25em;
     margin-left: 10px;
 }
 
@@ -84,39 +71,90 @@ input, select
     padding: 10px 10px;
     margin: 10px;
 }
-/* ################################################### NAVIGATION STRIP ########################################################################## */
-.nav_links, .page_title
+
+input[type=text], input[type=time]
 {
+    width: 30%;
+    height: 30px;
+}
+
+select
+{
+    height: 51px;
+    width: 31.5%;
+}
+
+.slct_weekday
+{
+    width: 83px;
+    margin-right: 0;
+    margin-left: 0;
+    text-align: center;
+}
+
+#mon, #mon2
+{
+    margin-left: 10px;
+}
+
+.tab_add-remove, .tab_update
+{
+    display: inline-block;
+    padding: 10px;
+    font-size: 2em;
+    font-weight: bold;
+}
+
+.tab_add-remove a, .tab_update a
+{
+    text-decoration: none;
+    color:rgb(39,171,113);
+}
+
+.tab_add-remove:hover, .tab_update:hover
+{
+    background-color: rgb(220, 231, 235);
+}
+
+/* ################################################### NAVIGATION STRIP ########################################################################## */
+#nav
+{
+    background-color: rgb(220, 231, 235);
+}
+.page_title{
+    font-size: 80px;
+    transition: color .25s;
     text-decoration: none;
     color: #212962;
 }
-
-.nav_links:hover, .page_title:hover{
+.page_title:hover{
     color: white;
 }
-
-#logout_link, #changepw_link
+#img_puzzle
 {
-    font-size: .85em;
+    height: 80px;
+    width: 80px;
+    padding: 10px;
 }
-
-#nav_list
+.nav_list
 {
     list-style-type: none;
     margin: 0;
     padding: 0;
     overflow: hidden;
-    background-color: #7acedc;
+    background-color: rgb(220, 231, 235);
+    display: inline-block;
 }
 
-#nav_list > li
+.nav_list > li
 {
+    margin: 0;
     float: left;
     padding-top: 10px;
     padding-bottom: 10px;
 }
 
-#nav_list a, .dropbtn
+.nav_list a, .dropbtn
 {
     color: #212962;
     font-size: 1.1em;
@@ -124,7 +162,7 @@ input, select
     padding: 10px 12px;
 }
 
-#nav_list a:hover, .dropdown:hover .dropbtn
+.nav_list a:hover, .dropdown:hover .dropbtn
 {
     background-color: whitesmoke;
 }
@@ -154,9 +192,21 @@ input, select
     display: block;
 }
 
-#nav
+#login
 {
+    float: right;
+    font-size: .7em;
+}
+
+#login li, #login a
+{
+    color: gray;
+}
+
+#login a:hover{
+    color: #212962;
     background-color: #7acedc;
+    background-color: rgb(220, 231, 235);
 }
 /* ################################################### HOMEPAGE BIG BUTTONS ###################################################################### */
 
@@ -173,8 +223,8 @@ input, select
     margin: 15px;
     text-align: center;
     padding: 5px;
-    background-color: #7acedc;
-    border: solid 2px darkslategrey;
+    background-color: rgb(220, 231, 235);
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.1);
 }
 
 .big_icon
@@ -186,6 +236,7 @@ input, select
 .big_link:hover
 {
     background-color: #b6dee6;
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.39);
 }
 
 .icon_links
@@ -289,26 +340,96 @@ input, select
 }
 
 /* ################################################### ALL TABLES ############################################################################ */
+th, td
+{
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-right: 50px;
+    padding-left: 50px;
+    text-align: center;
+    border: 1px solid grey;
+}
 
 table, th, td
 {
-    border: 1px solid black;
+    color: black;
     border-collapse: collapse;
-    background-color: whitesmoke;
-}
-
-th, td
-{
-    padding: 5px;
 }
 
 th
 {
-    background-color: grey;
+    font-weight: bold;
 }
 
 caption{
-    border: 1px solid black;
     border-collapse: collapse;
-    background-color: #7acedc;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    font-size: 1.4em;
+    letter-spacing: 2px;
+}
+
+table
+{
+    border-style: hidden;
+    width: 90%;
+    margin: auto;
+}
+
+/* ################################################### SPECIFIC TABLES ######################################################################## */
+.teams_clientnames
+{
+    text-align: center;
+    border-style: none;
+}
+.teams_staffnames
+{
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    border-bottom: 1px solid grey;
+    background-color: rgb(235, 235, 235);
+}
+.table_container
+{
+    width: 100%;
+    background-color: whitesmoke;
+    overflow: auto; /* div was is 0px tall because child elements are set to float, thus background-color does not work w/o this */
+}
+#table_client_sch
+{
+    overflow-y: auto;
+    width: 49%;
+    height: 600px;
+    float: left;
+}
+#table_staff_sch
+{
+    overflow-y: auto;
+    width: 49%;
+    height: 600px;
+    float: right;
+}
+.table_either_sch
+{
+    margin: auto;
+    width: 75%;
+    height: 600px;
+    overflow-y: auto;
+}
+
+#table_staffinfo
+{
+    overflow-y: auto;
+    width: 60%;
+    height: 600px;
+    float: left;
+}
+
+#table_staffteams
+{
+    overflow-y: auto;
+    width: 38%;
+    height: 600px;
+    float: right;
 }

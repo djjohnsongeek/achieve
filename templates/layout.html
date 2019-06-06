@@ -11,41 +11,72 @@
     </head>
     <body>
         <nav>
-            {% if session.logged_in == True %}
+            {% if session.user_id == 0 %}
             <div id="nav">
                 <image id="img_puzzle" src="static/logo.png" alt="puzzle logo"></image>
                 <a class="page_title" href="/">Achieve</a>
+                <ul class="nav_list">
+                    <li><a class="nav_links" href="/">Home</a></li>
+                    <li class="dropdown">
+                        <a href="/staff" class="dropbtn">Staff</a>
+                        <div class="dropdown_content">
+                            <a href="/staff">Manage Staff</a>
+                            <a href="/staff/view-staff-info">View Staff Info</a>
+                            <a href="/view-schedule/staff">View Staff Schedule</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropbtn" href="/clients">Clients</a>
+                        <div class="dropdown_content">
+                            <a href="/clients">Manage Clients</a>
+                            <a href="/clients/view-client-info">View Client Info</a>
+                            <a href="/view-schedule/clients">View Client Schedule</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropbtn" href="/schedule">Schedule</a>
+                        <div class="dropdown_content">
+                            <a href="/view-schedule/both">View Schedules</a>
+                            <a href="/schedule">Generate Schedule</a>
+                            <a href="/download">Download Schedule</a>
+                        </div>
+                    </li>
+                </ul>
+                <ul id="login" class="nav_list">
+                    <li><a class="nav_links" id="logout_link" href="/logout">Log Out</a></li>
+                    <li>|</li>
+                    <li><a class="nav_links" id="changepw_link" href="/changepw">Change Password</a></li>
+                </ul>
             </div>
-            <ul id="nav_list">
-                <li><a class="nav_links" href="/">Home</a></li>
-                <li class="dropdown">
-                    <a href="/staff" class="dropbtn">Staff</a>
-                    <div class="dropdown_content">
-                        <a href="/staff">Manage Staff</a>
-                        <a href="/staff/view-staff-info">View Staff Info</a>
-                        <a href="/view-schedule/staff">View Staff Schedule</a>
-                    </div>
-                </li>
-                <li class="dropdown">
-                    <a class="dropbtn" href="/clients">Clients</a>
-                    <div class="dropdown_content">
-                        <a href="/clients">Manage Clients</a>
-                        <a href="/clients/view-client-info">View Client Info</a>
-                        <a href="/view-schedule/clients">View Client Schedule</a>
-                    </div>
-                </li>
-                <li class="dropdown">
-                    <a class="dropbtn" href="/schedule">Schedule</a>
-                    <div class="dropdown_content">
-                        <a href="/view-schedule/both">View Schedules</a>
-                        <a href="/schedule">Generate Schedule</a>
-                        <a href="/download">Download Schedule</a>
-                    </div>
-                </li>
-                <li>|</li>
-                <li><a class="nav_links" id="logout_link" href="/logout">Log Out</a></li>
-                <li><a class="nav_links" id="changepw_link" href="/changepw">Change Password</a></li>
-            </ul>
+            {% elif session.user_id == 1 %}
+            <div id="nav">
+                <image id="img_puzzle" src="static/logo.png" alt="puzzle logo"></image>
+                <a class="page_title" href="/">Achieve</a>
+                <ul class="nav_list">
+                    <li><a class="nav_links" href="/">Home</a></li>
+                    <li class="dropdown">
+                        <a href="javascript:void(0)" class="dropbtn">Staff</a>
+                        <div class="dropdown_content">
+                            <a href="/view-schedule/staff">View Staff Schedule</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropbtn" href="javascript:void(0)">Clients</a>
+                        <div class="dropdown_content">
+                            <a href="/view-schedule/clients">View Client Schedule</a>
+                        </div>
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropbtn" href="javascript:void(0)">Schedule</a>
+                        <div class="dropdown_content">
+                            <a href="/view-schedule/both">View Schedules</a>
+                        </div>
+                    </li>
+                </ul>
+                <ul id="login" class="nav_list">
+                    <li><a class="nav_links" id="logout_link" href="/logout">Log Out</a></li>
+                </ul>
+            </div>
             {% else %}
             <div id="nav">
                 <image id="img_puzzle" src="static/logo.png" alt="puzzle logo"></image>
@@ -66,7 +97,7 @@
         {% endif %}
         <main>{% block main %}{% endblock %}</main>
         <footer>
-            Website Design and Implementation by Daniel Johnson
+            Website built by Daniel Johnson, Design by Christina Bobo
         </footer>
     </body>
 </html>

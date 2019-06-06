@@ -6,30 +6,23 @@
         <header>
             <h1>What is Achieve?</h1>
         </header>
-        <h2>Description</h2>
         <p class="welcome">
             In short Achieve is a scheduling web application that allows users to store client, staff, and team info in a database.
             Using that information Achieve can generate a daily schedule for the entire database of staff and clients. This schedule is downloadable
             as a "CSV" file. Which can be opened in Microsoft Excel or a simular spreadsheet program.
         </p>
         <h2>Features</h2>
-        <h3 class="list_title">Current Features:</h3>
-        <ul>
-            <li>Securely add, edit, and remove client and staff info from database</li>
-            <li>Login Functionality</li>
+        <ul style="list-style: none;">
+            <li>- Securely* add, edit, and remove client and staff info</li>
+            <li>- Login Functionality</li>
+            <li>- Generate a daily schedule for clients and staff <i>(In Progress)</i></li>
+            <li>- Generate downloadable CSV files for the daily schedule</li>
+            <li>- View selected client's or staff's teams, schedule, or info</li>
+            <li>- View entire schedule online</li>
+            <li>*full security still needs to be verified</li>
         </ul>
-        <h3 class="list_title">Future Features:</h3>
-        <ul>
-            <li>Generate a daily schedule for clients and staff <i>(In Progress)</i></li>
-            <li>Generate downloadable CSV files for the daily schedule</li>
-            <li>View selected client's or staff's teams, schedule, or info</li>
-            <li>View entire schedule online</li>
-            <li>Generate a weekly schedule</li>
-            <li>Save, download, and view shedules generated in the past</li>
-            <li>Mobile friendly</li>
-        </ul>
-        
         <!--Large "Button" Links for each of the website's main pages/functions-->
+        {% if session.user_id == 0 %}
         <h2>Site Functions</h2>
         <div id="container">
             <div class="big_link">
@@ -42,5 +35,6 @@
                 <a href="/schedule" class="icon_links"><image class="big_icon" src="static/scheduleicon.png" alt="Generate Schedule Link">Generate Schedule</image></a>
             </div>
         </div>
+        {% endif %}
     </div>
 {% endblock %}

@@ -27,11 +27,12 @@ Server Side Functionality (UNFINISHED)
 
         Priority:
         -TEST schedule generation with new week settings, with teamsize scheduling hours
-            -check the client's team lenghth BEFORE deviding
+        -schedule for classes first (preffered subs for class)
         -generate classroom schedule
         -securly remove unencrypted fields
-        -hash names differently?
-        -schedule for classes first (preffered subs for class)
+
+        -remove big links from staff login
+
         
 
         Backburner:
@@ -85,13 +86,9 @@ Client Side Functionality
             -searchable tables
 
 HTML and CSS Rework:
-    -layout.html
-    -index.html
-    -clients.html
-    -staff.html
-    -schedule.html
-    -view staff/clients/schedule.html
-    -better download page and navigation
+    -all tables pages
+    -client side scripts for now seperate staff and client form pages
+    -login and change password page
 
 CURRENT Version Features
     -add, edit, remove client and staff info from database (DONE)

@@ -3,20 +3,26 @@
 {% block title %}Clients{% endblock %}
 
 {% block main %}
-    <div class="description">
-        <header><h1>Manage Clients</h1></header>
-    </div> 
+<div class="description">
+    <header>
+        <div style="background-color: rgb(220, 231, 235);" class="tab_add-remove">
+            <a style="color:#212962;" href="/clients">Add or Remove</a>
+        </div><!--
+        --><div class="tab_update">
+            <a href="/clients-update">Update Client</a>
+        </div>
+    </header>
+</div>
     <div class="div_forms">
-        <h2>Add or Remove Clients</h2>
         <form nonvalidate id="form_add_client" name="form_add_client" method="POST" action="/clients">
-            <fieldset>
-                <legend>Add a Client</legend>
-                <input type="text" id="client_name" name="client_name" placeholder="Client Name">
-                <label for="client_hours_start" class="form_titles">Start Time:</label>
-                <input type="time" name="client_hours_start" id="client_hours_start" placeholder="hh:mm (24hr)">
-                <label for="client_hours_end" class="form_titles">End Time:</label>
-                <input type="time" name="client_hours_end" id="client_hours_end" placeholder="hh:mm (24hr)">
-                Days Present:
+            <div class="fieldset">
+                <lable class="form_titles" for="client_name">Add a Client</lable><br/>
+                <input type="text" id="client_name" name="client_name" placeholder="Client Name"><br/>
+                <label for="client_hours_start" class="form_titles">Start Time</label><br/>
+                <input type="time" name="client_hours_start" id="client_hours_start" placeholder="hh:mm (24hr)"><br/>
+                <label for="client_hours_end" class="form_titles">End Time</label><br/>
+                <input type="time" name="client_hours_end" id="client_hours_end" placeholder="hh:mm (24hr)"><br/>
+                <lable class="form_titles">Days Present (check all that apply)</lable><br/>
                 <ul class="lst_client_days">
                     <li class="chbx_client_days"><input type="checkbox" id="monday1" name="monday" value="monday">Monday</li>
                     <li class="chbx_client_days"><input type="checkbox" id="tuesday1" name="tuesday" value="tuesday">Tuesday</li>
@@ -24,136 +30,52 @@
                     <li class="chbx_client_days"><input type="checkbox" id="thursday1" name="thursday" value="thursday">Thursday</li>
                     <li class="chbx_client_days"><input type="checkbox" id="friday1" name="friday" value="friday">Friday</li>
                 </ul><br/>
-                <span class="form_titles">Assign Teachers to Team:</span><br/>
-                <div id="div_teacher_team">
-                    <select id="assign_teacher0" name="assign_teacher0">
-                        <option value="" selected disabled>Select Staff</option>
-                        {% for item in staff_query %}
-                        <option value="{{item['name']}}">{{ item["name"] }}</option>
-                        {% endfor %}
-                    </select>
-                    <select id="assign_teacher1" name="assign_teacher1">
-                        <option value="" selected disabled>Select Staff</option>
-                        {% for item in staff_query %}
-                        <option value="{{item['name']}}">{{ item["name"] }}</option>
-                        {% endfor %}
-                    </select>
-                    <select id="assign_teacher2" name="assign_teacher2">
-                        <option value="" selected disabled>Select Staff</option>
-                        {% for item in staff_query %}
-                        <option value="{{item['name']}}">{{ item["name"] }}</option>
-                        {% endfor %}
-                    </select>
-                    <select id="assign_teacher3" name="assign_teacher3">
-                        <option value="" selected disabled>Select Staff</option>
-                        {% for item in staff_query %}
-                        <option value="{{item['name']}}">{{ item["name"] }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <br/>
-                <select name="color">
+                <lable class="form_titles">Assign Teachers to Team</lable><br/>
+                <select id="assign_teacher0" name="assign_teacher0">
+                    <option value="" selected disabled>Select Staff</option>
+                    {% for item in staff_query %}
+                    <option value="{{item['name']}}">{{ item["name"] }}</option>
+                    {% endfor %}
+                </select><br/>
+                <select id="assign_teacher1" name="assign_teacher1">
+                    <option value="" selected disabled>Select Staff</option>
+                    {% for item in staff_query %}
+                    <option value="{{item['name']}}">{{ item["name"] }}</option>
+                    {% endfor %}
+                </select><br/>
+                <select id="assign_teacher2" name="assign_teacher2">
+                    <option value="" selected disabled>Select Staff</option>
+                    {% for item in staff_query %}
+                    <option value="{{item['name']}}">{{ item["name"] }}</option>
+                    {% endfor %}
+                </select><br/>
+                <select id="assign_teacher3" name="assign_teacher3">
+                    <option value="" selected disabled>Select Staff</option>
+                    {% for item in staff_query %}
+                    <option value="{{item['name']}}">{{ item["name"] }}</option>
+                    {% endfor %}
+                </select><br/>
+                <lable class="form_titles">Select Client Classification</lable><br/>
+                <select id="classification" name="color">
                     <option value="" selected disabled>Select Client Classification</option>
                     <option value="1">Green</option>
                     <option value="2">Yellow</option>
                     <option value="3">Red</option>
                 </select><br/>
                 <button type="submit" id="btn_add_client" class="btn_submit" value="add_client" name="btn_add_client">Add Client</button>
-            </fieldset>
+            </div>
         </form>
         <form id="form_remove_client" name="form_remove_client" action="/clients/remove" method="POST">
-            <fieldset>
-                <legend>Remove a Client</legend>
+            <div class="fieldset">
+                <lable class="form_titles" for="slct_client">Remove a Client</lable><br/>
                 <select id="slct_client" name="slct_client">
                     <option disabled selected value="">Client Name</option>
                     {% for name in client_query %}
                     <option value ="{{ name['name'] }}">{{ unscramble(name["name"]) }}</option>
                     {% endfor %}
-                </select>
+                </select><br/>
                 <button type="submit" id="btn_remove_client" class="btn_submit">Remove Client</button>
-            </fieldset>
+            </div>
         </form>
-    </div>
-    <div class="div_forms">
-    <h2>Update Client Info</h2>
-        <form id="form_update_client" name="form_update_client" method="POST" action="/clients/update">
-            <fieldset>
-                <legend>Update Client Info</legend>
-                <p>
-                    Select Client Name:<br/>
-                    <select id="slct_update_client" name="update_client">
-                        <option disabled selected value="">Client Name</option>
-                        {% for name in client_query %}
-                        <option value ="{{ name['name'] }}">{{ unscramble(name["name"]) }}</option>
-                        {% endfor %}
-                    </select>
-                </p>
-                <p style="display: inline">
-                    Update Client Hours:<br/>
-                    <lable for="new_client_hours_start">New Start Time:</lable>
-                    <input type="time" name="new_client_hours_start" id="new_client_hours_start" placeholder="hh:mm">
-                    <lable for="new_client_hours_end">New End Time:</lable>
-                    <input type="time" name="new_client_hours_end" id="new_client_hours_end" placeholder="hh:mm">
-                    <ul class="lst_client_days">
-                        <li class="chbx_client_days"><input type="checkbox" name="monday" value="monday">Monday</li>
-                        <li class="chbx_client_days"><input type="checkbox" name="tuesday" value="tuesday">Tuesday</li>
-                        <li class="chbx_client_days"><input type="checkbox" name="wednesday" value="wednesday">Wednesday</li>
-                        <li class="chbx_client_days"><input type="checkbox" name="thursday" value="thursday">Thursday</li>
-                        <li class="chbx_client_days"><input type="checkbox" name="friday" value="friday">Friday</li>
-                    </ul>
-                </p>
-                <p>
-                    Update Client Attendance:<br/>
-                    <select id="mon" name="mon">
-                        <option value="" selected disabled>Monday</option>
-                        <option value="1">Present</option>
-                        <option value="0">Absent</option>
-                    </select>
-                    <select id="tue" name="tue">
-                        <option value="" selected disabled>Tuesday</option>
-                        <option value="1">Present</option>
-                        <option value="0">Absent</option>
-                    </select>
-                    <select id="wed" name="wed">
-                        <option value="" selected disabled>Wednesday</option>
-                        <option value="1">Present</option>
-                        <option value="0">Absent</option>
-                    </select>
-                    <select id="thu" name="thu">
-                        <option value="" selected disabled>Thursday</option>
-                        <option value="1">Present</option>
-                        <option value="0">Absent</option>
-                    </select>
-                    <select id="fri" name="fri">
-                        <option value="" selected disabled>Friday</option>
-                        <option value="1">Present</option>
-                        <option value="0">Absent</option>
-                    </select>
-                    <input type="checkbox" name="del_hours" value="1">Delete hours where Absent?
-                </p>
-                <p>
-                    Update Client Classification:<br/>
-                    <select name="update_color">
-                        <option value="" disabled selected>New Client Classification</option>
-                        <option value="1">Green</option>
-                        <option value="2">Yellow</option>
-                        <option value="3">Red</option>
-                    </select>
-                </p>
-                <p>
-                    Add or Remove a Teacher from Selected Client's Team<br/>
-                    <select name="new_teacher"><br/>
-                        <option disabled selected value="">Staff Name</option>
-                        {% for name in staff_query %}
-                        <option value="{{ name['name'] }}">{{ name["name"] }}</option>
-                        {% endfor %}
-                    </select>
-                    <input type="radio" name="addOrRemove_teacher" value="add">Add
-                    <input type="radio" name="addOrRemove_teacher" value="remove">Remove<br/>
-                    <button type="submit" id="btn_update_client" class="btn_submit">Update Info</button>
-                </p>
-            </fieldset>
-        </form>
-        <script src="../static/clients.js"></script>
     </div>
 {% endblock %}

@@ -13,7 +13,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from jinja2 import Environment, FileSystemLoader
 
 from SQL import db_connect
-from server import generate_schedules, convert_strtime, create_schhours, login_required, shorten_day, lengthen_day
+from server import generate_schedules, convert_strtime, create_schhours, login_required, shorten_day, lengthen_day, admin_required
 from cypher import scramble, unscramble
 
 # NOTE: need to replace annoying single error page with client side UI feedback
@@ -144,6 +144,7 @@ def index():
 
 @app.route("/clients", methods=["GET", "POST"])
 @login_required
+@admin_required
 def clients():
     # for GET requests
     if request.method == "GET":
@@ -287,6 +288,18 @@ def clients():
     session["error"] = 0
     flash("Client Successfully Added")
     return redirect("/clients")
+
+@app.route("/clients-update")
+@login_required
+@admin_required
+def clients_update_form():
+    db, conn = db_connect(DB_URL)
+    db.execute("SELECT name FROM staff")
+    staff_query = db.fetchall()
+    db.execute("SELECT name FROM clients")
+    client_query = db.fetchall()
+    conn.close()
+    return render_template("clients-update.html", staff_query=staff_query, client_query=client_query, unscramble=unscramble)
 
 @app.route("/addclient", methods=["GET"])
 def addclient():
@@ -570,6 +583,7 @@ def update_client():
 
 @app.route("/staff", methods=["POST", "GET"])
 @login_required
+@admin_required
 def staff():
     if request.method == "GET":
         # connect to database
@@ -685,6 +699,21 @@ def staff():
     session["error"] = 0
     flash(f"{staff_name} Succesfully Added")
     return redirect("/staff")
+
+@app.route("/staff-update")
+@login_required
+@admin_required
+def staff_update_form():
+    # connect to database
+    db, conn = db_connect(DB_URL)
+
+    # retrieve all staff names
+    db.execute("SELECT name FROM staff")
+    staff_names = db.fetchall()
+
+    # close connection to database
+    conn.close()
+    return render_template("staff-update.html", staff_names=staff_names)
 
 @app.route("/staff/view-staff-info")
 @login_required
@@ -930,10 +959,11 @@ def staff_update():
     # prepare feedback info
     session["error"] = 0
     flash(f"{staff_name}'s info successfully updated")
-    return redirect("/staff")
+    return redirect("/staff-update")
 
 @app.route("/schedule", methods=["GET", "POST"])
 @login_required
+@admin_required
 def schedule():
     # when user navigatest to schedule route
     if request.method == "GET":
@@ -1126,6 +1156,7 @@ def view_schedule(catagory):
     
 @app.route("/download")
 @login_required
+@admin_required
 def downloadpage():
     return render_template("downloads.html")
 
@@ -1152,6 +1183,11 @@ def download(filename):
             yield from f
         
         # subprocess.check_call(f"srm {path}")
+        with open(path, "w", newline = "") as csvfile:
+            writer = csv.writer(csvfile)
+            for i in range(10000):
+                writer.writerow(["abcdefghijklmnopwrstuvwxyz", "abcdefghijklmnopwrstuvwxyz", "abcdefghijklmnopwrstuvwxyz", "abcdefghijklmnopwrstuvwxyz", "abcdefghijklmnopwrstuvwxyz"])
+
         os.remove(path)
     
     r = app.response_class(generate(), mimetype="text/csv")

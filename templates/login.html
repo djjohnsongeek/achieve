@@ -3,15 +3,19 @@
 {% block title %}Login{% endblock %}
 
 {% block main %}
+<div class="description">
     <header>
         <h1>Login to Access the Site</h1>
     </header>
     <div class="login_form">
-        <form id="login" method="POST" action="/login">
+        <form id="form-login" method="POST" action="/login">
             <p><input class="login_input" type="text" id="username" name="username" placeholder="Username" autofocus></p>
             <p><input class="login_input" type="password" id="password" name="password" placeholder="Password"></p>
             <p><button class="login_input" type="submit" id="btn_login">Login</button></p>
         </form>
         <script src="../static/login.js"></script>
     </div>
+</div>
+<div class="description">
+</div>
 {% endblock %} 

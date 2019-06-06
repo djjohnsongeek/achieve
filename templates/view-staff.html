@@ -8,22 +8,41 @@
             <h1>Staff Information</h1>
         </header>
     </div>
-    <table>
-        <caption>Staff Info</caption>
-        <tr>
-            <th>Staff Name</th>
-            <th>RBT</th>
-            <th>Tier</th>
-            <th>Color</th>
-        </tr>
-        {% for row in staff_info %}
-        <tr>
-            {% for data in row.values() %}
-            <td>{{ data }}</td>
-            {% endfor %}
-        </tr>
-        {% endfor %}
-    </table>
+    <div class="table_container">
+        <div id="table_staffinfo">
+            <table>
+                <caption>Staff Info</caption>
+                <tr>
+                    <th>Staff Name</th>
+                    <th>RBT</th>
+                    <th>Tier</th>
+                    <th>Color</th>
+                </tr>
+                {% for row in staff_info %}
+                <tr>
+                    {% for data in row.values() %}
+                    <td>{{ data }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+        <div id="table_staffteams">
+            <table>
+                <caption>Staff Teams</caption>
+                {% for item in staff_teams.items() %}
+                <tr>
+                    <td class="teams_staffnames">{{ item[0] }}</td>
+                </tr>
+                    {% for client in item[1] %}
+                    <tr>
+                        <td class="teams_clientnames">{{ client }}</td>
+                    </tr>
+                    {% endfor %}
+                {% endfor %}
+            </table>
+        </div>
+    </div>
     <table>
         <caption>Staff Hours</caption>
         <tr>
@@ -58,19 +77,6 @@
             <td>{{ data }}</td>
             {% endfor %}
         </tr>
-        {% endfor %}
-    </table>
-    <table>
-        <caption>Staff Teams</caption>
-        {% for item in staff_teams.items() %}
-        <tr>
-            <td style="background-color: grey; text-align: center; text-transform: uppercase; font-weight: bold;">{{ item[0] }}</td>
-        </tr>
-            {% for client in item[1] %}
-            <tr>
-                <td style="text-align: center;">{{ client }}</td>
-            </tr>
-            {% endfor %}
         {% endfor %}
     </table>
 {% endblock %}
