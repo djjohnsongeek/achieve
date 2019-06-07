@@ -380,7 +380,8 @@ table
     position: -webkit-sticky;
     top: 0;
     z-index: 999;
-    background-color: rgb(235, 235, 235);
+    background-color: rgb(220, 231, 235);
+    background-color: whitesmoke;  /* testing out different colors */
 }
 
 /* ################################################### SPECIFIC TABLES ######################################################################## */

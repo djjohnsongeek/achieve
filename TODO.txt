@@ -25,13 +25,9 @@ Server Side Functionality (UNFINISHED)
             -implement client name cryptogrophy (DONE)
             -update scheduling (decode hashed client names, update sql queries) (DONE)
 
-        Priority:
         -TEST schedule generation with new week settings, with teamsize scheduling hours
-        -schedule for classes first (preffered subs for class)
         -generate classroom schedule
         -securly remove unencrypted fields
-
-        -remove big links from staff login
 
         Backburner:
         -re-schedules already scheduled staff if available?
@@ -63,13 +59,8 @@ Server Side Functionality (UNFINISHED)
     -Review all code
 
 Client Side Functionality
-    -Basic Client Side feedback (DONE)
-        -clients (DONE)
-        -login (DONE)
-        -staff (DONE)
-        -change pw (DONE)
-        -schedule (DONE)
-
+    -Basic Client Side feedback
+        -need to recheck all JavaScripts after revent HTML/CSS rework
 
     -In-depth client Side Feedback/Search/AJAX
         -clients
@@ -83,24 +74,15 @@ Client Side Functionality
         -view staff/clients/teams/schedule
             -searchable tables
 
-HTML and CSS Rework:
+HTML and CSS Rework (DONE)
     -schedule tables
     -client side scripts for now seperate staff and client form pages
     -login and change password page
 
-CURRENT Version Features
-    -add, edit, remove client and staff info from database (DONE)
-    -only schedule for one day (IN PROGRESS)
-
-FUTURE Features (V1)
-    -generate downloadable csv file for the daily schedule
-FUTURE Features (V2)
-    -ability to view selected client's or staff's teams, schedule, or info in-general
+FUTURE Features
     -seperate teams page? (For team management)
-    -view entire schedule online
     -save, download, and view shedules generated in the past
-    -schedule one week at a time
     -mobile responsive
     
 KNOWN BUGS:
-    -logo picture fails to load when rendering error.html template from the /clients/remove route  or the /clients/update route
+    -logo picture fails to load when rendering error.html template from the /clients/remove route  or the /clients/update route (picture removed frow now)
