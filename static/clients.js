@@ -1,84 +1,48 @@
-//validate functions
-function validate(form)
-{
-    var valid =  true;
-    for (i = 0; i <form.length; i++)
-    {
-        if (!form[i].value)
-        {   
-            valid = false;
-            form[i].style.border = "1px solid red";
-        }
-
-        else
-        {
-            form[i].style.border = "1px solid grey";
-        }
-    }
-    return valid;
-}
-
-function validate_one(form)
-{
-    valid = false
-    for (j = 0; j < form.length; j ++)
-    {
-        if (!form[j] || !form[j].value)
-        {
-            document.getElementById("div_teacher_team").style.border = "1px solid red";
-        }
-
-        else
-        {
-            valid = true
-        }
-
-        if (j == form.length - 1)
-        {
-            if (valid == true)
-            {
-                document.getElementById("div_teacher_team").style.border = "none";
-                return true
-            }
-            else
-            {
-                return false
-            }
-        }
-    }
-}
+import {validate, validate_teachers, reveal_error} from "./lib.js"
 
 //Listen for the add client button being clicked
 document.getElementById("btn_add_client").addEventListener("click", function(event){
 
     // store client first and last name in variable
     var client_name = document.getElementById("client_name");
-    var hrsForm = [client_name, document.getElementById("client_hours_start"), document.getElementById("client_hours_end")]
-    var teamForm = [document.getElementById("assign_teacher0"), document.getElementById("assign_teacher1"), document.getElementById("assign_teacher2"),
-                     document.getElementById("assign_teacher3")]
+    var hrsForm = [client_name, document.getElementById("client_hours_start"), document.getElementById("client_hours_end")];
+    var teamForm = document.getElementsByClassName("teachers");
+    var button = document.getElementById("btn_add_client");
 
 //prevent form submission
     event.preventDefault();
     //send GET request with clientname
     $.get("/addclient?clientname=" + client_name.value, function(data){
-        console.log(data);
         if (data == false)
         {
-            if (validate(hrsForm) && validate_one(teamForm))
+            if (validate(hrsForm) && validate_teachers(teamForm))
             {
                 document.getElementById("form_add_client").submit();
+            }
+            else
+            {
+                var original_text = button.innerText;
+                button.style.backgroundColor = "red";
+                button.innerText = "Check for Errors";
+                setTimeout(reveal_error, 3000, button, original_text);
             }
         }
         else
         {
-            alert("This Client already exists in the database");
+            document.getElementById("client_name_title").innerHTML = "Client Already Exists";
+            document.getElementById("client_name_title").style.color = "red";
+            document.getElementById("client_name").style.border = "1px solid red";
+            var original_text = button.innerText;
+            button.style.backgroundColor = "red";
+            button.innerText = "Check for Errors";
+            setTimeout(reveal_error, 3000, button, original_text);
         }
     });
 });
 
 //Listen for the remove client button being clicked
 document.getElementById("btn_remove_client").addEventListener("click", function(event){
-
+    var button = document.getElementById("btn_remove_client");
     //prevent form submission
     event.preventDefault();
     var client_name = document.getElementById("slct_client");
@@ -86,28 +50,14 @@ document.getElementById("btn_remove_client").addEventListener("click", function(
     if (!client_name.value)
     {
         client_name.style.border = "1px solid red";
+        var original_text = button.innerText;
+        button.innerText = "Check for Errors";
+        button.style.backgroundColor = "red";
+        setTimeout(reveal_error, 1500, button, original_text);
     }
     else
     {
         client_name.style.border = "1px solid grey";
         document.getElementById("form_remove_client").submit()
     }
-});
-
-//Listen for update client info button being clicked
-document.getElementById("btn_update_client").addEventListener("click", function(event){
-    //prevent form submission
-    event.preventDefault();
-    var client_name = document.getElementById("slct_update_client");
-
-    if (!client_name.value)
-    {
-        client_name.style.border = "1px solid red";
-    }
-    else
-    {
-        client_name.style.border = "1px solid grey";
-        document.getElementById("form_update_client").submit();
-    }
-
 });

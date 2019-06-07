@@ -63,21 +63,15 @@ Client Side Functionality
         -need to recheck all JavaScripts after revent HTML/CSS rework
 
     -In-depth client Side Feedback/Search/AJAX
-        -clients
-            -better error feedback
-            -ajax requests for all client name fields
         -staff
-            -better error feedback
-            -ajax requests for all staff name fields
+            -ajax requests for staff - name
         -schedule
             -better error feedback
         -view staff/clients/teams/schedule
             -searchable tables
 
 HTML and CSS Rework (DONE)
-    -schedule tables
-    -client side scripts for now seperate staff and client form pages
-    -login and change password page
+    -login and change password page (need )
 
 FUTURE Features
     -seperate teams page? (For team management)

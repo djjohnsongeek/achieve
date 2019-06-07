@@ -28,6 +28,21 @@ footer
     font-size: 12px;
     margin: 10px;
 }
+
+#client_feedback
+{
+    border: 1px solid black;
+    border-radius: 10px;
+    top: 100px;
+    bottom: 50%;
+    left: 75%;
+    position: sticky;
+    text-align: center;
+    background-color: red;
+    color: black;
+    font-weight: bold;
+    display: none;
+}
 /* ################################################### INPUT FORMS ########################################################################## */
 .div_forms
 {
@@ -117,6 +132,11 @@ select, option
 {
     background-color: rgb(220, 231, 235);
     border-bottom: 1px solid rgb(220, 231, 235);
+}
+
+.teachers
+{
+    width: 14.9%;
 }
 /* ################################################### NAVIGATION STRIP ########################################################################## */
 #nav
@@ -250,10 +270,7 @@ select, option
 
 .login_form
 {
-    display: block;
     text-align: center;
-    width: 100%;
-    margin: auto;
     margin-top: 0;
     background-color: whitesmoke;
     padding: 10px;
@@ -377,7 +394,6 @@ table
 .sticky-th thead
 {
     position: sticky;
-    position: -webkit-sticky;
     top: 0;
     z-index: 999;
     background-color: rgb(220, 231, 235);

@@ -445,7 +445,7 @@ def update_client():
     # ensure client name is filled out
     if not request.form.get("update_client"):
         flash("Please provide a client's name")
-        return redirect("/clients")
+        return redirect("/clients-update")
 
     client_name = request.form.get("update_client")
 
@@ -457,7 +457,7 @@ def update_client():
     client_info = db.fetchone()
     if not client_info:
         flash(f"{unscramble(client_name)} was not found in the database")
-        return redirect("/clients")
+        return redirect("/clients-update")
 
     # get and insert new hours data
     if request.form.get("new_client_hours_start") and request.form.get("new_client_hours_end"):
@@ -469,7 +469,7 @@ def update_client():
         time = re.compile(r"[012][0-9]:30")
         if not time.match(client_hours_end) or not time.match(client_hours_start):
             flash("Invalid time format")
-            return redirect("/clients")
+            return redirect("/clients-update")
 
         # get client's total number of hours
         total_hours = len(create_schhours(convert_strtime(client_hours_start), convert_strtime(client_hours_end)))
@@ -481,7 +481,7 @@ def update_client():
             # validate day data
             if request.form.get(day) != day and request.form.get(day) != None:
                 flash("Invalid day data")
-                return redirect("/clients")
+                return redirect("/clients-update")
 
             if request.form.get(day) == day:
                 client_days.append(day)
@@ -496,10 +496,10 @@ def update_client():
         try:
             if request.form.get(day) != None and int(request.form.get(day)) not in {0, 1}:
                 flash("Invalid attendance data")
-                return redirect("/clients")
+                return redirect("/clients-update")
         except ValueError:
             flash("Invalid attendance data")
-            return redirect("/clients")
+            return redirect("/clients-update")
 
         # skip over fields with no info seleected
         if not request.form.get(day):
@@ -530,7 +530,7 @@ def update_client():
         # return an error if client is marked present on days where they have no hours
         if not result[full_day] and item[1] == 1:
             flash("Client cannot be marked present if they have no scheduable hours for that day")
-            return redirect("/clients")
+            return redirect("/clients-update")
 
         # update the data
         item[0] = shorten_day(item[0])
@@ -542,11 +542,11 @@ def update_client():
             update_color = int(request.form.get("update_color"))
         except ValueError:
             flash("Invalid client classification data")
-            return redirect("/clients")
+            return redirect("/clients-update")
 
         if update_color not in {1, 2, 3}:
             flash("Invalid client classification data")
-            return redirect("/clients")
+            return redirect("/clients-update")
         else:
             db.execute("UPDATE clients SET color=? WHERE name=?", (update_color, client_name))
 
@@ -562,7 +562,7 @@ def update_client():
         staff_info = db.fetchone()
         if not staff_info:
             flash(f"{new_teacher} was not found in the database")
-            return redirect("/clients")
+            return redirect("/clients-update")
         
         # check if teacher is already on client's team
         db.execute("SELECT * FROM teams WHERE clientID=? AND staffID=?", (client_info["clientID"], staff_info["staffID"]))
@@ -574,12 +574,12 @@ def update_client():
 
         if not result:
             flash("Invalid Add or Remove data")
-            return redirect("/clients")
+            return redirect("/clients-update")
 
         if add_or_remove == "add":
             if team_info:
                 flash(f"{new_teacher} is already on {unscramble(client_name)}'s team")
-                return redirect("/clients")
+                return redirect("/clients-update")
             else:
                 # add selected teacher to selected Client's team
                 db.execute("INSERT INTO teams (clientID, staffID) VALUES(?,?)", (client_info["clientID"], staff_info["staffID"]))
@@ -861,7 +861,7 @@ def staff_update():
     # check that staff name is filled out
     if not request.form.get("slct_staff_update"):
         flash("Please provide a staff member's name")
-        return redirect("/staff")
+        return redirect("/staff-update")
 
     staff_name = request.form.get("slct_staff_update")
     
@@ -873,7 +873,7 @@ def staff_update():
     staff_info = db.fetchone()
     if not staff_info:
         flash(f"{staff_name} is not in the database")
-        return redirect("/staff")
+        return redirect("/staff-update")
 
     # if RBT is checked, validate data and submit
     if request.form.get("rbt_update"):
@@ -887,7 +887,7 @@ def staff_update():
             db.execute("UPDATE staff SET rbt=? WHERE staffID=?", (rbt_status, staff_info["staffID"]))
         else:
             flash("Incorrect value for RBT field")
-            return redirect("/staff")
+            return redirect("/staff-update")
 
     # if Tier radio is chosen
     if request.form.get("tier_update"):
@@ -895,13 +895,13 @@ def staff_update():
             tier = int(request.form.get("tier_update"))
         except ValueError:
             flash("Teacher tier field must be a digit")
-            return redirect("/staff")
+            return redirect("/staff-update")
         
         if tier in {1,2,3}:
             db.execute("UPDATE staff SET tier=?, color=? WHERE staffID=?", (tier, tier, staff_info["staffID"]))
         else:
             flash("Invalid teacher tier data")
-            return redirect("/staff")
+            return redirect("/staff-update")
 
     # build hours variable
     if request.form.get("staff_hours_update_start") and request.form.get("staff_hours_update_end"):
@@ -919,7 +919,7 @@ def staff_update():
             for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
                 if request.form.get(day) != day and request.form.get(day) != None:
                     flash("Invalid day data")
-                    return redirect("/staff")
+                    return redirect("/staff-update")
 
                 if request.form.get(day) == day:
                     staff_days.append(day)
@@ -929,7 +929,7 @@ def staff_update():
 
         else:
             flash("Invalid time format")
-            return redirect("/staff")
+            return redirect("/staff-update")
 
     # staff color category
     if request.form.get("staff_color"):
@@ -937,11 +937,11 @@ def staff_update():
             color = int(request.form.get("staff_color"))
         except ValueError:
             flash("Invalid staff classification value")
-            return redirect("/staff")
+            return redirect("/staff-update")
 
         if color not in {1,2,3}:
             flash("Invalid staff classification value")
-            return redirect("/staff")
+            return redirect("/staff-update")
         else:
             db.execute("UPDATE staff SET color=? WHERE staffID=?", (color, staff_info["staffID"]))
 
@@ -951,11 +951,11 @@ def staff_update():
         try:
             if request.form.get(day) != None and int(request.form.get(day)) not in {0,1}:
                 flash("Invalid attendance data")
-                return redirect("/staff")
+                return redirect("/staff-update")
 
         except ValueError:
             flash("Invalid attendance data")
-            return redirect("/staff")
+            return redirect("/staff-update")
 
         if not request.form.get(day):
             continue
@@ -986,7 +986,7 @@ def staff_update():
         # return error if staff is to be marked present on a day they have no hours
         if not result[full_day] and item[1] == 1:
             flash("Staff info not updated: Staff cannot be marked present if they have no scheduable hours for that day")
-            return redirect("/staff")
+            return redirect("/staff-update")
 
         item[0] = shorten_day(item[0])
         db.execute(f"UPDATE staff SET {item[0]}=? WHERE staffID=?", (item[1], staff_info["staffID"]))
