@@ -13,50 +13,58 @@
     {% if staff_schedule %}
     <div class="description">
             <header>
-                <h1>Staff Schedule</h1>
+                <h1>Staff Schedule: {{ current_day[0] }}</h1>
             </header>
         </div>
+    <div class="spacer"></div>
     <div class="table_container">
         <div class="table_either_sch">
-            <table>
-                <caption>Staff Schedule: {{ staff_schedule[0] }}</caption>
-                <tr>
-                    <th>Staff Name</th>
-                    <th>Time</th>
-                    <th>Client Name</th>
-                </tr>
-                {% for row in staff_schedule %}
-                <tr>
-                    {% for data in row %}
-                    <td>{{ data }}</td>
+            <table class="sticky-th">
+                <thead>
+                    <tr>
+                        <th>Staff Name</th>
+                        <th>Time</th>
+                        <th>Client Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in staff_schedule %}
+                    <tr>
+                        {% for data in row %}
+                        <td>{{ data }}</td>
+                        {% endfor %}
+                    </tr>
                     {% endfor %}
-                </tr>
-                {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>
     {% elif client_schedule %}
     <div class="description">
         <header>
-            <h1>Client Schedule</h1>
+            <h1>Client Schedule: {{ current_day[0] }}</h1>
         </header>
     </div>
+    <div class="spacer"></div>
     <div class="table_container">
         <div class="table_either_sch">
-            <table>
-                <caption>Client Schedule: {{ client_schedule[0] }}</caption>
-                <tr>
-                    <th>Client Name</th>
-                    <th>Time</th>
-                    <th>Staff Name</th>
-                </tr>
-                {% for row in client_schedule %}
-                <tr>
-                    {% for data in row %}
-                    <td>{{ data }}</td>
+            <table class="sticky-th">
+                <thead>
+                    <tr>
+                        <th>Client Name</th>
+                        <th>Time</th>
+                        <th>Staff Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in client_schedule %}
+                    <tr>
+                        {% for data in row %}
+                        <td>{{ data }}</td>
+                        {% endfor %}
+                    </tr>
                     {% endfor %}
-                </tr>
-                {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>

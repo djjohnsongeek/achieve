@@ -48,11 +48,11 @@
             </thead>
             {% for item in staff_teams.items() %}
             <tr>
-                <td class="teams_staffnames">{{ item[0] }}</td>
+                <td class="teams_header">{{ item[0] }}</td>
             </tr>
                 {% for client in item[1] %}
                 <tr>
-                    <td class="teams_clientnames">{{ client }}</td>
+                    <td class="teams_data">{{ client }}</td>
                 </tr>
                 {% endfor %}
             {% endfor %}

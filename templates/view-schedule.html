@@ -5,42 +5,49 @@
 {% block main %}
     <div class="description">
         <header>
-            <h1>Schedules</h1>
+            <h1>Schedules: {{ current_day[0] }}</h1>
         </header>
     </div>
+    <div class="spacer"></div>
     <div class="table_container">
         <div id="table_client_sch">
-            <table>
-                <caption>Client Schedule: {{ schedules[0][0] }}</caption>
-                <tr>
-                    <th>Client Name</th>
-                    <th>Time</th>
-                    <th>Staff Name</th>
-                </tr>
-                {% for row in schedules[0] %}
-                <tr>
-                    {% for data in row %}
-                    <td>{{ data }}</td>
+            <table class="sticky-th">
+                <thead>
+                    <tr>
+                        <th>Client</th>
+                        <th>Time</th>
+                        <th>Staff</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in schedules[0] %}
+                    <tr>
+                        {% for data in row %}
+                        <td>{{ data }}</td>
+                        {% endfor %}
+                    </tr>
                     {% endfor %}
-                </tr>
-                {% endfor %}
+                </tbody>
             </table>
         </div>
         <div id="table_staff_sch">
-            <table>
-                <caption>Staff Schedule: {{ schedules[1][0] }}</caption>
-                <tr>
-                    <th>Staff Name</th>
-                    <th>Time</th>
-                    <th>Client Name</th>
-                </tr>
-                {% for row in schedules[1] %}
-                <tr>
-                    {% for data in row %}
-                    <td>{{ data }}</td>
+            <table class="sticky-th">
+                <thead>
+                    <tr>
+                        <th>Staff</th>
+                        <th>Time</th>
+                        <th>Client</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in schedules[1] %}
+                    <tr>
+                        {% for data in row %}
+                        <td>{{ data }}</td>
+                        {% endfor %}
+                    </tr>
                     {% endfor %}
-                </tr>
-                {% endfor %}
+                </tbody>
             </table>
         </div>
     </div>

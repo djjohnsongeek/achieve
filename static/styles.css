@@ -2,7 +2,6 @@ body{
     background-color: #212962;
     font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
-
 header
 {
     text-align: center;
@@ -10,12 +9,10 @@ header
     font-size: .8em;
     color:rgb(39,171,113)
 }
-
 .description
 {
     background-color: whitesmoke;
 }
-
 h2
 {
     color: #212962;
@@ -24,7 +21,6 @@ h2
     margin-left: 20px;
     margin-right: 20px;
 }
-
 footer
 {
     text-align: center;
@@ -32,7 +28,6 @@ footer
     font-size: 12px;
     margin: 10px;
 }
-
 /* ################################################### INPUT FORMS ########################################################################## */
 .div_forms
 {
@@ -40,7 +35,6 @@ footer
     margin-top: 0px;
     text-align: center;
 }
-
 .btn_submit
 {
     padding: 10px;
@@ -48,11 +42,11 @@ footer
     width: 20%;
     height: 51px;
     background-color: rgb(39,171,113);
+    border-radius: 5px;
     border: none;
     font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
     font-weight: bold;
 }
-
 .btn_submit:hover
 {
     background-color: rgb(79, 190, 142);
@@ -66,37 +60,32 @@ footer
 {
     margin-left: 20px;
 }
-
 .list_title
 {
     margin-left: 20px;
 }
-
 .form_titles
 {
     color: #212962;
     font-size: 1.25em;
     margin-left: 10px;
 }
-
 input, select
 {
     padding: 10px 10px;
     margin: 10px;
 }
-
-input[type=text], input[type=time]
+input[type=text], input[type=time], input[type=password]
 {
     width: 30%;
     height: 30px;
 }
-
-select
+select, option
 {
     height: 51px;
     width: 31.5%;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
-
 .slct_weekday
 {
     width: 83px;
@@ -104,17 +93,14 @@ select
     margin-left: 0;
     text-align: center;
 }
-
 #mon, #mon2
 {
     margin-left: 10px;
 }
-
 .tabs
 {
     background-color: whitesmoke;
 }
-
 .tab_add-remove, .tab_update, .tab3
 {
     display: inline-block;
@@ -122,18 +108,16 @@ select
     font-size: 2em;
     font-weight: bold;
 }
-
 .tab_add-remove a, .tab_update a, .tab3 a
 {
     text-decoration: none;
     color:rgb(39,171,113);
 }
-
 .tab_add-remove:hover, .tab_update:hover, .tab3:hover
 {
     background-color: rgb(220, 231, 235);
+    border-bottom: 1px solid rgb(220, 231, 235);
 }
-
 /* ################################################### NAVIGATION STRIP ########################################################################## */
 #nav
 {
@@ -141,7 +125,6 @@ select
 }
 .page_title{
     font-size: 80px;
-    transition: color .25s;
     text-decoration: none;
     color: #212962;
 }
@@ -276,16 +259,11 @@ select
     padding: 10px;
 }
 
-.login_input
-{
-    width: 25%;
-    text-align: center;
-}
-
 #btn_login, #btn_changepw
 {
     padding-top: 9px;
     padding-bottom: 9px;
+    width: 31.5%;
 }
 
 /* ################################################### WEEK DAY CHECK BOXES ###################################################################### */
@@ -305,35 +283,31 @@ select
 
 /* ################################################### SCHEDULE PAGE ############################################################################ */
 
-#slct_schedule_day
-{
-    width: 200px;
-}
-
 #btn_generate
 {
-    width: 40%;
-    height: 80px;
+    width: 31.5%;
+    height: 51px;
     margin-top: 20px;
     margin-bottom: 20px;
     border-radius: 5px;
-    background-color: lightslategrey;
-    border: solid 1px rgb(128, 128, 128);
-    transition: font-size .1s, background-color .5s;
+    background-color: rgb(39,171,113);
+    font-weight: bold;
+    font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    border: none;
 }
 
 #btn_generate:hover
-{
-    background-color: rgb(146, 180, 224);
-    border: solid 2px rgb(2, 93, 179);
-    font-size: 108%;
+{   
+    background-color: rgb(79, 190, 142);
 }
 
+#btn_generate:active{
+    border: 1px solid lightgrey;
+}
 /* ################################################### FLASK FLASHED MESSAGES ############################################################################ */
 .alert
 {
-    background-color: green;
-    border-top: 1px solid grey;
+    background-color: rgb(15, 141, 15);
     text-align: center;
     padding: 15px;
     font-size: 1.25em;
@@ -341,8 +315,7 @@ select
 
 .error
 {
-    background-color: red;
-    border-top: 1px solid grey;
+    background-color: rgb(231, 8, 8);
     text-align: center;
     padding: 15px;
     font-size: 1.25em;
@@ -351,7 +324,7 @@ select
 .info 
 {
     display: none;
-    color: red;
+    color: rgb(231, 8, 8);
     text-align: center;
     font-size: 1em;
     background-color: whitesmoke;
@@ -370,7 +343,7 @@ th, td
     padding-right: 50px;
     padding-left: 50px;
     text-align: center;
-    border: 1px solid grey;
+    border: 1px solid lightgrey;
 }
 
 table, th, td
@@ -407,22 +380,20 @@ table
     position: -webkit-sticky;
     top: 0;
     z-index: 999;
-    background-color: rgb(172, 192, 204);
+    background-color: rgb(235, 235, 235);
 }
 
 /* ################################################### SPECIFIC TABLES ######################################################################## */
-.teams_clientnames
+.teams_data
 {
-    text-align: center;
     border-style: none;
 }
-.teams_staffnames
+.teams_header
 {
-    text-align: center;
     text-transform: uppercase;
     font-weight: bold;
-    border-bottom: 1px solid grey;
-    background-color: rgb(235, 235, 235);
+    border-style: none;
+    border-bottom: 1px solid lightgrey;
 }
 .table_container
 {
@@ -447,12 +418,12 @@ table
 .table_either_sch
 {
     margin: auto;
-    width: 75%;
+    width: 85%;
     height: 600px;
     overflow-y: auto;
 }
 
-.table_staffinfo
+.table_staffinfo /*div that contains the table - Also applies to client Info */
 {
     overflow-y: auto;
     width: 60%;
@@ -460,14 +431,14 @@ table
     float: left;
 }
 
-.table_staffteams
+.table_staffteams /*div that contains the table - Also applies to client Info */
 {
     overflow-y: auto;
     width: 38%;
     height: 600px;
     float: right;
 }
- #table_staff_att, #table_staff_hours
+ #table_staff_att, #table_staff_hours, #table_client_att, #table_client_hours
  {
     overflow-y: auto;
     height: 600px;

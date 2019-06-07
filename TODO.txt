@@ -84,9 +84,7 @@ Client Side Functionality
             -searchable tables
 
 HTML and CSS Rework:
-    -all tables pages
-        -client tables - scroll functionality
-        -client team headers
+    -schedule tables
     -client side scripts for now seperate staff and client form pages
     -login and change password page
 

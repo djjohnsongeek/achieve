@@ -1,12 +1,18 @@
 {% extends "layout.html" %}
-
 {% block title %}Downloads{% endblock %}
 {% block main %}
-<header>
-    <h1>Download Schedules</h1>
-</header>
-    <div class="div_forms">
-        <p><a href="/download/staff_schedule.csv">Download Staff Schedule</a></p>
-        <p><a href="/download/client_schedule.csv">Download Client Schedule</a></p>
+<div class="tabs">
+        <header style="padding: 0;">
+            <div class="tab_add-remove">
+                <a href="/schedule">Create</a>
+            </div><!--
+            --><div class="tab_update" style="background-color: rgb(220, 231, 235); border: 1px solid lightgrey;border-top: none;">
+                <a href="/download" style="color:#212962;">Download</a>
+            </div>
+        </header>
+    </div>
+    <div class="login_form">
+        <a href="/download/staff_schedule.csv"><button class="btn_submit"><i class="fa fa-download"></i>Staff Schedule</button></a><br/>
+        <a href="/download/client_schedule.csv"><button class="btn_submit"><i class="fa fa-download"></i>Client Schedule</button></a>
     </div>
 {% endblock %}

@@ -1172,6 +1172,8 @@ def view_schedule(catagory):
         try:
             with open(path, "r", newline="") as csvfile:
                 reader = csv.reader(csvfile)
+                current_day = next(reader)
+                next(reader)
                 schedule = [row for row in reader]
                 schedules.append(schedule)
         except csv.Error as e:
@@ -1183,11 +1185,11 @@ def view_schedule(catagory):
 
     # render schedules tables
     if catagory == "both":
-        return render_template("view-schedule.html", schedules = schedules)
+        return render_template("view-schedule.html", schedules = schedules, current_day = current_day)
     elif catagory == "clients":
-        return render_template("staff-or-client-schedule.html", client_schedule = schedules[0])
+        return render_template("staff-or-client-schedule.html", client_schedule = schedules[0], current_day = current_day)
     elif catagory == "staff":
-        return render_template("staff-or-client-schedule.html", staff_schedule = schedules[1])
+        return render_template("staff-or-client-schedule.html", staff_schedule = schedules[1], current_day = current_day)
     else:
         session["error"] = 1
         flash("URL invalid")
