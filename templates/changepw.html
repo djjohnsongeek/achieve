@@ -1,18 +1,17 @@
 {% extends "layout.html" %}
-
 {% block title %}Change Password{% endblock %}
-
 {% block main %}
+<div class="spacer"></div>
 <div class="description">
     <header>
-        <h1>Change your Password</h1>
+        <h1 class="login_header">Change your Password</h1>
     </header>
     <span id="change_pw_info" class="info">Passwords do not match</span>
     <div class="login_form">
         <form id="form_change_pw" method="POST" action="/changepw">
-            <p><input class="login_input" type="password" id="password_new" name="password_new" placeholder="Password"></p>
-            <p><input class="login_input" type="password" id="password_check" name="password_check" placeholder="Renter Password"></p>
-            <p><button class="btn_submit" type="submit" id="btn_changepw">Submit</button></p>
+            <span id="login_lable_pwn" class="login_lable">Password</span><input autofocus class="login_input" type="password" id="password_new" name="password_new"><br/>
+            <span id="login_lable_pwc" class="login_lable">Confirm</span><input class="login_input" type="password" id="password_check" name="password_check"><br/>
+            <button class="btn_submit" type="submit" id="btn_changepw">Submit</button>
         </form>
         <script src="../static/changepw.js"></script>
     </div>

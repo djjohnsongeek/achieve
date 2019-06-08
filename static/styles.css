@@ -236,6 +236,7 @@ select, option
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: center;
 }
 
 .big_link
@@ -266,8 +267,17 @@ select, option
     color: darkslategrey;
 }
 
-/* ################################################### LOGIN PAGE ############################################################################### */
-
+/* ################################################### LOGIN PAGE/CHANGE PW ###################################################################### */
+.login_header
+{
+    display: inline-block;
+    border: none;
+    margin: 0;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    padding-left: 100px;
+    padding-right: 100px;
+}
 .login_form
 {
     text-align: center;
@@ -280,7 +290,67 @@ select, option
 {
     padding-top: 9px;
     padding-bottom: 9px;
-    width: 31.5%;
+    width: 30%;
+    margin-top: none;
+    border-radius: 0;
+}
+
+.login_input
+{
+    margin: 0;
+    border: 1px solid lightgrey;
+    border-left: none;
+}
+
+.login_lable
+{
+    border: 1px solid lightgrey;
+    padding-top: 13px;
+    padding-bottom: 13px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+#login_lable_pw
+{
+    padding-left: 11px;
+    border-top: none;
+}
+
+#login_lable_user
+{
+    padding-top: 12px;
+    padding-right: 6px;
+}
+#username
+{
+    border-bottom: none;
+    width: 21.5%;
+}
+#password
+{
+    width: 21.5%;
+}
+#password_new
+{
+    border-bottom: none;
+    width: 21.5%;
+}
+#password_check
+{
+    width: 21.5%;
+}
+#login_lable_pwn{
+    border-bottom: none;
+    padding-top: 12px;
+    padding-right: 9px;
+    padding-left: 8px;
+}
+#login_lable_pwc
+{
+    padding-top: 12px;
+    padding-left: 13px;
+    padding-right: 14px
 }
 
 /* ################################################### WEEK DAY CHECK BOXES ###################################################################### */

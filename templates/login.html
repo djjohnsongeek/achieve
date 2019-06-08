@@ -1,19 +1,18 @@
 {% extends "layout.html" %}
 {% block title %}Login{% endblock %}
 {% block main %}
+<div class="spacer"></div>
 <div class="description">
     <header>
-        <h1>Login</h1>
-    </header>
-    <div class="login_form">
-        <form id="form-login" method="POST" action="/login">
-            <p><input class="login_input" type="text" id="username" name="username" placeholder="Username" autofocus></p>
-            <p><input class="login_input" type="password" id="password" name="password" placeholder="Password"></p>
-            <p><button class="btn_submit" type="submit" id="btn_login">Login</button></p>
+        <h1 class="login_header">Login</h1><!--
+   --></header><!--
+    --><div class="login_form"><!--
+        --><form id="form-login" method="POST" action="/login">
+            <span id="login_lable_user" class="login_lable">Username</span><input class="login_input" type="text" id="username" name="username" autofocus><br/>
+            <span id="login_lable_pw" class="login_lable">Password</span><input class="login_input" type="password" id="password" name="password"><br/>
+            <button class="btn_submit" type="submit" id="btn_login">Submit</button>
         </form>
         <script src="../static/login.js"></script>
     </div>
-</div>
-<div class="description">
 </div>
 {% endblock %} 
