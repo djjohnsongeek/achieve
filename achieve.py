@@ -1000,6 +1000,22 @@ def staff_update():
     flash(f"{staff_name}'s info successfully updated")
     return redirect("/staff-update")
 
+@app.route("/classrooms", methods=["GET","POST"])
+@login_required
+@admin_required
+def classrooms():
+    if request.method == "GET":
+        return render_template("classrooms.html")
+
+    flash("POST fuctionality is incomplete - TODO")
+    return redirect("/classrooms")
+
+@app.route("/classrooms-update")
+@login_required
+@admin_required
+def class_update_form():
+    return render_template("classrooms-update.html")
+
 @app.route("/schedule", methods=["GET", "POST"])
 @login_required
 @admin_required
@@ -1039,13 +1055,54 @@ def schedule():
     # build staff schedules with nested dicts
     db.execute(f"SELECT name FROM staff where {curr_att_day}=1")
     staff_data = db.fetchall()
-
     all_staff_sch = {}
     for staff in staff_data:
+        # NOTE: dynamically generate these times?
         all_staff_sch[staff["name"]] = {830: "" , 930: "" , 1030: "" , 1130: "" , 1230: "" , 130: "" , 230: "" , 330: "" , 430: ""} # NOTE: dynamically generate these times?
 
-    # get client data (where client/staff are present, ordered color and total hours)
-    # sort selection by color (highest first) then by number of hours (highest first)
+    # ------------------------------------------------------------------------------------------------------------ #
+    # create schedule list for each class
+    db.execute("SELECT * FROM classrooms")
+    classes = db.fetchall()
+    classroom_hrs = [830, 930, 1030, 1130, 1230, 130]
+    for classroom in classes:
+        class_nums = [classroom["teacher1"], classroom["teacher2"]]
+        class_teachers = []
+        
+        # build teacher list
+        for teacher in class_nums:
+            db.execute(f"SELECT name FROM staff where staffID=? AND {curr_att_day}=1", (teacher,))
+            staff_name = db.fetchone()
+            if staff_name:
+                class_teachers.append(staff_name["name"])
+
+        # Add subs to teacher list if necessary
+        if len(class_teachers) < classroom["req"]:
+            class_nums = [classroom["sub1"], classroom["sub2"], classroom["sub3"], classroom["sub4"]]
+            for teacher in class_nums:
+                db.execute(f"SELECT name FROM staff where staffID=? AND {curr_att_day}=1", (teacher,))
+                staff_name = db.fetchone()
+                if staff_name:
+                    class_teachers.append(staff_name["name"])
+
+                # end loop if enought staff are in the list
+                if len(class_teachers) == classroom["req"]:
+                    break
+
+            # if sublist is empty or  prompt user to add teacher to sublist
+            if len(class_teachers) < classroom["req"]:
+                flash(f'{classroom["classroom"]} sublist is empty or too small. Please add staff to the sublist to continue')
+                return redirect("/schedule")
+
+        # add classroom to teacher's schedule
+        for i in range(len(class_teachers)):
+            for hr in classroom_hrs:
+                all_staff_sch[class_teachers[i]][hr] = classroom["classroom"]
+
+        # NOTE: account for teachers who are arriving late
+    # ------------------------------------------------------------------------------------------------------------ #
+
+    # get client data (where client/staff are present, ordered by color and total hours)
     db.execute(f"SELECT * FROM clients WHERE {curr_att_day}=1 ORDER BY color DESC, totalhours DESC") 
     client_data = db.fetchall()
 
