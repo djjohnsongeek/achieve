@@ -26,12 +26,14 @@ Server Side Functionality (UNFINISHED)
             -update scheduling (decode hashed client names, update sql queries) (DONE)
 
         -TEST schedule generation with new week settings, with teamsize scheduling hours
-        -generate classroom schedule
+        -generate classroom schedule (DONE - need to chech for staff hours availability)
         -securly remove unencrypted fields
 
         Backburner:
         -save schedule for the entire week, able to few enture weeks schedule
+        -generate and download schedule on the same page
         -bigger check boxes
+        -consolodate staff/client/classroom update routes
         -re-schedules already scheduled staff if available?
         -possible optimization: no rebuiliding tier_team_member list EVERY loop
 

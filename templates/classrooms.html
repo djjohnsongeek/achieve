@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+{% block title %}Classrooms{% endblock %}
+{% block main %}
+<div class="tabs">
+    <header style="padding: 0;">
+        <div style="background-color: rgb(220, 231, 235); border: 1px solid lightgrey;border-top: none;" class="tab_add-remove">
+            <a style="color:#212962;" href="/classrooms">Add or Remove</a>
+        </div><!--
+        --><div class="tab_update">
+            <a href="/classrooms-update">Update Classrooms</a>
+        </div>
+    </header>
+</div>
+<div class="div_forms">
+    <form nonvalidate id="form_add_class" name="form_add_class" method="POST" action="/classrooms">
+        <div class="fieldset"><br/>
+            <lable class="form_titles" for="class_name">Classroom Name</lable><br/>
+            <input type="text" id="class_name" name="class_name" placeholder="Classroom Name"><br/>
+            <!--Main classroom Teachers-->
+            <lable class="form_titles">Choose Teachers</lable><br/>
+            <select class="teachers" id="class_teacher1" name="class_teacher1">
+                <option value="" selected disabled>Select Staff</option>
+                {% for item in staff_query %}
+                <option value="{{item['name']}}">{{ item["name"] }}</option>
+                {% endfor %}
+            </select>
+            <select class="teachers" id="class_teacher2" name="class_teacher2">
+                <option value="" selected disabled>Select Staff</option>
+                {% for item in staff_query %}
+                <option value="{{item['name']}}">{{ item["name"] }}</option>
+                {% endfor %}
+            </select><br/>
+            <!--Substitute classroom Teachers-->
+            <lable class="form_titles">Choose Substitute Teachers</lable><br/>
+            <select class="teachers" id="sub_teacher1" name="sub_teacher1">
+                <option value="" selected disabled>Select Staff</option>
+                {% for item in staff_query %}
+                <option value="{{item['name']}}">{{ item["name"] }}</option>
+                {% endfor %}
+            </select>
+            <select class="teachers" id="sub_teacher2" name="sub_teacher2">
+                <option value="" selected disabled>Select Staff</option>
+                {% for item in staff_query %}
+                <option value="{{item['name']}}">{{ item["name"] }}</option>
+                {% endfor %}
+            </select><br/>
+            <select class="teachers" id="sub_teacher3" name="sub_teacher3">
+                <option value="" selected disabled>Select Staff</option>
+                {% for item in staff_query %}
+                <option value="{{item['name']}}">{{ item["name"] }}</option>
+                {% endfor %}
+            </select>
+            <select class="teachers" id="sub_teacher4" name="sub_teacher4">
+                <option value="" selected disabled>Select Staff</option>
+                {% for item in staff_query %}
+                <option value="{{item['name']}}">{{ item["name"] }}</option>
+                {% endfor %}
+            </select><br/>
+            <lable class="form_titles" for="class_rq">Required Number of Teachers</lable><br/>
+            <input type=number min="1" max="3" name="class_rq" id="class_rq"><br/><br/>
+            <button class="btn_submit" id="btn_add_class">Add Class</button>
+        </div>
+    </form>
+    <form id="form_remove_class" name="form_remove_class" action="/classrooms/remove" method="POST">
+        <div class="fieldset"><br/>
+            <lable id="slct_className_title" class="form_titles" for="slct_class">Remove a Classroom</lable><br/>
+            <select id="slct_class" name="slct_class">
+                <option disabled selected value="">Classroom</option>
+                {% for name in class_query %}
+                <option value ="{{ name['name'] }}">{{ name["name"] }}</option>
+                {% endfor %}
+            </select><br/>
+            <button type="submit" id="btn_remove_class" class="btn_submit">Remove Classroom</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

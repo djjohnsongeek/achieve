@@ -85,7 +85,7 @@ footer
     font-size: 1.25em;
     margin-left: 10px;
 }
-#slct_staff-name_title, #slct_clientName_title
+#slct_staff-name_title, #slct_clientName_title, #slct_className_title
 {
     font-size: 1.5em;
 }
@@ -94,7 +94,7 @@ input, select
     padding: 10px 10px;
     margin: 10px;
 }
-input[type=text], input[type=time], input[type=password]
+input[type=text], input[type=time], input[type=password], input[type="number"]
 {
     width: 30%;
     height: 30px;

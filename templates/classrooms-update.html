@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block title %}Update Classroom Info{% endblock %}
+{% block main %}
+<div class="tabs">
+        <header style="padding: 0;">
+            <div class="tab_add-remove">
+                <a href="/classrooms">Add or Remove</a>
+            </div><!--
+            --><div class="tab_update" style="background-color: rgb(220, 231, 235); border: 1px solid lightgrey;border-top: none;">
+                <a href="/classrooms-update" style="color:#212962;">Update Classrooms</a>
+            </div>
+        </header>
+    </div>
+    <div class="div_forms"><br/>
+        <form nonvalidate id="form_updateclass" name="form_update_class" method="POST" action="/classrooms/update">
+            <lable class="form_titles" for="slct_class">Choose a Classroom</lable><br/>
+            <select id="slct_class" name="slct_class">
+                <option selected value="" disabled>Classroom</option>
+            </select><br/>
+            <lable class="form_titles" for="slct_classTeacher">Choose a Teacher</lable><br/>
+            <select id="slct_classTeacher" name="slct_classTeacher">
+                <option selected value="" disabled>Staff Name</option>
+            </select><br/>
+            <input type="radio" name="add-remove_Cteacher" value="add">Add
+            <input type="radio" name="add-remove_Cteacher" value="remove">Remove<br/><br/>
+            <lable class="form_titles" for="slct_classSub">Choose a Staff Member</lable><br/>
+            <select id="slct_classSub" name="slct_classSub">
+                <option selected value="" disabled>Staff Name</option>
+            </select><br/>
+            <input type="radio" name="add-remove_Csub" value="add">Add
+            <input type="radio" name="add-remove_Csub" value="remove">Remove<br/><br/>
+            <lable class="form_titles" for="update_rq">Update Required Number of Teachers</lable><br/>
+            <input type="number" min="1" max="3" name="update_rq" id="update_rq"><br/>
+            <button type="submit" id="btn_update_class" class="btn_submit">Update Info</button>
+        </form>
+    </div>
+{% endblock %}
