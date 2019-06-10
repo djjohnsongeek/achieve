@@ -9,6 +9,11 @@ document.getElementById("btn_add_client").addEventListener("click", function(eve
     var teamForm = document.getElementsByClassName("teachers");
     var button = document.getElementById("btn_add_client");
 
+    // reset default look
+    document.getElementById("client_name_title").innerHTML = "Add Client";
+    document.getElementById("client_name_title").style.color = "#212962";
+    client_name.style.border = "1px solid grey";
+
 //prevent form submission
     event.preventDefault();
     //send GET request with clientname
@@ -19,8 +24,10 @@ document.getElementById("btn_add_client").addEventListener("click", function(eve
             {
                 document.getElementById("form_add_client").submit();
             }
+
             else
             {
+                // style button temporarely
                 var original_text = button.innerText;
                 button.style.backgroundColor = "red";
                 button.innerText = "Check for Errors";
@@ -29,9 +36,11 @@ document.getElementById("btn_add_client").addEventListener("click", function(eve
         }
         else
         {
+            // style lable and text box
             document.getElementById("client_name_title").innerHTML = "Client Already Exists";
             document.getElementById("client_name_title").style.color = "red";
-            document.getElementById("client_name").style.border = "1px solid red";
+            client_name.style.border = "1px solid red";
+            // style button temporarely
             var original_text = button.innerText;
             button.style.backgroundColor = "red";
             button.innerText = "Check for Errors";

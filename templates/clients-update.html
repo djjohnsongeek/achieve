@@ -13,7 +13,7 @@
 </div>
 <div class="div_forms">
         <form id="form_update_client" name="form_update_client" method="POST" action="/clients/update">
-            <div class="fieldset">
+            <div class="fieldset"><br/>
                 <lable class="form_titles">Update Client Information</lable><br/>
                 <select id="slct_update_client" name="update_client">
                     <option disabled selected value="">Client Name</option>
@@ -24,7 +24,7 @@
                 <lable class="form_titles" for="new_client_hours_start">New Start Time</lable><br/>
                 <input type="time" name="new_client_hours_start" id="new_client_hours_start" placeholder="hh:mm"><br/>
                 <lable class="form_titles" for="new_client_hours_start">New End Time</lable><br/>
-                <input type="time" name="new_client_hours_end" id="new_client_hours_end" placeholder="hh:mm"><br/>
+                <input type="time" name="new_client_hours_end" id="new_client_hours_end" placeholder="hh:mm"><br/><br/>
                 <lable class="form_titles">Days Present (check all the apply)</lable><br/>
                 <ul class="lst_client_days">
                     <li class="chbx_client_days"><input type="checkbox" name="monday" value="monday">Monday</li>
@@ -32,7 +32,7 @@
                     <li class="chbx_client_days"><input type="checkbox" name="wednesday" value="wednesday">Wednesday</li>
                     <li class="chbx_client_days"><input type="checkbox" name="thursday" value="thursday">Thursday</li>
                     <li class="chbx_client_days"><input type="checkbox" name="friday" value="friday">Friday</li>
-                </ul><br/>
+                </ul><br/><br/>
                 <lable class="form_titles">Update Client Attendance</lable><br/>
                 <select class="slct_weekday" id="mon" name="mon">
                     <option value="" selected disabled>Mon.</option>
@@ -59,14 +59,14 @@
                     <option value="1">Present</option>
                     <option value="0">Absent</option>
                 </select><br/>
-                <input type="checkbox" name="del_hours" value="1">Delete hours where Absent?<br/>
+                <input type="checkbox" name="del_hours" value="1">Delete hours where Absent?<br/><br/>
                 <lable class="form_titles">Update Client Classification</lable><br/>
                 <select name="update_color">
                     <option value="" disabled selected>New Client Classification</option>
                     <option value="1">Green</option>
                     <option value="2">Yellow</option>
                     <option value="3">Red</option>
-                </select><br/>
+                </select><br/><br/>
                 <lable class="form_titles">Update Client's Team</lable><br/>
                 <select name="new_teacher"><br/>
                     <option disabled selected value="">Staff Name</option>
@@ -75,7 +75,7 @@
                     {% endfor %}
                 </select><br/>
                 <input type="radio" name="addOrRemove_teacher" value="add">Add
-                <input type="radio" name="addOrRemove_teacher" value="remove">Remove<br/>
+                <input type="radio" name="addOrRemove_teacher" value="remove">Remove<br/><br/>
                 <button type="submit" id="btn_update_client" class="btn_submit">Update Info</button>
             </div>
         </form>

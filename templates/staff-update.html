@@ -13,7 +13,7 @@
 </div>
 <div class="div_forms">
     <form id="form_update_staff" action="/staff/update" method="POST">
-        <div class="fieldset">
+        <div class="fieldset"><br/>
             <lable class="form_titles" for="slct_staff_update">Update Staff Information</lable><br/>
             <select id="slct_staff_update" name="slct_staff_update">
                 <option disabled selected value="">Staff Name</option>
@@ -25,7 +25,7 @@
                 <label class="form_titles" for="staff_hours_update_start">Start Time:</label><br/>
                 <input type="time" name="staff_hours_update_start" id="staff_hours_update_start" placeholder="hh:mm (24hr)"><br/>
                 <label class="form_titles" for="staff_hours_update_end">End Time:</label><br/>
-                <input type="time" name="staff_hours_update_end" id="staff_hours_update_end" placeholder="hh:mm (24hr)"><br/>
+                <input type="time" name="staff_hours_update_end" id="staff_hours_update_end" placeholder="hh:mm (24hr)"><br/><br/>
                 <label class="form_titles" for="lst_client_daysid">Days to Update Hours (check all the apply)</label><br/>
                 <ul id="list_client_daysid" class="lst_client_days">
                     <li class="chbx_staff_days"><input type="checkbox" name="monday" value="monday">Monday</li>
@@ -34,7 +34,7 @@
                     <li class="chbx_staff_days"><input type="checkbox" name="thursday" value="thursday">Thursday</li>
                     <li class="chbx_staff_days"><input type="checkbox" name="friday" value="friday">Friday</li>
                 </ul>
-            </p>
+            </p><br/>
             <lable class="form_titles">Update Staff Attendance</lable><br/>
             <select id="mon2" class="slct_weekday" name="mon">
                 <option value="" selected disabled>Mon.</option>
@@ -61,19 +61,19 @@
                 <option value="1">Present</option>
                 <option value="0">Absent</option>
             </select><br/>
-            <input type="checkbox" name="del_hours" value="1">Delete hours where Absent?<br/>
+            <input type="checkbox" name="del_hours" value="1">Delete hours where Absent?<br/><br/>
             <lable class="form_titles">Update Staff Credentials</lable><br/>
             <input type="checkbox" value="1" name="rbt_update">RBT?
             <input type="radio" value="1" name="tier_update">Tier 1
             <input type="radio" value="2" name="tier_update">Tier 2
-            <input type="radio" value="3" name="tier_update">Tier 3<br/>
+            <input type="radio" value="3" name="tier_update">Tier 3<br/><br/>
             <lable class="form_titles">Update Classification</lable><br/>
             <select name="staff_color">
                 <option value="" disabled selected>Select New Staff Classification</option>
                 <option value="1">Green</option>
                 <option value="2">Yellow</option>
                 <option value="3">Red</option>
-            </select><br/>
+            </select><br/><br/>
             <button id="btn_update_staff" type="submit" class="btn_submit">Update Info</button>
         </div>
     </form>

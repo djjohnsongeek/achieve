@@ -15,13 +15,13 @@
 </div>
 <div class="div_forms">
     <form nonvalidate id="form_add_client" name="form_add_client" method="POST" action="/clients">
-        <div class="fieldset">
-            <lable class="form_titles" id="client_name_title" for="client_name">Add a Client</lable><br/>
+        <div class="fieldset"><br/>
+            <lable class="form_titles" id="client_name_title" for="client_name">Client Name</lable><br/>
             <input type="text" id="client_name" name="client_name" placeholder="Client Name"><br/>
             <label for="client_hours_start" class="form_titles">Start Time</label><br/>
             <input type="time" name="client_hours_start" id="client_hours_start" placeholder="hh:mm (24hr)"><br/>
             <label for="client_hours_end" class="form_titles">End Time</label><br/>
-            <input type="time" name="client_hours_end" id="client_hours_end" placeholder="hh:mm (24hr)"><br/>
+            <input type="time" name="client_hours_end" id="client_hours_end" placeholder="hh:mm (24hr)"><br/><br/>
             <lable class="form_titles">Days Present (check all that apply)</lable><br/>
             <ul class="lst_client_days">
                 <li class="chbx_client_days"><input type="checkbox" id="monday1" name="monday" value="monday">Monday</li>
@@ -29,7 +29,7 @@
                 <li class="chbx_client_days"><input type="checkbox" id="wednesday1" name="wednesday" value="wednesday">Wednesday</li>
                 <li class="chbx_client_days"><input type="checkbox" id="thursday1" name="thursday" value="thursday">Thursday</li>
                 <li class="chbx_client_days"><input type="checkbox" id="friday1" name="friday" value="friday">Friday</li>
-            </ul><br/>
+            </ul><br/><br/>
             <lable id="teachers_title" class="form_titles">Assign Teachers to Team</lable><br/>
             <select class="teachers" id="assign_teacher0" name="assign_teacher0">
                 <option value="" selected disabled>Select Staff</option>
@@ -54,10 +54,10 @@
                 {% for item in staff_query %}
                 <option value="{{item['name']}}">{{ item["name"] }}</option>
                 {% endfor %}
-            </select><br/>
-            <lable class="form_titles">Select Client Classification</lable><br/>
+            </select><br/><br/>
+            <lable class="form_titles">Select Classification</lable><br/>
             <select id="classification" name="color">
-                <option value="" selected disabled>Select Client Classification</option>
+                <option value="" selected disabled>Classification</option>
                 <option value="1">Green</option>
                 <option value="2">Yellow</option>
                 <option value="3">Red</option>
@@ -66,8 +66,8 @@
         </div>
     </form>
     <form id="form_remove_client" name="form_remove_client" action="/clients/remove" method="POST">
-        <div class="fieldset">
-            <lable class="form_titles" for="slct_client">Remove a Client</lable><br/>
+        <div class="fieldset"><br/>
+            <lable id="slct_clientName_title" class="form_titles" for="slct_client">Remove a Client</lable><br/>
             <select id="slct_client" name="slct_client">
                 <option disabled selected value="">Client Name</option>
                 {% for name in client_query %}

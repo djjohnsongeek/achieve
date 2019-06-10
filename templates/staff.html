@@ -15,13 +15,13 @@
     </div>
     <div class="div_forms">
         <form id="form_add_staff" action="/staff" method="POST">
-            <div class="fieldset">
-                <lable class="form_titles" for="staff_name">Add Staff</lable><br/>
-                <input type="text" id="staff_name" name="staff_name" placeholder="First and Last Name"><br/>
+            <div class="fieldset"><br/>
+                <lable id="staff-name_title" class="form_titles" for="staff_name">Staff Name</lable><br/>
+                <input type="text" id="staff_name" name="staff_name" placeholder="Staff Name"><br/>
                 <lable class="form_titles" for="staff_hours_start">Start Time</lable><br/>
                 <input type="time" name="staff_hours_start" id="staff_hours_start"placeholder="hh:mm (24hr)"><br/>
                 <lable class="form_titles" for="staff_hours_end">End Time</lable><br/>
-                <input type="time" name="staff_hours_end" id="staff_hours_end" placeholder="hh:mm (24hr)"><br/>
+                <input type="time" name="staff_hours_end" id="staff_hours_end" placeholder="hh:mm (24hr)"><br/><br/>
                 <label class="form_titles" for="lst_client_dys">Days Present (check all the apply)</label><br/>
                 <ul id="lst_client_days" class="lst_client_days">
                     <li class="chbx_staff_days"><input type="checkbox" name="monday" value="monday">Monday</li>
@@ -29,18 +29,18 @@
                     <li class="chbx_staff_days"><input type="checkbox" name="wednesday" value="wednesday">Wednesday</li>
                     <li class="chbx_staff_days"><input type="checkbox" name="thursday" value="thursday">Thursday</li>
                     <li class="chbx_staff_days"><input type="checkbox" name="friday" value="friday">Friday</li>
-                </ul><br/>
+                </ul><br/></br>
                 <label class="form_titles">Staff Credentials:</label><br/>
                 <input type="checkbox" value="1" name="RBT">RBT?
                 <input type="radio" value="1" name="Tier">Tier 1
                 <input type="radio" value="2" name="Tier">Tier 2
-                <input type="radio" value="3" name="Tier">Tier 3<br/>
+                <input type="radio" value="3" name="Tier">Tier 3<br/><br/>
                 <button type="submit" class="btn_submit" id="btn_add_staff">Add Staff</button>
             </div>
-        </form>
+        </form><br/>
         <form id="form_remove_staff" action="/staff/remove" method="POST">
             <div class="fieldset">
-                <lable class="form_titles" for="slct_staff_remove">Remove Staff</lable><br/>
+                <lable id="slct_staff-name_title" class="form_titles" for="slct_staff_remove">Remove Staff</lable><br/>
                 <select id="slct_staff_remove" name="slct_staff_remove">
                     <option disabled selected value="">Staff Name</option>
                     {% for name in staff_names %}

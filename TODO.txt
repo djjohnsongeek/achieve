@@ -30,6 +30,8 @@ Server Side Functionality (UNFINISHED)
         -securly remove unencrypted fields
 
         Backburner:
+        -save schedule for the entire week, able to few enture weeks schedule
+        -bigger check boxes
         -re-schedules already scheduled staff if available?
         -possible optimization: no rebuiliding tier_team_member list EVERY loop
 
@@ -59,19 +61,12 @@ Server Side Functionality (UNFINISHED)
     -Review all code
 
 Client Side Functionality
-    -Basic Client Side feedback
-        -need to recheck all JavaScripts after revent HTML/CSS rework
-
     -In-depth client Side Feedback/Search/AJAX
         -staff
-            -ajax requests for staff - name
-        -schedule
-            -better error feedback
+            -ajax requests for staff name
         -view staff/clients/teams/schedule
             -searchable tables
-
-HTML and CSS Rework (DONE)
-    -login and change password page (need )
+        -look at rewriting JavaScrip Validation
 
 FUTURE Features
     -seperate teams page? (For team management)
