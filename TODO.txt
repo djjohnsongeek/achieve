@@ -1,8 +1,6 @@
-TODO:
 Basic HTML Structure (DONE)
 Basic CSS Features (DONE)
-
-Server Side Functionality (UNFINISHED)
+Server Side Functionality (DONE)
     -clients page (DONE)     -NOTE: when choosing staff/client times 830 means available 830 - 930
     -staff page (DONE)
     -schedule (IN PROGRESS)
@@ -27,16 +25,6 @@ Server Side Functionality (UNFINISHED)
         -generate classroom schedule (DONE - need to check for staff hours availability)
         -securly remove unencrypted fields (DONE)
         -TEST schedule generation with new week settings, with teamsize scheduling hours, and FULL database
-
-        -deal with late teachers
-        -save schedule for the entire week, able to few enture weeks schedule
-        -generate and download schedule on the same page
-        -bigger check boxes
-        -consolodate staff/client/classroom update routes
-
-        Backburner:
-        -re-schedule already scheduled staff if available?
-        -possible optimization: no rebuiliding tier_team_member list EVERY loop
 
     -login functionality (DONE)
     -download schedules page (DONE)
@@ -63,17 +51,28 @@ Server Side Functionality (UNFINISHED)
         
     -Review all code
 
-Client Side Functionality
+Client Side Functionality (Requires update)
     -In-depth client Side Feedback/Search/AJAX
         -staff
             -ajax requests for staff name
         -view staff/clients/teams/schedule
             -searchable tables
-        -look at rewriting JavaScrip Validation
+        -look at rewriting JavaScript Validation
+
+Current Tasks:
+        -deal with late teachers
+        -save schedule for the entire week, able to few entire weeks schedule
+        -generate and download schedule on the same page
+        -bigger check boxes
+        -consolodate staff/client/classroom update routes
+        -parse finished schedlue docs to reveal staff openings
+
+        Backburner:
+        -re-schedule already scheduled staff if available?
+        -possible optimization: no rebuiliding tier_team_member list EVERY loop
 
 FUTURE Features
     -seperate teams page? (For team management)
-    -save, download, and view shedules generated in the past
     -mobile responsive
     
 KNOWN BUGS:
