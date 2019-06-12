@@ -15,7 +15,7 @@ Server Side Functionality (UNFINISHED)
         -remove remenants of SQL scheduling (DONE)
         -backup current master server side master branch as a new branch (DONE)
         -schedules staff more then just two hours (based upon team size) (DONE)
-        -schedule by color and largest amount of hours (TEST)
+        -schedule by color and largest amount of hours (DONE)
         -mon-fri profile system for staff and client's (DONE)
             -write basic html for clients, staff (DONE)
             -write backend sql commits, adn deletions for removing of clients/staff (DONE)
@@ -24,23 +24,24 @@ Server Side Functionality (UNFINISHED)
                 -staff update (DONE)
             -implement client name cryptogrophy (DONE)
             -update scheduling (decode hashed client names, update sql queries) (DONE)
+        -generate classroom schedule (DONE - need to check for staff hours availability)
+        -securly remove unencrypted fields (DONE)
+        -TEST schedule generation with new week settings, with teamsize scheduling hours, and FULL database
 
-        -TEST schedule generation with new week settings, with teamsize scheduling hours
-        -generate classroom schedule (DONE - need to chech for staff hours availability)
-        -securly remove unencrypted fields
-
-        Backburner:
+        -deal with late teachers
         -save schedule for the entire week, able to few enture weeks schedule
         -generate and download schedule on the same page
         -bigger check boxes
         -consolodate staff/client/classroom update routes
-        -re-schedules already scheduled staff if available?
+
+        Backburner:
+        -re-schedule already scheduled staff if available?
         -possible optimization: no rebuiliding tier_team_member list EVERY loop
 
     -login functionality (DONE)
     -download schedules page (DONE)
         -file encryption, decryption (DONE)
-        -file deletion (DONE, but not completely secure)
+        -file deletion (DONE)
 
     -Update server error messages to use flash() (DONE)
         -clients (DONE)

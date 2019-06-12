@@ -289,120 +289,8 @@ def clients():
     flash("Client Successfully Added")
     return redirect("/clients")
 
-@app.route("/clients-update")
-@login_required
-@admin_required
-def clients_update_form():
-    db, conn = db_connect(DB_URL)
-    db.execute("SELECT name FROM staff")
-    staff_query = db.fetchall()
-    db.execute("SELECT name FROM clients")
-    client_query = db.fetchall()
-    conn.close()
-    return render_template("clients-update.html", staff_query=staff_query, client_query=client_query, unscramble=unscramble)
-
-@app.route("/addclient", methods=["GET"])
-def addclient():
-    clientname = scramble(request.args.get("clientname"))
-    
-    # connect to database
-    db, conn = db_connect(DB_URL)
-
-    # check if client name is already in the database
-    db.execute("SELECT clientID FROM clients WHERE name=?", (clientname,))
-    query = db.fetchone()
-    conn.close()
-
-    # return result
-    if query:
-        return jsonify(True)
-    else:
-        return jsonify(False)
-
-@app.route("/clients/view-client-info")
-@login_required
-@admin_required
-def view_clients():
-    db, conn = db_connect(DB_URL)
-
-    # get basic client info
-    db.execute("SELECT name, totalhours, color FROM clients ORDER BY name DESC")
-    client_info = [dict(row) for row in db.fetchall()]
-
-
-    # update number data with text, decrypt client name
-    for row in client_info:
-        if row["color"] == 1:
-            row["color"] = "Green"
-        elif row["color"] == 2:
-            row["color"] = "Yellow"
-        else:
-            row["color"] = "Red"
-
-        row["name"] = unscramble(row["name"])
-
-    # get team information
-    db.execute("SELECT clients.name, staff.name FROM teams JOIN staff ON staff.staffID=teams.staffID JOIN clients ON clients.clientID=teams.clientID ORDER BY clients.name DESC")
-
-    # convert to dictionary of teams by client
-    team = []
-    team_dict = {}
-    for row in db.fetchall():
-        item = list(row)
-        item[0] = unscramble(item[0])
-
-        if item[0] not in team_dict.keys():  
-            team = []
-
-        if item[1] not in team:
-            team.append(item[1])
-            team_dict[item[0]] = team
-
-    # close database and render client tables
-    conn.close()
-    return render_template("view-client-info.html", client_info = client_info, client_teams = team_dict)
-
-@app.route("/clients/view-client-hours")
-@login_required
-@admin_required
-def view_client_hrs():
-    db, conn = db_connect(DB_URL)
-
-    # get client hours, decrypt client name
-    db.execute("SELECT clients.name, monday, tuesday, wednesday, thursday, friday FROM clienthours JOIN clients ON clienthours.clientID = clients.clientID ORDER BY clients.name DESC")
-    client_hours = [dict(row) for row in db.fetchall()]
-    for row in client_hours:
-        row["name"] = unscramble(row["name"])
-
-    # close database and render client tables
-    conn.close()
-    return render_template("view-client-hours.html", client_hours = client_hours)
-
-@app.route("/clients/view-client-att")
-@login_required
-@admin_required
-def view_client_att():
-    db, conn = db_connect(DB_URL)
-
-    # get client attendance data, decrypt client name
-    db.execute("SELECT name, mon, tue, wed, thu, fri FROM clients ORDER BY name DESC")
-    client_att = [dict(row) for row in db.fetchall()]
-
-    for row in client_att:
-        for day in ["mon", "tue", "wed", "thu", "fri"]:
-            if row[day] == 1:
-                row[day] = "Present"
-            else:
-                row[day] = "OUT"
-
-        row["name"] = unscramble(row["name"])
-
-    # close database and render client tables
-    conn.close()
-    return render_template("view-client-att.html", client_att = client_att)
-
 @app.route("/clients/remove", methods=["POST"])
-def remove_client():\
+def remove_client():
     # setup feedback as error
     session["error"] = 1
 
@@ -437,8 +325,21 @@ def remove_client():\
     flash(f"{unscramble(client_name)} has been deleted")
     return redirect("clients")
 
-@app.route("/clients/update", methods=["POST"])
+@app.route("/clients-update", methods=["GET", "POST"])
+@login_required
+@admin_required
 def update_client():
+    # GET requests
+    if request.method == "GET":
+        db, conn = db_connect(DB_URL)
+        db.execute("SELECT name FROM staff")
+        staff_query = db.fetchall()
+        db.execute("SELECT name FROM clients")
+        client_query = db.fetchall()
+        conn.close()
+        return render_template("clients-update.html", staff_query=staff_query, client_query=client_query, unscramble=unscramble)
+
+    # POST requests
     # setup feedback for errors
     session["error"] = 1
 
@@ -592,13 +493,113 @@ def update_client():
                 # remove selected teacher from selected Client's team
                 db.execute("DELETE FROM teams WHERE clientID=? and staffID=?", (client_info["clientID"], staff_info["staffID"]))
 
-    # commit changes, change feedback to info
+    # commit changes, change feedback style to info
     conn.commit()
     conn.close()
 
     session["error"] = 0
     flash(f"{unscramble(client_name)}'s info has been updated")
     return redirect("/clients")
+
+@app.route("/addclient", methods=["GET"])
+def addclient():
+    clientname = scramble(request.args.get("clientname"))
+    
+    # connect to database
+    db, conn = db_connect(DB_URL)
+
+    # check if client name is already in the database
+    db.execute("SELECT clientID FROM clients WHERE name=?", (clientname,))
+    query = db.fetchone()
+    conn.close()
+
+    # return result
+    if query:
+        return jsonify(True)
+    else:
+        return jsonify(False)
+
+@app.route("/clients/view-client-info")
+@login_required
+@admin_required
+def view_clients():
+    db, conn = db_connect(DB_URL)
+
+    # get basic client info
+    db.execute("SELECT name, totalhours, color FROM clients ORDER BY name DESC")
+    client_info = [dict(row) for row in db.fetchall()]
+
+
+    # update number data with text, decrypt client name
+    for row in client_info:
+        if row["color"] == 1:
+            row["color"] = "Green"
+        elif row["color"] == 2:
+            row["color"] = "Yellow"
+        else:
+            row["color"] = "Red"
+
+        row["name"] = unscramble(row["name"])
+
+    # get team information
+    db.execute("SELECT clients.name, staff.name FROM teams JOIN staff ON staff.staffID=teams.staffID JOIN clients ON clients.clientID=teams.clientID ORDER BY clients.name DESC")
+
+    # convert to dictionary of teams by client
+    team = []
+    team_dict = {}
+    for row in db.fetchall():
+        item = list(row)
+        item[0] = unscramble(item[0])
+
+        if item[0] not in team_dict.keys():  
+            team = []
+
+        if item[1] not in team:
+            team.append(item[1])
+            team_dict[item[0]] = team
+
+    # close database and render client tables
+    conn.close()
+    return render_template("view-client-info.html", client_info = client_info, client_teams = team_dict)
+
+@app.route("/clients/view-client-hours")
+@login_required
+@admin_required
+def view_client_hrs():
+    db, conn = db_connect(DB_URL)
+
+    # get client hours, decrypt client name
+    db.execute("SELECT clients.name, monday, tuesday, wednesday, thursday, friday FROM clienthours JOIN clients ON clienthours.clientID = clients.clientID ORDER BY clients.name DESC")
+    client_hours = [dict(row) for row in db.fetchall()]
+    for row in client_hours:
+        row["name"] = unscramble(row["name"])
+
+    # close database and render client tables
+    conn.close()
+    return render_template("view-client-hours.html", client_hours = client_hours)
+
+@app.route("/clients/view-client-att")
+@login_required
+@admin_required
+def view_client_att():
+    db, conn = db_connect(DB_URL)
+
+    # get client attendance data, decrypt client name
+    db.execute("SELECT name, mon, tue, wed, thu, fri FROM clients ORDER BY name DESC")
+    client_att = [dict(row) for row in db.fetchall()]
+
+    for row in client_att:
+        for day in ["mon", "tue", "wed", "thu", "fri"]:
+            if row[day] == 1:
+                row[day] = "Present"
+            else:
+                row[day] = "OUT"
+
+        row["name"] = unscramble(row["name"])
+
+    # close database and render client tables
+    conn.close()
+    return render_template("view-client-att.html", client_att = client_att)
 
 @app.route("/staff", methods=["POST", "GET"])
 @login_required
@@ -719,103 +720,6 @@ def staff():
     flash(f"{staff_name} Succesfully Added")
     return redirect("/staff")
 
-@app.route("/staff-update")
-@login_required
-@admin_required
-def staff_update_form():
-    # connect to database
-    db, conn = db_connect(DB_URL)
-
-    # retrieve all staff names
-    db.execute("SELECT name FROM staff")
-    staff_names = db.fetchall()
-
-    # close connection to database
-    conn.close()
-    return render_template("staff-update.html", staff_names=staff_names)
-
-@app.route("/staff/view-staff-info")
-@login_required
-@admin_required
-def view_staff():
-    db, conn = db_connect(DB_URL)
-
-    # Get basic staff info
-    db.execute("SELECT name, rbt, tier, color FROM staff ORDER BY name ASC")
-    staff_info = [dict(row) for row in db.fetchall()]
-
-    # replace numbers with text
-    for row in staff_info:
-        if row["color"] == 1:
-            row["color"] = "Green"
-        elif row["color"] == 2:
-            row["color"] = "Yellow"
-        else:
-            row["color"] = "Red"
-
-        if row["rbt"] == 1:
-            row["rbt"] = "Yes"
-        else:
-            row["rbt"] = "No"
-
-    # get team information
-    db.execute("SELECT clients.name, staff.name FROM teams JOIN staff ON staff.staffID=teams.staffID JOIN clients ON clients.clientID=teams.clientID ORDER BY staff.name")
-
-    # convert to dictionary, ordered by staff
-    team = []
-    team_dict = {}
-    for row in db.fetchall():
-        item = list(row)
-        item[0] = unscramble(item[0])
-
-        if item[1] not in team_dict.keys():  
-            team = []
-
-        if item[0] not in team:
-            team.append(item[0])
-            team_dict[item[1]] = team
-
-    # close database, render staff tables
-    conn.close()
-    return render_template("view-staff-info.html", staff_info = staff_info, staff_teams = team_dict)
-
-@app.route("/staff/view-staff-hours")
-@login_required
-@admin_required
-def view_staff_hours():
-    db, conn = db_connect(DB_URL)
-
-    # get staff hours
-    db.execute("SELECT staff.name, monday, tuesday, wednesday, thursday, friday FROM staffhours JOIN staff ON staffhours.staffID = staff.staffID ORDER BY staff.name")
-    staff_hours = db.fetchall()
-
-    # close database, render staff tables         
-    conn.close()
-    return render_template("view-staff-hours.html", staff_hours = staff_hours)
-
-@app.route("/staff/view-staff-attendance")
-@login_required
-@admin_required
-def vew_staff_att():
-    db, conn = db_connect(DB_URL)
-
-    # get staff attendance
-    db.execute("SELECT name, mon, tue, wed, thu, fri FROM staff ORDER BY name")
-    staff_att = [dict(row) for row in db.fetchall()]
-
-    # replace numbers with text
-    for row in staff_att:
-        for day in row.keys():
-            if day == "name":
-                continue
-            if row[day] == 1:
-                row[day] = "Present"
-            else:
-                row[day] = "OUT"
-
-    conn.close()
-    return render_template("view-staff-att.html", staff_att=staff_att)
-
 @app.route("/staff/remove", methods=["POST"])
 def remove_staff():
 
@@ -853,8 +757,24 @@ def remove_staff():
     flash(f"{staff_name} has been deleted")
     return redirect("/staff")
 
-@app.route("/staff/update", methods=["POST"])
-def staff_update():
+@app.route("/staff-update", methods=["GET", "POST"])
+@login_required
+@admin_required
+def update_staff():
+    # ---GET requests---
+    if request.method == "GET":
+        # connect to database
+        db, conn = db_connect(DB_URL)
+
+        # retrieve all staff names
+        db.execute("SELECT name FROM staff")
+        staff_names = db.fetchall()
+
+        # close connection to database
+        conn.close()
+        return render_template("staff-update.html", staff_names=staff_names)
+
+    # ---POST requests---
     # prepare feedback for errors
     session["error"] = 1
 
@@ -1000,21 +920,365 @@ def staff_update():
     flash(f"{staff_name}'s info successfully updated")
     return redirect("/staff-update")
 
+@app.route("/staff/view-staff-info")
+@login_required
+@admin_required
+def view_staff():
+    db, conn = db_connect(DB_URL)
+
+    # Get basic staff info
+    db.execute("SELECT name, rbt, tier, color FROM staff ORDER BY name ASC")
+    staff_info = [dict(row) for row in db.fetchall()]
+
+    # replace numbers with text
+    for row in staff_info:
+        if row["color"] == 1:
+            row["color"] = "Green"
+        elif row["color"] == 2:
+            row["color"] = "Yellow"
+        else:
+            row["color"] = "Red"
+
+        if row["rbt"] == 1:
+            row["rbt"] = "Yes"
+        else:
+            row["rbt"] = "No"
+
+    # get team information
+    db.execute("SELECT clients.name, staff.name FROM teams JOIN staff ON staff.staffID=teams.staffID JOIN clients ON clients.clientID=teams.clientID ORDER BY staff.name")
+
+    # convert to dictionary, ordered by staff
+    team = []
+    team_dict = {}
+    for row in db.fetchall():
+        item = list(row)
+        item[0] = unscramble(item[0])
+
+        if item[1] not in team_dict.keys():  
+            team = []
+
+        if item[0] not in team:
+            team.append(item[0])
+            team_dict[item[1]] = team
+
+    # close database, render staff tables
+    conn.close()
+    return render_template("view-staff-info.html", staff_info = staff_info, staff_teams = team_dict)
+
+@app.route("/staff/view-staff-hours")
+@login_required
+@admin_required
+def view_staff_hours():
+    db, conn = db_connect(DB_URL)
+
+    # get staff hours
+    db.execute("SELECT staff.name, monday, tuesday, wednesday, thursday, friday FROM staffhours JOIN staff ON staffhours.staffID = staff.staffID ORDER BY staff.name")
+    staff_hours = db.fetchall()
+
+    # close database, render staff tables         
+    conn.close()
+    return render_template("view-staff-hours.html", staff_hours = staff_hours)
+
+@app.route("/staff/view-staff-attendance")
+@login_required
+@admin_required
+def vew_staff_att():
+    db, conn = db_connect(DB_URL)
+
+    # get staff attendance
+    db.execute("SELECT name, mon, tue, wed, thu, fri FROM staff ORDER BY name")
+    staff_att = [dict(row) for row in db.fetchall()]
+
+    # replace numbers with text
+    for row in staff_att:
+        for day in row.keys():
+            if day == "name":
+                continue
+            if row[day] == 1:
+                row[day] = "Present"
+            else:
+                row[day] = "OUT"
+
+    conn.close()
+    return render_template("view-staff-att.html", staff_att=staff_att)
+
 @app.route("/classrooms", methods=["GET","POST"])
 @login_required
 @admin_required
 def classrooms():
+    # --- GET requests --- #
     if request.method == "GET":
-        return render_template("classrooms.html")
+        db, conn = db_connect(DB_URL)
 
-    flash("POST fuctionality is incomplete - TODO")
+        # get all staff
+        db.execute("SELECT name FROM staff")
+        staff_query = db.fetchall()
+
+        # get classrooms
+        db.execute("SELECT classroom FROM classrooms")
+        class_rms = db.fetchall()
+
+        return render_template("classrooms.html", staff_query = staff_query, class_rms = class_rms)
+
+    # --- POST requests --- #
+    # prepare feeback for errors, connet to db
+    session["error"] = 1
+    db, conn = db_connect(DB_URL)
+
+    # validate class name forms
+    if not request.form.get("class_name"):
+        flash("Please provide a classroom name")
+        return redirect ("/classrooms")
+    classroom = request.form.get("class_name")
+    db.execute("SELECT classID FROM classrooms WHERE classroom=?", (classroom,))
+    if db.fetchone():
+        flash(f"{classroom} is already in the database")
+        return redirect ("/classrooms")
+
+    # validate teacher forms
+    teachers = []
+    count = 0
+    for teacher in [request.form.get("class_teacher1"), request.form.get("class_teacher2")]:
+        if teacher:
+            count += 1
+        if teacher == None or teacher not in teachers:
+            teachers.append(teacher)
+        else:
+            teachers.append(None)
+    if count < 1:
+        flash("Please select at least one teacher")
+        return redirect("/classrooms")
+
+    print(teachers)
+    # validate substitute forms
+    subs= []
+    count = 0
+    for sub in ["sub1", "sub2", "sub3", "sub4"]:
+        if request.form.get(sub):
+            count += 1
+        if request.form.get(sub) == None or request.form.get(sub) not in subs:
+            subs.append(request.form.get(sub))
+        else:
+            subs.append(None)
+    if count < 1:
+        flash("Please select at least one substitute teacher")
+        return redirect("/classrooms")
+
+    print(subs)
+    # check that all supplied teachers are in database
+    teachers = teachers + subs
+    teachers_filtered = [teacher for teacher in teachers if teacher]
+    for teacher in teachers_filtered:
+        db.execute("SELECT name FROM staff WHERE name=?", (teacher,))
+        if not db.fetchone()["name"]:
+            flash(f"{teacher} was not found in the database")
+            return redirect("/classrooms")
+
+    # check teacher amount requirement field
+    class_rq = request.form.get("class_rq")
+    try:
+        if int(class_rq) not in {1, 2, 3}:
+            flash("Invalid required number of teachers input")
+            return redirect("/classrooms")
+    except:
+            flash("Invalid required number of teachers input")
+            return redirect("/classrooms")
+
+    # prepare classroom data
+    teachers.insert(0, class_rq)
+    teachers.insert(0, classroom)
+
+    # insert classroom data into the databvase
+    db.execute("INSERT INTO classrooms (classroom, req, teacher1, teacher2, sub1, sub2, sub3, sub4 ) VALUES(?,?,?,?,?,?,?,?)", teachers)
+    conn.commit()
+    conn.close()
+    
+    # return success
+    session["error"] = 0
+    flash(f"{classroom} successfully added")
     return redirect("/classrooms")
 
-@app.route("/classrooms-update")
+@app.route("/classrooms-remove", methods=["POST"])
+@login_required
+@admin_required
+def classrooms_remove():
+    # prepare feedback for errors
+    session["error"] = 1
+    classrm = request.form.get("slct_class")
+    if classrm:
+        db, conn = db_connect(DB_URL)
+        db.execute("SELECT classID FROM classrooms WHERE classroom=?", (classrm,))
+        if db.fetchone():
+            db.execute("DELETE FROM classrooms WHERE classroom=?", (classrm,))
+            conn.commit()
+            conn.close()
+            session["error"] = 0
+            flash(f"{classrm} successfuly deleted")
+            return redirect("/classrooms")
+        else:
+            conn.close()
+            flash(f"{classrm} is not in the database")
+            return redirect("/classrooms")
+    else:
+        flash("Please select a classroom to remove")
+        return redirect("/classrooms")
+
+@app.route("/classrooms-update", methods=["GET", "POST"])
 @login_required
 @admin_required
 def class_update_form():
-    return render_template("classrooms-update.html")
+    # --- GET requests --- #
+    if request.method == "GET":
+        db, conn = db_connect(DB_URL)
+
+        # get classrooms
+        db.execute("SELECT classroom FROM classrooms")
+        classrm_data = db.fetchall()
+
+        # get classroom teachers
+        db.execute("SELECT teacher1, teacher2, sub1, sub2, sub3, sub4 FROM classrooms")
+        teacher_data = db.fetchall()
+        teacher_names = [name for row in teacher_data for name in row if name]
+
+        # get all teachers
+        db.execute("SELECT name FROM staff")
+        staff_data = db.fetchall()
+        conn.close()
+        return render_template("classrooms-update.html", classrm_data = classrm_data, teacher_names = teacher_names, staff_data = staff_data)
+
+    # --- POST requests --- #
+    # prepare feedback for errors, connect to db
+    session["error"] = 1
+    db, conn  = db_connect(DB_URL)
+
+    # validate classroom field
+    if not request.form.get("slct_class"):
+        flash("Please provide a classroom to edit")
+        return redirect("/classrooms-update")
+    classrm = request.form.get("slct_class")
+
+    # check given classroom is in the database
+    db.execute("SELECT classID FROM classrooms WHERE classroom=?", (classrm,))
+    if not db.fetchone():
+        flash(f"{classrm} is not in the database")
+        return redirect("/classrooms-update")
+
+    # remove provided staff name NOTE: this assumes that subs and teachers are never the same
+    staff_toremove = request.form.get("slct_classTeacher")
+    if staff_toremove:
+        counter = 0
+        for staff in ["teacher1", "teacher2", "sub1", "sub2", "sub3", "sub4"]:
+            db.execute(f"SELECT {staff} FROM classrooms WHERE classroom=?", (classrm,))
+            teacher = db.fetchone()
+            if teacher[staff] and staff_toremove == teacher[staff]:
+                db.execute(f"UPDATE classrooms SET {staff}=? WHERE classroom=?", (None, classrm))
+                counter += 1
+                conn.commit()
+
+        if counter == 0:
+            flash(f"Removal not possible, {staff_toremove} is not part of {classrm}")
+            return redirect("/classrooms-update")
+    
+    # add user selected staff to classroom
+    if request.form.get("slct_add_sub"):
+        staff_toadd = request.form.get("slct_add_sub")
+
+        # check if staff is in staff database
+        db.execute("SELECT name FROM staff WHERE name=?", (staff_toadd,))
+        if not db.fetchone():
+            flash(f"{staff_toadd} is not in the database")
+            return redirect("/classrooms-update")
+        
+        # adding staff member as a teacher
+        if request.form.get("add_as") == "t":
+
+            # check staff is not alread part of classroom
+            db.execute("SELECT sub1, sub2, sub3, sub4 FROM classrooms WHERE classroom=?", (classrm,))
+            subs = db.fetchone()
+            for sub in subs:
+                if sub == staff_toadd:
+                    flash(f"{staff_toadd} is already a part of {classrm}")
+                    return redirect("/classrooms-update")
+                    
+            # look for blank spot to insert new staff
+            counter = 0
+            for teacher in ["teacher1", "teacher2"]:
+                db.execute(f"SELECT {teacher} FROM classrooms WHERE classroom=?", (classrm,))
+                spot = db.fetchone()
+                if spot[teacher] == staff_toadd:
+                    flash(f"{staff_toadd} is already a part of {classrm}")
+                    return redirect("/classrooms-update")
+                if not spot[teacher]:
+                    db.execute(f"UPDATE classrooms SET {teacher}=? WHERE classroom=?", (staff_toadd, classrm))
+                    conn.commit()
+                    counter +=1
+                    break
+            if counter == 0:
+                flash("No room in class to add new teacher")
+                return redirect("/classrooms-update")
+
+        # adding staff member as a sub
+        elif request.form.get("add_as") == "s":
+
+            # check staff is not alread part of classroom
+            db.execute("SELECT teacher1, teacher2 FROM classrooms WHERE classroom=?", (classrm,))
+            teachers = db.fetchone()
+            for teacher in teachers:
+                if teacher == staff_toadd:
+                    flash(f"{staff_toadd} is already a part of {classrm}")
+                    return redirect("/classrooms-update")
+
+            # look for blank spot to insert new staff
+            counter = 0
+            for sub in ["sub1", "sub2", "sub3", "sub4"]:
+                db.execute(f"SELECT {sub} FROM classrooms WHERE classroom=?", (classrm,))
+                spot = db.fetchone()
+                if spot[sub] == staff_toadd:
+                    flash(f"{staff_toadd} is already a part of {classrm}")
+                    return redirect("/classrooms-update")
+                if not spot[sub]:
+                    db.execute(f"UPDATE classrooms SET {sub}=? WHERE classroom=?", (staff_toadd, classrm))
+                    conn.commit()
+                    counter += 1
+                    break
+            if counter == 0:
+                flash("No room in class to add new substitute")
+                return redirect("/classrooms-update")
+                
+        else:
+            flash("Invalid radio button data recieved")
+            return redirect("/classrooms-update")
+
+    # check for required number of staff data
+    if request.form.get("udpate_rq"):
+        try:
+            rq = int(request.form.get("update_rq"))
+        except ValueError:
+            flash("Invalid required number of teachers data received")
+            return redirect("/classrooms-update")
+
+        if rq in [1, 2, 3]:
+            db.execute("UPDATE classrooms SET req=? WHERE classroom=?", (rq, classrm))
+            conn.commit()
+        else:
+            flash("Invalid required number of teachers data received")
+            return redirect("/classrooms-update")
+
+    conn.commit()
+    conn.close()
+    session["error"] = 0
+    flash(f"{classrm} successfully updated")
+    return redirect("/classrooms-update")
+
+@app.route("/classrooms-viewinfo",)
+@login_required
+@admin_required
+def view_class():
+    db, conn = db_connect(DB_URL)
+    db.execute("SELECT classroom, req, teacher1, teacher2, sub1, sub2, sub3, sub4 FROM classrooms")
+    class_data = db.fetchall()
+    conn.close()
+    return render_template("classrooms-view-info.html", class_data = class_data)
 
 @app.route("/schedule", methods=["GET", "POST"])
 @login_required
@@ -1066,30 +1330,39 @@ def schedule():
     classes = db.fetchall()
     classroom_hrs = [830, 930, 1030, 1130, 1230, 130]
     for classroom in classes:
-        class_nums = [classroom["teacher1"], classroom["teacher2"]]
+        allclass_teachers = [classroom["teacher1"], classroom["teacher2"]]
+        allclass_teachers = [teacher for teacher in allclass_teachers if teacher]
+
         class_teachers = []
-        
-        # build teacher list
-        for teacher in class_nums:
-            db.execute(f"SELECT name FROM staff where staffID=? AND {curr_att_day}=1", (teacher,))
-            staff_name = db.fetchone()
-            if staff_name:
-                class_teachers.append(staff_name["name"])
+        # remove teachers who are absent
+        for teacher in allclass_teachers:
+            db.execute(f"SELECT {curr_att_day} FROM staff WHERE name=?", (teacher,))
+            att = db.fetchone()[curr_att_day]
+            if att == 1:
+                class_teachers.append(teacher)
+            
 
         # Add subs to teacher list if necessary
         if len(class_teachers) < classroom["req"]:
-            class_nums = [classroom["sub1"], classroom["sub2"], classroom["sub3"], classroom["sub4"]]
-            for teacher in class_nums:
-                db.execute(f"SELECT name FROM staff where staffID=? AND {curr_att_day}=1", (teacher,))
-                staff_name = db.fetchone()
-                if staff_name:
-                    class_teachers.append(staff_name["name"])
+            allclass_subs = [classroom["sub1"], classroom["sub2"], classroom["sub3"], classroom["sub4"]]
+            allclass_subs = [sub for sub in allclass_subs if sub]
 
-                # end loop if enought staff are in the list
+            # remove absent subs
+            class_subs = []
+            for sub in allclass_subs:
+                db.execute(f"SELECT {curr_att_day} FROM staff WHERE name=?", (sub,))
+                att = db.fetchone()[curr_att_day]
+                if att == 1:
+                    class_subs.append(sub)
+
+            for sub in class_subs:
+                class_teachers.append(sub)
+                # end loop if enough staff are in the list
                 if len(class_teachers) == classroom["req"]:
                     break
 
-            # if sublist is empty or  prompt user to add teacher to sublist
+            print(class_teachers)
+            # if sublist is empty prompt user to add teacher to sublist
             if len(class_teachers) < classroom["req"]:
                 flash(f'{classroom["classroom"]} sublist is empty or too small. Please add staff to the sublist to continue')
                 return redirect("/schedule")

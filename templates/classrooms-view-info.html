@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block title %}CLassroom Information{% endblock %}
+{% block main %}
+<div class="description">
+        <header>
+            <h1>Classrooms</h1>
+        </header>
+    </div>
+<div class="spacer"></div>
+<div class="table_container" id="table_class_info">
+    <table class="sticky-th">
+        <thead>
+            <tr>
+                <th>Class</th>
+                <th>Staff Num.</th>
+                <th>Teacher</th>
+                <th>Teacher</th>
+                <th>Sub</th>
+                <th>Sub</th>
+                <th>Sub</th>
+                <th>Sub</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for classrooms in class_data %}
+            <tr>
+                {% for data in classrooms %}
+                <td>{{ data }}</td>
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

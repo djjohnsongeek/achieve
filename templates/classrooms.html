@@ -17,7 +17,7 @@
             <lable class="form_titles" for="class_name">Classroom Name</lable><br/>
             <input type="text" id="class_name" name="class_name" placeholder="Classroom Name"><br/>
             <!--Main classroom Teachers-->
-            <lable class="form_titles">Choose Teachers</lable><br/>
+            <lable id="lable_class_teachers" class="form_titles">Choose Teachers</lable><br/>
             <select class="teachers" id="class_teacher1" name="class_teacher1">
                 <option value="" selected disabled>Select Staff</option>
                 {% for item in staff_query %}
@@ -31,26 +31,26 @@
                 {% endfor %}
             </select><br/>
             <!--Substitute classroom Teachers-->
-            <lable class="form_titles">Choose Substitute Teachers</lable><br/>
-            <select class="teachers" id="sub_teacher1" name="sub_teacher1">
+            <lable id="lable_sub_teachers" class="form_titles">Choose Substitute Teachers</lable><br/>
+            <select class="teachers" id="sub_teacher1" name="sub1">
                 <option value="" selected disabled>Select Staff</option>
                 {% for item in staff_query %}
                 <option value="{{item['name']}}">{{ item["name"] }}</option>
                 {% endfor %}
             </select>
-            <select class="teachers" id="sub_teacher2" name="sub_teacher2">
+            <select class="teachers" id="sub_teacher2" name="sub2">
                 <option value="" selected disabled>Select Staff</option>
                 {% for item in staff_query %}
                 <option value="{{item['name']}}">{{ item["name"] }}</option>
                 {% endfor %}
             </select><br/>
-            <select class="teachers" id="sub_teacher3" name="sub_teacher3">
+            <select class="teachers" id="sub_teacher3" name="sub3">
                 <option value="" selected disabled>Select Staff</option>
                 {% for item in staff_query %}
                 <option value="{{item['name']}}">{{ item["name"] }}</option>
                 {% endfor %}
             </select>
-            <select class="teachers" id="sub_teacher4" name="sub_teacher4">
+            <select class="teachers" id="sub_teacher4" name="sub4">
                 <option value="" selected disabled>Select Staff</option>
                 {% for item in staff_query %}
                 <option value="{{item['name']}}">{{ item["name"] }}</option>
@@ -61,17 +61,18 @@
             <button class="btn_submit" id="btn_add_class">Add Class</button>
         </div>
     </form>
-    <form id="form_remove_class" name="form_remove_class" action="/classrooms/remove" method="POST">
+    <form id="form_remove_class" name="form_remove_class" action="/classrooms-remove" method="POST">
         <div class="fieldset"><br/>
             <lable id="slct_className_title" class="form_titles" for="slct_class">Remove a Classroom</lable><br/>
             <select id="slct_class" name="slct_class">
                 <option disabled selected value="">Classroom</option>
-                {% for name in class_query %}
-                <option value ="{{ name['name'] }}">{{ name["name"] }}</option>
+                {% for class in class_rms %}
+                <option value ="{{ class['classroom'] }}">{{ class["classroom"] }}</option>
                 {% endfor %}
             </select><br/>
             <button type="submit" id="btn_remove_class" class="btn_submit">Remove Classroom</button>
         </div>
     </form>
 </div>
+<script src="../static/classrooms.js" type="module"></script>
 {% endblock %}

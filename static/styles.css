@@ -529,7 +529,7 @@ table
     height: 600px;
     float: right;
 }
- #table_staff_att, #table_staff_hours, #table_client_att, #table_client_hours
+ #table_staff_att, #table_staff_hours, #table_client_att, #table_client_hours, #table_class_info
  {
     overflow-y: auto;
     height: 600px;

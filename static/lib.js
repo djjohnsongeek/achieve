@@ -1,4 +1,11 @@
 //validate functions
+export function button_error(button)
+{
+    var original_text = button.innerText;
+    button.style.backgroundColor = "red";
+    button.innerText = "Check for Errors";
+    setTimeout(reveal_error, 2000, button, original_text);
+}
 
 export function reveal_error(button, original_text)
 {
@@ -24,10 +31,8 @@ export function validate(form)
     return valid;
 }
 
-export function validate_teachers(form)
+export function validate_teachers(form, button, lable)
 {
-    var lable = document.getElementById("teachers_title");
-    var button = document.getElementById("btn_add_client");
     var valid = false;
     for (var j = 0; j < form.length; j ++)
     {
