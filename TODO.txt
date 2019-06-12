@@ -64,6 +64,7 @@ Current Tasks:
         -save schedule for the entire week, able to few entire weeks schedule
         -generate and download schedule on the same page
         -bigger check boxes
+        -set and restore database to 'default'
         -consolodate staff/client/classroom update routes
         -parse finished schedlue docs to reveal staff openings
 
