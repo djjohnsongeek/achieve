@@ -1049,7 +1049,6 @@ def classrooms():
         flash("Please select at least one teacher")
         return redirect("/classrooms")
 
-    print(teachers)
     # validate substitute forms
     subs= []
     count = 0
@@ -1064,7 +1063,13 @@ def classrooms():
         flash("Please select at least one substitute teacher")
         return redirect("/classrooms")
 
-    print(subs)
+    # ensure teacher are not accidentially inserted as subs
+    for t in teachers:
+        for s in subs:
+            if t == s:
+                flash(f"{t} cannot be both a teacher and a sub for {classroom}")
+                return redirect("/classrooms")
+
     # check that all supplied teachers are in database
     teachers = teachers + subs
     teachers_filtered = [teacher for teacher in teachers if teacher]

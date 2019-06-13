@@ -435,12 +435,11 @@ select, option
     padding: 3px;
     padding-top: 10px;
     padding-bottom: 10px;
-    border-radius: 5px;
     background-color: whitesmoke;
     display: inline-block;
     margin-top: 0;
     margin-bottom: 10px;
-    max-width: 300px;
+    max-width: 306px;
 }
 /* ################################################### FLASK FLASHED MESSAGES ############################################################################ */
 .alert

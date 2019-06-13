@@ -62,8 +62,7 @@ Client Side Functionality (Requires update)
 Current Tasks:
         -deal with late teachers
         -parse finished schedule docs to reveal staff openings
-
-
+        
         Backburner:
         -bigger check boxes (on hold)
         -re-schedule already scheduled staff if available?
