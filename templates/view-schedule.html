@@ -8,7 +8,19 @@
             <h1>Schedules: {{ current_day[0] }}</h1>
         </header>
     </div>
-    <div class="spacer"></div>
+    <form class="view_schedules" action="/view-schedule/both" method="POST">
+        <div class="div_forms">
+            <select name="view_schedule_day_both">
+                <option value="" selected disabled>Select a day</option>
+                <option value="mon">Monday</option>
+                <option value="tue">Tuesday</option>
+                <option value="wed">Wednesday</option>
+                <option value="thu">Thursday</option>
+                <option value="fri">Friday</option>
+            </select><!--
+            --><button class="btn_submit" type="submit">View Schedule</button>
+        </div>
+    </form>
     <div class="table_container">
         <div id="table_client_sch">
             <table class="sticky-th">

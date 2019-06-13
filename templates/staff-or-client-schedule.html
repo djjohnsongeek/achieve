@@ -2,21 +2,33 @@
 
 
 {% block title %}
-    {% if staff_schedule %}
+    {% if catagory == "staff" %}
     Staff Schedule
-    {% elif client_schedule %}
+    {% elif catagory =="clients" %}
     Client Schedule
     {% endif %}
 {% endblock %}
 
 {% block main %}
-    {% if staff_schedule %}
+    {% if catagory == "staff" %}
     <div class="description">
-            <header>
-                <h1>Staff Schedule: {{ current_day[0] }}</h1>
-            </header>
-        </div>
-    <div class="spacer"></div>
+        <header>
+            <h1>Staff Schedule: {{ current_day[0] }}</h1>
+        </header>
+    </div>
+    <div class="div_forms">
+        <form class="view_schedules" action="/view-schedule/staff" method="POST">
+            <select name="view_schedule_day">
+                <option value="" selected disabled>Pick a day</option>
+                <option value="mon">Monday</option>
+                <option value="tue">Tuesday</option>
+                <option value="wed">Wednesday</option>
+                <option value="thu">Thursday</option>
+                <option value="fri">Friday</option>
+            </select><!--
+            --><button type="submit" class="btn_submit">View Schedule</button>
+        </form>
+    </div>
     <div class="table_container">
         <div class="table_either_sch">
             <table class="sticky-th">
@@ -39,13 +51,25 @@
             </table>
         </div>
     </div>
-    {% elif client_schedule %}
+    {% elif catagory == "clients" %}
     <div class="description">
         <header>
             <h1>Client Schedule: {{ current_day[0] }}</h1>
         </header>
     </div>
-    <div class="spacer"></div>
+    <div class="div_forms">
+        <form class="view_schedules" action="/view-schedule/clients" method="POST">
+            <select name="view_schedule_day">
+                <option value="" selected disabled>Pick a day</option>
+                <option value="mon">Monday</option>
+                <option value="tue">Tuesday</option>
+                <option value="wed">Wednesday</option>
+                <option value="thu">Thursday</option>
+                <option value="fri">Friday</option>
+            </select><!--
+            --><button type="submit" class="btn_submit">View Schedule</button>
+        </form>
+    </div>
     <div class="table_container">
         <div class="table_either_sch">
             <table class="sticky-th">

@@ -57,11 +57,32 @@ footer
     width: 20%;
     height: 51px;
     background-color: rgb(39,171,113);
-    border-radius: 5px;
     border: none;
     font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
     font-weight: bold;
 }
+
+.view_schedules .btn_submit
+{
+    height: 45px;
+    padding: 5px;
+    width: 12%;
+    margin: 0;
+    border-radius: 0px;
+    border: 1px solid grey;
+    border-left: none;
+}
+#btn_download
+{
+    height: 45px;
+    padding: 5px;
+    width: 24%;
+    margin: 0;
+    border-radius: 0px;
+    border: 1px solid grey;
+    border-top: none;
+}
+
 .btn_submit:hover
 {
     background-color: rgb(79, 190, 142);
@@ -94,17 +115,27 @@ input, select
     padding: 10px 10px;
     margin: 10px;
 }
+
 input[type=text], input[type=time], input[type=password], input[type="number"]
 {
     width: 30%;
     height: 30px;
 }
+
 select, option
 {
     height: 51px;
     width: 31.5%;
     font-family: "Lucida Sans Unicode", "Lucida Grande", sans-serif;
 }
+
+.view_schedules select
+{
+    width: 12%;
+    height: 45px;
+    margin: 0;
+}
+
 .slct_weekday
 {
     width: 83px;
@@ -112,6 +143,7 @@ select, option
     margin-left: 0;
     text-align: center;
 }
+
 #mon, #mon2
 {
     margin-left: 10px;
@@ -395,6 +427,21 @@ select, option
 #btn_generate:active{
     border: 1px solid lightgrey;
 }
+
+.warning
+{
+    color: red;
+    border: 1px dashed;
+    padding: 3px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    border-radius: 5px;
+    background-color: whitesmoke;
+    display: inline-block;
+    margin-top: 0;
+    margin-bottom: 10px;
+    max-width: 300px;
+}
 /* ################################################### FLASK FLASHED MESSAGES ############################################################################ */
 .alert
 {
@@ -427,6 +474,12 @@ select, option
     height: 50px;
     background-color: whitesmoke;
 }
+
+.spacer_small
+{
+    height: 10px;
+    background-color: whitesmoke;
+}
 th, td
 {
     padding-top: 20px;
@@ -448,14 +501,6 @@ th
     font-weight: bold;
     color: rgb(39,171,113);
     color: #212962;
-}
-
-caption{
-    border-collapse: collapse;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    font-size: 1.4em;
-    letter-spacing: 2px;
 }
 
 table
@@ -507,7 +552,7 @@ table
     float: right;
 }
 .table_either_sch
-{
+{   
     margin: auto;
     width: 85%;
     height: 600px;
@@ -529,8 +574,8 @@ table
     height: 600px;
     float: right;
 }
- #table_staff_att, #table_staff_hours, #table_client_att, #table_client_hours, #table_class_info
- {
+#table_staff_att, #table_staff_hours, #table_client_att, #table_client_hours, #table_class_info
+{
     overflow-y: auto;
     height: 600px;
- }
+}

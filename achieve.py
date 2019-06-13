@@ -1416,7 +1416,7 @@ def schedule():
         # write client's schedule to csv
         header = ("Name", "Time", "Staff")
         try:
-            with open(os.path.join(app.instance_path, "client_schedule.csv"), "a", newline="") as csvfile:
+            with open(os.path.join(app.instance_path, "client_schedule_" + curr_att_day + ".csv"), "a", newline="") as csvfile:
                 writer = csv.writer(csvfile)
                 if client_num == 0:
                     writer.writerow((current_day.capitalize(),))
@@ -1440,7 +1440,7 @@ def schedule():
 
    # write staff's schedule to csv NOTE: need to output in alphabetical order
     try:
-        with open(os.path.join(app.instance_path, "staff_schedule.csv"), "a", newline="") as csvfile2:
+        with open(os.path.join(app.instance_path, "staff_schedule_" + curr_att_day + ".csv"), "a", newline="") as csvfile2:
             writer = csv.writer(csvfile2)
             header = ("Name", "Time", "Client")
             writer.writerow((current_day.capitalize(),))
@@ -1465,7 +1465,7 @@ def schedule():
     conn.close()
 
     # encrypt files, removed unencrypted files
-    files = {"staff_schedule.csv", "client_schedule.csv"}
+    files = {"staff_schedule_" + curr_att_day + ".csv", "client_schedule_" + curr_att_day + ".csv"}
     buffer = 64 * 1024
     key = "abcofnc1!"
     
@@ -1476,16 +1476,50 @@ def schedule():
     # redirect to downloads page, prepare feedback for info
     session["error"] = 0
     flash("Success")
-    return redirect("/download")
+    return redirect("/schedule")
 
-@app.route("/view-schedule/<string:catagory>")
+@app.route("/view-schedule/<string:catagory>", methods=["GET", "POST"])
 @login_required
 def view_schedule(catagory):
+    # --- GET REQUESTS --- #
+    if request.method == "GET":
+        current_day = ["Pick a day"]
+        if catagory == "both":
+            schedules = []
+            return render_template("view-schedule.html", schedules = schedules, current_day = current_day)
+        elif catagory == "staff":
+            staff_schedule = []
+            return render_template("staff-or-client-schedule.html", catagory = catagory, staff_schedule = staff_schedule, current_day = current_day)
+        elif catagory == "clients":
+            client_schedule = []
+            return render_template("staff-or-client-schedule.html", catagory = catagory, client_schedule = client_schedule, current_day = current_day)
+        else:
+            flash("URL invalid")
+            return redirect("/")
+
+    # --- POST REQUESTS --- #
+    # prepare feedback varibles
+    session["error"] = 1
+    error_path = "view-schedule/" + catagory
+
+    # get correct form data
+    if catagory == "both":
+        day = request.form.get("view_schedule_day_both")
+    else:
+        day = request.form.get("view_schedule_day")
+    
+    if not day:
+        flash("Please select a day")
+        return redirect(error_path)
+
+    if day not in {"mon", "tue", "wed", "thu", "fri"}:
+        flash("Invalid data submitted")
+        return redirect(error_path)
 
     # prepare variables
     buffer = 64 * 1024
     key = "abcofnc1!"
-    files = ("client_schedule.csv", "staff_schedule.csv")
+    files = ("client_schedule_" + day + ".csv", "staff_schedule_" + day + ".csv")
     schedules = []
 
     # decrypt each schedule file, read each file into a list, remove the decrypted file
@@ -1496,9 +1530,8 @@ def view_schedule(catagory):
         try:
             pyAesCrypt.decryptFile(encrypted_path, path, key, buffer)
         except:
-            session["error"] = 1
             flash("No file found")
-            return redirect("/schedule")
+            return redirect(error_path)
         try:
             with open(path, "r", newline="") as csvfile:
                 reader = csv.reader(csvfile)
@@ -1507,9 +1540,8 @@ def view_schedule(catagory):
                 schedule = [row for row in reader]
                 schedules.append(schedule)
         except csv.Error as e:
-            session["error"] = 1
             flash(f"Error: {e}")
-            return redirect("/schedule")
+            return redirect(error_path)
 
         os.remove(path)
 
@@ -1517,23 +1549,46 @@ def view_schedule(catagory):
     if catagory == "both":
         return render_template("view-schedule.html", schedules = schedules, current_day = current_day)
     elif catagory == "clients":
-        return render_template("staff-or-client-schedule.html", client_schedule = schedules[0], current_day = current_day)
+        return render_template("staff-or-client-schedule.html", catagory = catagory, client_schedule = schedules[0], current_day = current_day)
     elif catagory == "staff":
-        return render_template("staff-or-client-schedule.html", staff_schedule = schedules[1], current_day = current_day)
+        return render_template("staff-or-client-schedule.html", catagory = catagory, staff_schedule = schedules[1], current_day = current_day)
     else:
-        session["error"] = 1
         flash("URL invalid")
         return redirect("/")
     
-@app.route("/download")
+@app.route("/download", methods=["GET", "POST"])
 @login_required
 @admin_required
 def downloadpage():
-    return render_template("downloads.html")
+    # --- GET REQUESTS --- #
+    if request.method == "GET":
+        return render_template("schedule.html")
 
-@app.route("/download/<path:filename>")
-@login_required
-def download(filename):
+    # --- POST REQUESTS --- #
+    # prepare server feedback as errors
+    session["error"] = 1
+    day = request.form.get("download_day")
+    schedule = request.form.get("schedule_type")
+
+    # validate day select values
+    if day not in {"mon", "tue", "wed", "thu", "fri"}:
+        flash("You must select a day")
+        return redirect("/schedule")
+
+    # validate radio values
+    if schedule not in {"s", "c"}:
+        flash("You must choose staff or client schedule")
+        return redirect("/schedule")
+    
+    # add CSV file type ending
+    day += ".csv"
+
+    # create file name to be dowloaded
+    if schedule == "s":
+        filename = "staff_schedule_" + day
+    else:
+        filename = "client_schedule_" + day
+
     buffer = 64 * 1024
     key = "abcofnc1!"
 
@@ -1543,11 +1598,10 @@ def download(filename):
     try:
         pyAesCrypt.decryptFile(encrypted_path, path, key, buffer)
     except:
-        session["error"] = 1
         flash("No file found")
-        return redirect("/download")
+        return redirect("/schedule")
 
-    # server file from memory, delete file
+    # server file from memory, overwrite file, then delete file
     # code from: https://stackoverflow.com/questions/40853201/remove-file-after-flask-serves-it?rq=1, by davidism
     def generate():
         with open(path) as f:

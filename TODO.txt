@@ -61,15 +61,15 @@ Client Side Functionality (Requires update)
 
 Current Tasks:
         -deal with late teachers
-        -save schedule for the entire week, able to few entire weeks schedule
-        -generate and download schedule on the same page
-        -bigger check boxes
-        -consolodate staff/client/classroom update routes
-        -parse finished schedlue docs to reveal staff openings
+        -parse finished schedule docs to reveal staff openings
+
 
         Backburner:
+        -bigger check boxes (on hold)
         -re-schedule already scheduled staff if available?
         -possible optimization: no rebuiliding tier_team_member list EVERY loop
+        -in-depth client-side feedback
+        -review all code
 
 FUTURE Features
     -seperate teams page? (For team management)
