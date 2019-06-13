@@ -62,8 +62,9 @@ Client Side Functionality (Requires update)
 Current Tasks:
         -deal with late teachers
         -parse finished schedule docs to reveal staff openings
+        -set and restore database to 'default'
         
-        Backburner:
+Backburner:
         -bigger check boxes (on hold)
         -re-schedule already scheduled staff if available?
         -possible optimization: no rebuiliding tier_team_member list EVERY loop
