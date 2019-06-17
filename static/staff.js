@@ -1,4 +1,4 @@
-import {validate, reveal_error} from "./lib.js"
+import {validate, reveal_error, button_error} from "./lib.js"
 
 // listen for add staff button
 document.getElementById("btn_add_staff").addEventListener("click", function(event){
@@ -12,10 +12,7 @@ document.getElementById("btn_add_staff").addEventListener("click", function(even
     }
     else
     {
-        var original_text = button.innerText;
-        button.style.backgroundColor = "red";
-        button.innerText = "Check for Errors";
-        setTimeout(reveal_error, 3000, button, original_text);
+        button_error(button);
     }
 });
 
@@ -28,10 +25,7 @@ document.getElementById("btn_remove_staff").addEventListener("click", function(e
     if (!staff_name.value)
     {
         staff_name.style.border = "1px solid red";
-        var original_text = button.innerText;
-        button.style.backgroundColor = "red";
-        button.innerText = "Check for Errors";
-        setTimeout(reveal_error, 1500, button, original_text);
+        button_error(button);
     }
     else
     {

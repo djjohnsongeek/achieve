@@ -1,22 +1,39 @@
-import {reveal_error} from "./lib.js"
+import {reveal_error, button_error, validate} from "./lib.js"
 
 //Listen for update client info button being clicked
 document.getElementById("btn_update_client").addEventListener("click", function(event){
+
     //prevent form submission
     event.preventDefault();
+
     var client_name = document.getElementById("slct_update_client");
+    var hrsForms = [document.getElementById("new_client_hours_start"), document.getElementById("new_client_hours_end")];
     var button = document.getElementById("btn_update_client");
-    if (!client_name.value)
+
+    // reset error colors:
+    client_name.style.border = "";
+
+    if (client_name.value)
     {
-        client_name.style.border = "1px solid red";
-        var original_text = button.innerText;
-        button.style.backgroundColor = "red";
-        button.innerText = "Check for Errors";
-        setTimeout(reveal_error, 3000, button, original_text);
+        if (hrsForms[0].value && hrsForms[1].value)
+        {
+            if(validate(hrsForms))
+            {
+                document.getElementById("form_update_client").submit();
+            }
+            else
+            {
+                button_error(button);
+            }
+        }
+        else
+        {
+            document.getElementById("form_update_client").submit();
+        }
     }
     else
     {
-        client_name.style.border = "1px solid grey";
-        document.getElementById("form_update_client").submit();
+        button_error(button);
+        client_name.style.border = "1px solid red";
     }
 });

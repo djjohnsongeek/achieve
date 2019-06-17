@@ -4,9 +4,9 @@
 
 {% block main %}
 <div class="login_form">
-    <header>
+    <div class="header">
             <h1>Generate Schedule</h1>
-    </header>
+    </div>
     <div class="spacer_small"></div>
     <lable for="slct_schedule_day" class="warning">This will overwrite the previously generated schedule</lable><br/>
     <form class="view_schedules" id="schedule_day" action="/schedule" method="POST">
@@ -17,34 +17,44 @@
                 <option value="wednesday">Wednesday</option>
                 <option value="thursday">Thursday</option>
                 <option value="friday">Friday</option>
-            </select><!--
-        --><button class="btn_submit" name="btn_generate">Generate Schedule</button>
+            </select><br/>
+        <button class="btn_submit" id="btn_create_sch" name="btn_generate">Generate Schedule</button>
     </form>
     <script src="../static/schedule.js" type="module"></script>
-</div>
-<div class="spacer_small"></div>
-<div class="login_form">
-    <header>
-            <h1>Download Schedule</h1>
-            
-    </header>
     <div class="spacer_small"></div>
-    <form class="view_schedules" action="/download" method="POST">
-        <select name="download_day">
-            <option selected disabled>Pick a day</option>
+    <div class="header">
+            <h1>Download Schedule</h1>        
+    </div>
+    <div class="spacer_small"></div>
+    <form id="form_download_sch" class="view_schedules" action="/download" method="POST">
+        <select id="slct_download_day" name="download_day">
+            <option selected disabled value="">Pick a day</option>
             <option value="mon">Monday</option>
             <option value="tue">Tuesday</option>
             <option value="wed">Wednesday</option>
             <option value="thu">Thursday</option>
             <option value="fri">Friday</option>
         </select><!--
-        --><select name="schedule_type">
+        --><select id="slct_schedule_type" name="schedule_type">
             <option value="" selected disabled>Catagory</option>
             <option value="c">Client Schedule</option>
             <option value="s">Staff Schedule</option>
         </select><br/>
         <button type="submit" id="btn_download" class="btn_submit"><i class="fa fa-download"></i>Download</button><br/>
     </form>
-    <div class="spacer_small"></div>      
+    <div class="spacer_small"></div>
+    <div class="header">
+            <h1>Manage Database</h1>        
+    </div>
+    <div class="spacer_small"></div>
+    <form id="form_manage_db" class="view_schedules" action="/database" method="GET">
+        <select id="slct_db_backup" name="manage_db">
+            <option selected disabled value="">Backup or Restore</option>
+            <option value="b">Backup</option>
+            <option value="r">Restore</option>
+        </select><!--
+        --></select><br/>
+        <button type="submit" id="btn_manage_db" class="btn_submit">Submit</button><br/>
+    </form>      
 </div>
 {% endblock %}

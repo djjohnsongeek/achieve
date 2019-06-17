@@ -21,7 +21,7 @@ document.getElementById("btn_add_client").addEventListener("click", function(eve
     $.get("/addclient?clientname=" + client_name.value, function(data){
         if (data == false)
         {
-            if (validate(hrsForm) && validate_teachers(teamForm, button, lable))
+            if (validate(hrsForm) && validate_teachers(teamForm, lable))
             {
                 document.getElementById("form_add_client").submit();
             }

@@ -27,11 +27,20 @@ export function validate(form)
         {
             form[i].style.border = "1px solid grey";
         }
+        if (form[i].type == "time")
+        {
+            var RE = /[012][0-9]:30/
+            if (!RE.test(form[i].value))
+            {
+                valid = false;
+                form[i].style.border = "1px solid red";
+            }
+        }
     }
     return valid;
 }
 
-export function validate_teachers(form, button, lable)
+export function validate_teachers(form, lable)
 {
     var valid = false;
     for (var j = 0; j < form.length; j ++)
@@ -57,7 +66,6 @@ export function validate_teachers(form, button, lable)
     {
         lable.innerHTML = "Please select at least one Teacher";
         lable.style.color = "red";
-        setTimeout(reveal_error, 3000);
         return false
     }
 }

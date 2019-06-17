@@ -60,9 +60,10 @@ Client Side Functionality (Requires update)
         -look at rewriting JavaScript Validation
 
 Current Tasks:
-        -deal with late teachers
+        -scheduling late teachers
         -parse finished schedule docs to reveal staff openings
-        -set and restore database to 'default'
+        -rename schedule page?
+        -ajax request for staff name
         
 Backburner:
         -bigger check boxes (on hold)

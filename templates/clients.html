@@ -14,13 +14,13 @@
     </header>
 </div>
 <div class="div_forms">
-    <form nonvalidate id="form_add_client" name="form_add_client" method="POST" action="/clients">
+    <form id="form_add_client" name="form_add_client" method="POST" action="/clients">
         <div class="fieldset"><br/>
             <lable class="form_titles" id="client_name_title" for="client_name">Client Name</lable><br/>
             <input type="text" id="client_name" name="client_name" placeholder="Client Name"><br/>
-            <label for="client_hours_start" class="form_titles">Start Time</label><br/>
+            <label for="client_hours_start" class="form_titles">Start Time (hh:30)</label><br/>
             <input type="time" name="client_hours_start" id="client_hours_start" placeholder="hh:mm (24hr)"><br/>
-            <label for="client_hours_end" class="form_titles">End Time</label><br/>
+            <label for="client_hours_end" class="form_titles">End Time (hh:30)</label><br/>
             <input type="time" name="client_hours_end" id="client_hours_end" placeholder="hh:mm (24hr)"><br/><br/>
             <lable class="form_titles">Days Present (check all that apply)</lable><br/>
             <ul class="lst_client_days">

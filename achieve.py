@@ -12,7 +12,7 @@ from random import randrange
 from werkzeug.security import check_password_hash, generate_password_hash
 from jinja2 import Environment, FileSystemLoader
 
-from SQL import db_connect
+from SQL import db_connect, db_backup, db_restore
 from server import generate_schedules, convert_strtime, create_schhours, login_required, shorten_day, lengthen_day, admin_required
 from cypher import scramble, unscramble
 
@@ -25,7 +25,7 @@ Achieve allows users to add, edit and remove staff and client information to and
 From the '/schedule' route it generates a daily schedule and saves it as an csv file which can be downloaded.
 (The 'generate schedule' is still in progress, and 'download csv file' is yet to be implemented)
 """
-DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
+DB_PATH = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 
 # initialize app
 app = Flask(__name__, instance_path="C:\\Users\\Johnson\\Documents\\Projects\\Achieve\\protected")
@@ -67,7 +67,7 @@ def login():
             return redirect("/login")
 
         # get user id number
-        db, conn = db_connect(DB_URL)
+        db, conn = db_connect(DB_PATH)
         db.execute("SELECT * FROM users WHERE username=?", (request.form.get("username"),))
         user_id = db.fetchone()
 
@@ -124,7 +124,7 @@ def changepw():
 
     # hash and update password
     hashed_pw = generate_password_hash(pw_new, method="sha256", salt_length=8)
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     db.execute("SELECT username FROM users WHERE userID=?", (session["user_id"],))
     user_name = db.fetchone()
@@ -148,7 +148,7 @@ def index():
 def clients():
     # for GET requests
     if request.method == "GET":
-        db, conn = db_connect(DB_URL)
+        db, conn = db_connect(DB_PATH)
         db.execute("SELECT name FROM staff")
         staff_query = db.fetchall()
         db.execute("SELECT name FROM clients")
@@ -226,7 +226,7 @@ def clients():
     unique_members = set(t_members)
     
     # connect to database
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # check if client's name is already in the database
     db.execute("SELECT clientID FROM clients WHERE name=?", (client_name,))
@@ -302,7 +302,7 @@ def remove_client():
     client_name = request.form.get("slct_client")
 
     # connect to database
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # get clientID, check to see if client is in database
     db.execute("SELECT clientID FROM clients WHERE name=?", (client_name,))
@@ -331,7 +331,7 @@ def remove_client():
 def update_client():
     # GET requests
     if request.method == "GET":
-        db, conn = db_connect(DB_URL)
+        db, conn = db_connect(DB_PATH)
         db.execute("SELECT name FROM staff")
         staff_query = db.fetchall()
         db.execute("SELECT name FROM clients")
@@ -351,7 +351,7 @@ def update_client():
     client_name = request.form.get("update_client")
 
     # connect to db
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # check if client is in the data base
     db.execute("SELECT clientID FROM clients WHERE name=?", (client_name,))
@@ -506,7 +506,7 @@ def addclient():
     clientname = scramble(request.args.get("clientname"))
     
     # connect to database
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # check if client name is already in the database
     db.execute("SELECT clientID FROM clients WHERE name=?", (clientname,))
@@ -523,7 +523,7 @@ def addclient():
 @login_required
 @admin_required
 def view_clients():
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # get basic client info
     db.execute("SELECT name, totalhours, color FROM clients ORDER BY name DESC")
@@ -566,7 +566,7 @@ def view_clients():
 @login_required
 @admin_required
 def view_client_hrs():
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # get client hours, decrypt client name
     db.execute("SELECT clients.name, monday, tuesday, wednesday, thursday, friday FROM clienthours JOIN clients ON clienthours.clientID = clients.clientID ORDER BY clients.name DESC")
@@ -582,7 +582,7 @@ def view_client_hrs():
 @login_required
 @admin_required
 def view_client_att():
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # get client attendance data, decrypt client name
     db.execute("SELECT name, mon, tue, wed, thu, fri FROM clients ORDER BY name DESC")
@@ -607,7 +607,7 @@ def view_client_att():
 def staff():
     if request.method == "GET":
         # connect to database
-        db, conn = db_connect(DB_URL)
+        db, conn = db_connect(DB_PATH)
 
         # retrieve all staff names
         db.execute("SELECT name FROM staff")
@@ -693,7 +693,7 @@ def staff():
             staff_att.append(0)
 
     # connect to database
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # check if staff is in the database
     db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
@@ -734,7 +734,7 @@ def remove_staff():
     staff_name = request.form.get("slct_staff_remove")
 
     # connect to database
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # get staffID, check to make sure it is in the database
     db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
@@ -764,7 +764,7 @@ def update_staff():
     # ---GET requests---
     if request.method == "GET":
         # connect to database
-        db, conn = db_connect(DB_URL)
+        db, conn = db_connect(DB_PATH)
 
         # retrieve all staff names
         db.execute("SELECT name FROM staff")
@@ -786,7 +786,7 @@ def update_staff():
     staff_name = request.form.get("slct_staff_update")
     
     # connect to db
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # check if staff name is in database
     db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
@@ -924,7 +924,7 @@ def update_staff():
 @login_required
 @admin_required
 def view_staff():
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # Get basic staff info
     db.execute("SELECT name, rbt, tier, color FROM staff ORDER BY name ASC")
@@ -969,7 +969,7 @@ def view_staff():
 @login_required
 @admin_required
 def view_staff_hours():
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # get staff hours
     db.execute("SELECT staff.name, monday, tuesday, wednesday, thursday, friday FROM staffhours JOIN staff ON staffhours.staffID = staff.staffID ORDER BY staff.name")
@@ -983,7 +983,7 @@ def view_staff_hours():
 @login_required
 @admin_required
 def vew_staff_att():
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # get staff attendance
     db.execute("SELECT name, mon, tue, wed, thu, fri FROM staff ORDER BY name")
@@ -1008,7 +1008,7 @@ def vew_staff_att():
 def classrooms():
     # --- GET requests --- #
     if request.method == "GET":
-        db, conn = db_connect(DB_URL)
+        db, conn = db_connect(DB_PATH)
 
         # get all staff
         db.execute("SELECT name FROM staff")
@@ -1023,7 +1023,7 @@ def classrooms():
     # --- POST requests --- #
     # prepare feeback for errors, connet to db
     session["error"] = 1
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # validate class name forms
     if not request.form.get("class_name"):
@@ -1111,7 +1111,7 @@ def classrooms_remove():
     session["error"] = 1
     classrm = request.form.get("slct_class")
     if classrm:
-        db, conn = db_connect(DB_URL)
+        db, conn = db_connect(DB_PATH)
         db.execute("SELECT classID FROM classrooms WHERE classroom=?", (classrm,))
         if db.fetchone():
             db.execute("DELETE FROM classrooms WHERE classroom=?", (classrm,))
@@ -1134,7 +1134,7 @@ def classrooms_remove():
 def class_update_form():
     # --- GET requests --- #
     if request.method == "GET":
-        db, conn = db_connect(DB_URL)
+        db, conn = db_connect(DB_PATH)
 
         # get classrooms
         db.execute("SELECT classroom FROM classrooms")
@@ -1154,7 +1154,7 @@ def class_update_form():
     # --- POST requests --- #
     # prepare feedback for errors, connect to db
     session["error"] = 1
-    db, conn  = db_connect(DB_URL)
+    db, conn  = db_connect(DB_PATH)
 
     # validate classroom field
     if not request.form.get("slct_class"):
@@ -1279,7 +1279,7 @@ def class_update_form():
 @login_required
 @admin_required
 def view_class():
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
     db.execute("SELECT classroom, req, teacher1, teacher2, sub1, sub2, sub3, sub4 FROM classrooms")
     class_data = db.fetchall()
     conn.close()
@@ -1306,7 +1306,7 @@ def schedule():
     curr_att_day = shorten_day(current_day)
 
     # when user generates a schedule
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     # update total hours for all clients
     db.execute(f"SELECT {current_day}, clientID from clienthours")
@@ -1623,3 +1623,26 @@ def downloadpage():
     r = app.response_class(generate(), mimetype="text/csv")
     r.headers.set("Content-Disposition", "attachment", filename=filename)
     return r
+
+@app.route("/database", methods=["GET"])
+@login_required
+@admin_required
+def manage_database():
+    session["error"] = 1
+    mode = request.args.get("manage_db")
+
+    # validate form
+    if not mode or mode not in {"r", "b"}:
+        flash("Please select an action to preform on the database")
+        return redirect("/schedule")
+
+    # backup or restore
+    session["error"] = 0
+    if mode == "b":
+        db_backup(DB_PATH)
+        flash("Backup Complete")
+    if mode == "r":
+        db_restore(DB_PATH)
+        flash("Data Base Restored")
+
+    return redirect("/schedule")
