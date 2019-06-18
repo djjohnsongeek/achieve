@@ -1429,6 +1429,7 @@ def schedule():
         client_sch = generate_schedules(client_ID, client_name, client_team, client_sch, all_staff_sch, curr_att_day)
         
         # TODO: update times outside of a staff's hours with "OUT"
+        
         # write client's schedule to csv
         header = ("Name", "Time", "Staff")
         try:
