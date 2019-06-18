@@ -1255,7 +1255,7 @@ def class_update_form():
             return redirect("/classrooms-update")
 
     # check for required number of staff data
-    if request.form.get("udpate_rq"):
+    if request.form.get("update_rq"):
         try:
             rq = int(request.form.get("update_rq"))
         except ValueError:
@@ -1327,57 +1327,65 @@ def schedule():
     all_staff_sch = {}
     for staff in staff_data:
         # NOTE: dynamically generate these times?
-        all_staff_sch[staff["name"]] = {830: "" , 930: "" , 1030: "" , 1130: "" , 1230: "" , 130: "" , 230: "" , 330: "" , 430: ""} # NOTE: dynamically generate these times?
+        all_staff_sch[staff["name"]] = {830: "" , 930: "" , 1030: "" , 1130: "" , 1230: "" , 130: "" , 230: "" , 330: "" , 430: ""}
 
     # ------------------------------------------------------------------------------------------------------------ #
-    # create schedule list for each class
+    # build classroom dicts
     db.execute("SELECT * FROM classrooms")
-    classes = db.fetchall()
-    classroom_hrs = [830, 930, 1030, 1130, 1230, 130]
-    for classroom in classes:
-        allclass_teachers = [classroom["teacher1"], classroom["teacher2"]]
+    class_info = db.fetchall()
+    classroom_hrs = {830: 0, 930: 0, 1030: 0, 1130: 0, 1230: 0, 130: 0}
+    classrooms_sch = [classroom_hrs.copy() for row in class_info]
+
+    # loop through classrooms
+    for i in range(len(classrooms_sch)):
+        allclass_teachers = [class_info[i]["teacher1"], class_info[i]["teacher2"], class_info[i]["sub1"], 
+                             class_info[i]["sub2"], class_info[i]["sub3"], class_info[i]["sub4"]]
         allclass_teachers = [teacher for teacher in allclass_teachers if teacher]
 
         class_teachers = []
-        # remove teachers who are absent
+        # create teacher list, removing those that are absent from work
         for teacher in allclass_teachers:
             db.execute(f"SELECT {curr_att_day} FROM staff WHERE name=?", (teacher,))
-            att = db.fetchone()[curr_att_day]
-            if att == 1:
+            if db.fetchone()[curr_att_day] == 1:
                 class_teachers.append(teacher)
-            
 
-        # Add subs to teacher list if necessary
-        if len(class_teachers) < classroom["req"]:
-            allclass_subs = [classroom["sub1"], classroom["sub2"], classroom["sub3"], classroom["sub4"]]
-            allclass_subs = [sub for sub in allclass_subs if sub]
-
-            # remove absent subs
-            class_subs = []
-            for sub in allclass_subs:
-                db.execute(f"SELECT {curr_att_day} FROM staff WHERE name=?", (sub,))
-                att = db.fetchone()[curr_att_day]
-                if att == 1:
-                    class_subs.append(sub)
-
-            for sub in class_subs:
-                class_teachers.append(sub)
-                # end loop if enough staff are in the list
-                if len(class_teachers) == classroom["req"]:
-                    break
-
-            print(class_teachers)
-            # if sublist is empty prompt user to add teacher to sublist
-            if len(class_teachers) < classroom["req"]:
-                flash(f'{classroom["classroom"]} sublist is empty or too small. Please add staff to the sublist to continue')
-                return redirect("/schedule")
+        # if sublist is empty prompt user to add teacher to sublist
+        if len(class_teachers) < class_info[i]["req"]:
+            flash(f'{class_info[i]["classroom"]} sublist is empty or too small. Please add staff to the sublist to continue')
+            return redirect("/schedule")
 
         # add classroom to teacher's schedule
-        for i in range(len(class_teachers)):
-            for hr in classroom_hrs:
-                all_staff_sch[class_teachers[i]][hr] = classroom["classroom"]
+        full_hours = []
+        for teacher in class_teachers:
+            # get staff id
+            db.execute("SELECT staffID FROM staff WHERE name=?", (teacher,))
+            teacher_id = db.fetchone()["staffID"]
 
-        # NOTE: account for teachers who are arriving late
+            # get teacher hours
+            db.execute(f"SELECT {current_day} FROM staffhours where staffID=?", (teacher_id,))
+            teacher_hours = db.fetchone()[current_day].split("-")
+            teacher_hours = create_schhours(convert_strtime(teacher_hours[0]), convert_strtime(teacher_hours[1]))
+
+            # remove hours that are not class times, that are "full"
+            teacher_hours = [hour for hour in teacher_hours if hour in classroom_hrs.keys()]
+            teacher_hours = [hour for hour in teacher_hours if hour not in full_hours]
+
+            # end loop if no hours left to schedule
+            if not teacher_hours:
+                break
+
+            # schedule required number of staff
+            for hr in teacher_hours:
+                all_staff_sch[teacher][hr] = class_info[i]["classroom"]
+                classrooms_sch[i][hr] += 1
+
+            # track hours that no longer need teachers
+            full_hours = [item[0] for item in classrooms_sch[i].items() if item[1] == class_info[i]["req"]]
+
+        print(classrooms_sch)
+        for item in all_staff_sch.items():
+            print(item[0])
+            print(item[1])
     # ------------------------------------------------------------------------------------------------------------ #
 
     # get client data (where client/staff are present, ordered by color and total hours)
@@ -1385,7 +1393,8 @@ def schedule():
     client_data = db.fetchall()
 
     # create schedule dicts for each client
-    c_dict = {830: "---" , 930: "---" , 1030: "---" , 1130: "---" , 1230: "---" , 130: "---" , 230: "---" , 330: "---" , 430: "---"} # NOTE: dynamically generate these times?
+    # NOTE: dynamically generate these times?
+    c_dict = {830: "---" , 930: "---" , 1030: "---" , 1130: "---" , 1230: "---" , 130: "---" , 230: "---" , 330: "---" , 430: "---"} 
     clients = [c_dict.copy() for row in client_data]
 
     # update each client's schedule
@@ -1396,6 +1405,7 @@ def schedule():
         client_ID = client_data[client_num]["clientID"]
         client_name = unscramble(client_data[client_num]["name"])
         db.execute(f"SELECT {current_day} FROM clienthours WHERE clientID=?", (client_ID,))
+        # NOTE: check for None here?
         client_hours = db.fetchone()[current_day].split("-")
         
         # generate a list of the client's scheduable hours
@@ -1417,7 +1427,8 @@ def schedule():
 
         # generate current client's schedule
         client_sch = generate_schedules(client_ID, client_name, client_team, client_sch, all_staff_sch, curr_att_day)
-
+        
+        # TODO: update times outside of a staff's hours with "OUT"
         # write client's schedule to csv
         header = ("Name", "Time", "Staff")
         try:
