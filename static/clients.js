@@ -1,4 +1,4 @@
-import {validate, validate_teachers, reveal_error, button_error} from "./lib.js"
+import {validate, validate_teachers, button_error} from "./lib.js"
 
 //Listen for the add client button being clicked
 document.getElementById("btn_add_client").addEventListener("click", function(event){

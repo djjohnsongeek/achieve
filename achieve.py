@@ -918,6 +918,26 @@ def update_staff():
     flash(f"{staff_name}'s info successfully updated")
     return redirect("/staff-update")
 
+@app.route("/addStaff")
+@login_required
+@admin_required
+def addstaff():
+    staff_name = request.args.get("staffname")
+    
+    # connect to database
+    db, conn = db_connect(DB_PATH)
+
+    # check if client name is already in the database
+    db.execute("SELECT staffID FROM staff WHERE name=?", (staff_name,))
+    query = db.fetchone()
+    conn.close()
+
+    # return result
+    if query:
+        return jsonify(True)
+    else:
+        return jsonify(False)
+
 @app.route("/staff/view-staff-info")
 @login_required
 @admin_required
