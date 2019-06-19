@@ -108,11 +108,13 @@ if argv[1][0] == "s":
     db.execute(f"SELECT name FROM staff WHERE {curr_att_day}=1")
     all_staff = [name for row in db.fetchall() for name in row]
     empty = ""
+    sch_type = "STAFF"
 else:
     schedule_type = "clients"
     db.execute(f"SELECT name FROM clients WHERE {curr_att_day}=1")
     all_staff = [unscramble(name) for row in db.fetchall() for name in row]
     empty = "0"
+    sch_type = "CLIENT"
 conn.close()
 
 # sort names, prepare dictionary
@@ -141,6 +143,8 @@ try:
                 if line[1] not in staff_details[name]["open-hours"]:
                     staff_details[name]["open-hours"].append(line[1])
                     staff_details[name]["total open-hours"] += 1
+            elif line[2] == "OUT":
+                pass
             else:
                 if line[1] not in staff_details[name]["session-hours"]:
                     staff_details[name]["session-hours"].append(line[1])
@@ -150,17 +154,40 @@ except FileNotFoundError:
     sys.exit(1)
 
 # write info to file, as well as terminal
-with open("schedule_details.txt", "w") as txtf:
+with open(sch_type + "_schedule_details.txt", "w") as txtf:
+    print(f"****{sch_type} SUMMARY****")
+    txtf.write(f"****{sch_type}SUMMARY****\n")
     for item in staff_details.items():
+        # print/write staff name and hear
         txtf.write("---------------------\n")
         print("---------------------")
         txtf.write(item[0].upper() + "\n")
         print(item[0].upper())
+        txtf.write("---------------------\n")
+        print("---------------------")
 
+        # print/write summary data
         for stuff in item[1].items():
             txtf.write(stuff[0] + ": " + str(stuff[1]) + "\n")
             print(stuff[0] + ": " + str(stuff[1]))
+        
+        print("\n")
+        txtf.write("\n")
+    
+    print(f"{sch_type} AVAILABILITY BY HOUR")
+    txtf.write(f"{sch_type} AVAILABILITY BY HOUR\n")
+    for time in [830, 930, 1030, 1130, 1230, 130, 230, 330, 430, 530]:
+        txtf.write("---------------------\n")
+        print("---------------------")
+        txtf.write("\t" + str(time) + "\n")
+        print("\t" + str(time))
+        txtf.write("---------------------\n")
+        print("---------------------")
+        for staff in all_staff:
+            if str(time) in staff_details[staff]["open-hours"]:
+                txtf.write(staff + "\n")
+                print(staff)
 
 print("\n")
 print("Analysis Finished")
-print(f"File 'schedule_details.txt' created at {sys.path[0]}")
+print(f"File '{sch_type}_schedule_details.txt' created at {sys.path[0]}")

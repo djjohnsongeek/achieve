@@ -1,7 +1,8 @@
 import sqlite3
+import sys
 from sqlite3 import Error
 
-BACKUP = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\backup.db"
+BACKUP = sys.path[0] + "\\backup.db"
 
 def db_connect(db_path):
     """ A simple fuction to make connection to SQLite databases easier """

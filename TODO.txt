@@ -60,10 +60,8 @@ Client Side Functionality (Requires update)
         -look at rewriting JavaScript Validation
 
 Current Tasks:
-        -update times outside of a staff's hours with "OUT"
-        -rename schedule page?
         -ajax request for staff name
-        -sys.path[0] for file paths
+        -write schedule in alphabetical order
         
 Backburner:
         -bigger check boxes (on hold)

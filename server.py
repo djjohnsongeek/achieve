@@ -1,4 +1,5 @@
 import sqlite3
+import sys
 
 from flask import session, request, redirect, render_template, flash
 from functools import wraps
@@ -6,7 +7,7 @@ from random import randrange
 
 from SQL import db_connect
 
-DB_URL = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
+DB_PATH = sys.path[0] + "\\achieve.db"
     
 def login_required(f):
     """ decorates routes to require login """
@@ -81,7 +82,7 @@ def generate_schedules(client_ID: int, client_name: str, client_team: list, clie
     # NOTE: need to devise a way to override "two hour only" scheduling, schedule based on team size
 
     # connect to database, prepare additional client specific variables
-    db, conn = db_connect(DB_URL)
+    db, conn = db_connect(DB_PATH)
 
     db.execute("SELECT totalhours FROM clients WHERE clientID=?", (client_ID,))
     client_data = db.fetchone()

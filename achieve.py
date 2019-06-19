@@ -1,9 +1,9 @@
 import os
+import sys
 import sqlite3
 import re
 import csv
 import pyAesCrypt
-# import subprocess
 
 from flask import Flask
 from flask import render_template, request, session, redirect, Response, jsonify, json, send_from_directory, flash
@@ -16,8 +16,6 @@ from SQL import db_connect, db_backup, db_restore
 from server import generate_schedules, convert_strtime, create_schhours, login_required, shorten_day, lengthen_day, admin_required
 from cypher import scramble, unscramble
 
-# NOTE: need to replace annoying single error page with client side UI feedback
-# NOTE: need to send POST requests with AJAX
 # NOTE: need to review code, optimize and improve design and style, use custom fuctions as well as revamp comments
 
 """
@@ -25,10 +23,10 @@ Achieve allows users to add, edit and remove staff and client information to and
 From the '/schedule' route it generates a daily schedule and saves it as an csv file which can be downloaded.
 (The 'generate schedule' is still in progress, and 'download csv file' is yet to be implemented)
 """
-DB_PATH = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
+DB_PATH = sys.path[0] + "\\achieve.db"
 
 # initialize app
-app = Flask(__name__, instance_path="C:\\Users\\Johnson\\Documents\\Projects\\Achieve\\protected")
+app = Flask(__name__, instance_path=sys.path[0] + "\\protected")
 app.secret_key = "development"
 
 # ensure auto reload, code from CS50 staff
@@ -1322,12 +1320,18 @@ def schedule():
     conn.commit()
     
     # build staff schedules with nested dicts
-    db.execute(f"SELECT name FROM staff where {curr_att_day}=1")
+    db.execute(f"SELECT name, staffhours.{current_day} FROM staff INNER JOIN staffhours ON staff.staffID = staffhours.staffID WHERE {curr_att_day}=1")
     staff_data = db.fetchall()
+
     all_staff_sch = {}
-    for staff in staff_data:
+    for row in staff_data:
         # NOTE: dynamically generate these times?
-        all_staff_sch[staff["name"]] = {830: "" , 930: "" , 1030: "" , 1130: "" , 1230: "" , 130: "" , 230: "" , 330: "" , 430: ""}
+        all_staff_sch[row["name"]] = {830: "" , 930: "" , 1030: "" , 1130: "" , 1230: "" , 130: "" , 230: "" , 330: "" , 430: ""}
+        for time in all_staff_sch[row["name"]].keys():
+            hours = row[current_day].split("-")
+            hours = create_schhours(convert_strtime(hours[0]), convert_strtime(hours[1]))
+            if time not in hours:
+                all_staff_sch[row["name"]][time] = "OUT"
 
     # ------------------------------------------------------------------------------------------------------------ #
     # build classroom dicts
@@ -1376,6 +1380,9 @@ def schedule():
 
             # schedule required number of staff
             for hr in teacher_hours:
+                if all_staff_sch[teacher][hr] != "":
+                    print("overlap error!!!!")
+
                 all_staff_sch[teacher][hr] = class_info[i]["classroom"]
                 classrooms_sch[i][hr] += 1
 
