@@ -158,7 +158,7 @@ with open(sch_type + "_schedule_details.txt", "w") as txtf:
     print(f"****{sch_type} SUMMARY****")
     txtf.write(f"****{sch_type}SUMMARY****\n")
     for item in staff_details.items():
-        # print/write staff name and hear
+        # print/write staff name and heading
         txtf.write("---------------------\n")
         print("---------------------")
         txtf.write(item[0].upper() + "\n")
@@ -166,7 +166,6 @@ with open(sch_type + "_schedule_details.txt", "w") as txtf:
         txtf.write("---------------------\n")
         print("---------------------")
 
-        # print/write summary data
         for stuff in item[1].items():
             txtf.write(stuff[0] + ": " + str(stuff[1]) + "\n")
             print(stuff[0] + ": " + str(stuff[1]))
@@ -174,15 +173,18 @@ with open(sch_type + "_schedule_details.txt", "w") as txtf:
         print("\n")
         txtf.write("\n")
     
+    # print/write staff summary by hour
     print(f"{sch_type} AVAILABILITY BY HOUR")
     txtf.write(f"{sch_type} AVAILABILITY BY HOUR\n")
     for time in [830, 930, 1030, 1130, 1230, 130, 230, 330, 430, 530]:
+        # print/write staff name and heading
         txtf.write("---------------------\n")
         print("---------------------")
         txtf.write("\t" + str(time) + "\n")
         print("\t" + str(time))
         txtf.write("---------------------\n")
         print("---------------------")
+        # print/write summary data by hour
         for staff in all_staff:
             if str(time) in staff_details[staff]["open-hours"]:
                 txtf.write(staff + "\n")
