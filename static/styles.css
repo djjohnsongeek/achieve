@@ -13,8 +13,9 @@ header
 {
     text-align: center;
     padding: 1px;
-    font-size: .8em;
+    font-size: 1.75em;
     color: #212962;
+    font-weight: bold;
 }
 .description
 {
