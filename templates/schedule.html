@@ -5,7 +5,7 @@
 {% block main %}
 <div class="login_form">
     <div class="header">
-            <h1>Generate Schedule</h1>
+            <span>Generate Schedule</span>
     </div>
     <div class="spacer_small"></div>
     <lable for="slct_schedule_day" class="warning">This will overwrite the previously generated schedule</lable><br/>
@@ -23,7 +23,7 @@
     <script src="../static/schedule.js" type="module"></script>
     <div class="spacer_small"></div>
     <div class="header">
-            <h1>Download Schedule</h1>        
+            <span>Download Schedule</span>        
     </div>
     <div class="spacer_small"></div>
     <form id="form_download_sch" class="view_schedules" action="/download" method="POST">
@@ -44,7 +44,7 @@
     </form>
     <div class="spacer_small"></div>
     <div class="header">
-            <h1>Manage Database</h1>        
+            <span>Manage Database</span>        
     </div>
     <div class="spacer_small"></div>
     <form id="form_manage_db" class="view_schedules" action="/database" method="GET">
@@ -55,6 +55,6 @@
         </select><!--
         --></select><br/>
         <button type="submit" id="btn_manage_db" class="btn_submit">Submit</button><br/>
-    </form>      
+    </form>
 </div>
 {% endblock %}
