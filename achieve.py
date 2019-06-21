@@ -1408,11 +1408,6 @@ def schedule():
 
             # track hours that no longer need teachers
             full_hours = [item[0] for item in classrooms_sch[i].items() if item[1] == class_info[i]["req"]]
-
-        print(classrooms_sch)
-        for item in all_staff_sch.items():
-            print(item[0])
-            print(item[1])
     # ------------------------------------------------------------------------------------------------------------ #
 
     # get client data (where client/staff are present, ordered by color and total hours)
@@ -1455,8 +1450,6 @@ def schedule():
         # generate current client's schedule
         client_sch = generate_schedules(client_ID, client_name, client_team, client_sch, all_staff_sch, curr_att_day)
         
-        # TODO: update times outside of a staff's hours with "OUT"
-        
         # write client's schedule to csv
         header = ("Name", "Time", "Staff")
         try:
@@ -1482,7 +1475,10 @@ def schedule():
         # increment through clients
         client_num += 1
 
-   # write staff's schedule to csv NOTE: need to output in alphabetical order
+    # short staff in schedule into alphabetical list
+    sorted_staff = sorted(all_staff_sch)
+
+    # write staff's schedule to csv
     try:
         with open(os.path.join(app.instance_path, "staff_schedule_" + curr_att_day + ".csv"), "a", newline="") as csvfile2:
             writer = csv.writer(csvfile2)
@@ -1490,16 +1486,15 @@ def schedule():
             writer.writerow((current_day.capitalize(),))
             writer.writerow(header)
 
-            for staff in all_staff_sch.items():
-                first_row = (staff[0], 830, staff[1][830])
-                writer.writerow(first_row)
+            for staff_name in sorted_staff:
                 counter = 0
-                for key in staff[1].keys():
+                for item in all_staff_sch[staff_name].items():
                     if counter == 0:
-                        counter += 1
-                        continue
-                    row = ("", key, staff[1][key])
+                        row = (staff_name, item[0], item[1])
+                    else:
+                        row = ("", item[0], item[1])
                     writer.writerow(row)
+                    counter += 1
                 writer.writerow("")
 
     except PermissionError:
