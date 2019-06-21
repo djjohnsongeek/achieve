@@ -95,27 +95,29 @@ if len(argv) != 2:
 # prepare varibles
 DB_PATH = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 FILE_PATH = sys.path[0] + "\\" + argv[1]
-f = open(FILE_PATH, "r")
-### get staff/client list from file, not db
-current_day = f.readline().lower()
-f.close()
-curr_att_day = shorten_day(current_day)
 
-# connect to database
-db, conn = db_connect(DB_PATH)
+### get staff/client names list from file
+try:
+    with open(FILE_PATH, "r") as f:
+        current_day = f.readline().lower()
+        all_staff = []
+        for line in f:
+            line = line.split(",")
+            if len(line) < 3 or line[0] == "Name" or line[0] == "":
+                continue
+
+            all_staff.append(line[0])
+except FileNotFoundError:
+    print("File not found")
+    sys.exit(1)
 
 # adjust variables and info depending of staff or client schedule
 if argv[1][0] == "s":
-    db.execute(f"SELECT name FROM staff WHERE {curr_att_day}=1")
-    all_staff = [name for row in db.fetchall() for name in row]
     empty = ""
-    sch_type = "STAFF"
+    sch_type = "Staff"
 else:
-    db.execute(f"SELECT name FROM clients WHERE {curr_att_day}=1")
-    all_staff = [unscramble(name) for row in db.fetchall() for name in row]
     empty = "0"
-    sch_type = "CLIENT"
-conn.close()
+    sch_type = "Client"
 
 # sort names, prepare dictionary
 all_staff.sort()
@@ -153,10 +155,10 @@ except FileNotFoundError:
     print("File not found")
     sys.exit(1)
 
-# write info to file, as well as terminal
+# write info to terminal and file
 with open(sch_type + "_schedule_details.txt", "w") as txtf:
-    print(f"****{sch_type} SUMMARY****")
-    txtf.write(f"****{sch_type}SUMMARY****\n")
+    print(f" ****{sch_type} summary ****")
+    txtf.write(f"**** {sch_type} summary ****\n")
     for item in staff_details.items():
         # print/write staff name and heading
         txtf.write("---------------------\n")
@@ -174,8 +176,8 @@ with open(sch_type + "_schedule_details.txt", "w") as txtf:
         txtf.write("\n")
     
     # print/write staff summary by hour
-    print(f"{sch_type} AVAILABILITY BY HOUR")
-    txtf.write(f"{sch_type} AVAILABILITY BY HOUR\n")
+    print(f"**** {sch_type} availability by hour ****")
+    txtf.write(f"**** {sch_type} availability by hour ****\n")
     for time in [830, 930, 1030, 1130, 1230, 130, 230, 330, 430, 530]:
         # print/write staff name and heading
         txtf.write("---------------------\n")
@@ -189,7 +191,6 @@ with open(sch_type + "_schedule_details.txt", "w") as txtf:
             if str(time) in staff_details[staff]["open-hours"]:
                 txtf.write(staff + "\n")
                 print(staff)
-
 print("\n")
 print("Analysis Finished")
-print(f"File '{sch_type}_schedule_details.txt' created at {sys.path[0]}")
+print(f"File '{sch_type.lower()}_schedule_details.txt' created at {sys.path[0]}")
