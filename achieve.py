@@ -1539,7 +1539,7 @@ def view_schedule(catagory):
     # --- POST REQUESTS --- #
     # prepare feedback varibles
     session["error"] = 1
-    error_path = "view-schedule/" + catagory
+    error_path = "/view-schedule/" + catagory
 
     # get correct form data
     if catagory == "both":
