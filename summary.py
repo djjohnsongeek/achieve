@@ -96,8 +96,9 @@ if len(argv) != 2:
 DB_PATH = "C:\\Users\\Johnson\\Documents\\Projects\\achieve\\achieve.db"
 FILE_PATH = sys.path[0] + "\\" + argv[1]
 f = open(FILE_PATH, "r")
+### get staff/client list from file, not db
 current_day = f.readline().lower()
-current_day.rstrip("\n")
+f.close()
 curr_att_day = shorten_day(current_day)
 
 # connect to database
@@ -110,7 +111,6 @@ if argv[1][0] == "s":
     empty = ""
     sch_type = "STAFF"
 else:
-    schedule_type = "clients"
     db.execute(f"SELECT name FROM clients WHERE {curr_att_day}=1")
     all_staff = [unscramble(name) for row in db.fetchall() for name in row]
     empty = "0"
@@ -129,7 +129,7 @@ try:
         for line in f:
             # prepare input for parsing
             line = line.split(",")
-            if len(line) < 2 or line[0] == "Name":
+            if len(line) < 3 or line[0] == "Name":
                 continue
             classroom = line[2].strip("\n")
             line.pop()

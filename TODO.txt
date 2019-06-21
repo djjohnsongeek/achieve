@@ -60,7 +60,9 @@ Client Side Functionality (Requires update)
         -look at rewriting JavaScript Validation
 
 Current Tasks:
-        -write schedule in alphabetical order
+        -summary.py: get staff/client list from the schedule itself, not the database
+        -write client schedule in alphabetical order (requires adjustment to scheduling algorithm)
+        -
         -enter in more staff/clients
         -bug test
         
@@ -76,4 +78,5 @@ FUTURE Features
     -mobile responsive
     
 KNOWN BUGS:
-    -logo picture fails to load when rendering error.html template from the /clients/remove route  or the /clients/update route (picture removed frow now)
+DEPLOYMENT STEPS:
+-python, sqlite3, venv, dot-env
