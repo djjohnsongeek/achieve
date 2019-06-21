@@ -1,8 +1,5 @@
-import os
 import sys
-import sqlite3
 
-from sqlite3 import Error
 from sys import argv
 
 KEY_TEXT = "rkjfawtphxuoievokbanzmycaksjdgoql"
@@ -67,24 +64,6 @@ def unscramble(cypher_text: str):
         i += 1
     
     return(plain_text)
-
-def db_connect(db_path):
-    """ A simple fuction to make connection to SQLite databases easier """
-    try:
-        conn = sqlite3.connect(db_path)
-        conn.row_factory = sqlite3.Row
-        db = conn.cursor()
-    except Error as e:
-        print(e)
-        conn.close()
-    else:  
-        return db, conn
-
-def shorten_day(day: str):
-    """ Takes a string and returns the first three letters as a string """
-
-    container = [day[i] for i in range(3)]
-    return "".join(container)
 #----------------------------------------- end helper functions --------------------------------------------------------#
 
 # ensure command is properly typed
@@ -156,7 +135,7 @@ except FileNotFoundError:
     sys.exit(1)
 
 # write info to terminal and file
-with open(sch_type + "_schedule_details.txt", "w") as txtf:
+with open(sch_type.lower() + "_schedule_details.txt", "w") as txtf:
     print(f" ****{sch_type} summary ****")
     txtf.write(f"**** {sch_type} summary ****\n")
     for item in staff_details.items():
