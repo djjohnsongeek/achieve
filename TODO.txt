@@ -60,12 +60,13 @@ Client Side Functionality (Requires update)
         -look at rewriting JavaScript Validation
 
 Current Tasks:
-        -summary.py: get staff/client list from the schedule itself, not the database
+        -Custom classroom hours
+        -Allow user to add a client that has no team members (JavaScript and serverside)
+        -Hours entry is confusing because end time of 1:30 is interpreted as 2:30 (causes an infinite loop atm)
+        -JavaScript on classroom page
+        -bug test with full data base
         -write client schedule in alphabetical order (requires adjustment to scheduling algorithm)
-        -
-        -enter in more staff/clients
-        -bug test
-        
+
 Backburner:
         -bigger check boxes (on hold)
         -re-schedule already scheduled staff if available?
@@ -78,5 +79,3 @@ FUTURE Features
     -mobile responsive
     
 KNOWN BUGS:
-DEPLOYMENT STEPS:
--python, sqlite3, venv, dot-env

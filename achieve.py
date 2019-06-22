@@ -746,6 +746,16 @@ def remove_staff():
     db.execute("DELETE FROM teams WHERE staffID=?", (staff_ID["staffID"],))
     db.execute("DELETE FROM staffhours WHERE staffID=?", (staff_ID["staffID"],))
 
+    # remove staff name from classroom teacher or sublist
+    db.execute("SELECT classroom FROM classrooms")
+    classrooms = db.fetchall()
+    for classroom in classrooms:
+        db.execute("SELECT teacher1, teacher2, sub1, sub2, sub3, sub4 FROM classrooms WHERE classroom=?", (classroom["classroom"],))
+        teachers = db.fetchone()
+        for key in teachers.keys():
+            if teachers[key] == staff_name:
+                db.execute(f"UPDATE classrooms SET {key}=? WHERE classroom=?", (None, classroom["classroom"]))
+
     # commit changes and close database
     conn.commit()
     conn.close()
@@ -1083,7 +1093,11 @@ def classrooms():
 
     # ensure teacher are not accidentially inserted as subs
     for t in teachers:
+        if t == None:
+            continue
         for s in subs:
+            if s == None:
+                continue
             if t == s:
                 flash(f"{t} cannot be both a teacher and a sub for {classroom}")
                 return redirect("/classrooms")
@@ -1093,7 +1107,9 @@ def classrooms():
     teachers_filtered = [teacher for teacher in teachers if teacher]
     for teacher in teachers_filtered:
         db.execute("SELECT name FROM staff WHERE name=?", (teacher,))
-        if not db.fetchone()["name"]:
+        name = db.fetchone()["name"]
+
+        if not name:
             flash(f"{teacher} was not found in the database")
             return redirect("/classrooms")
 
@@ -1370,6 +1386,7 @@ def schedule():
         # create teacher list, removing those that are absent from work
         for teacher in allclass_teachers:
             db.execute(f"SELECT {curr_att_day} FROM staff WHERE name=?", (teacher,))
+            print(teacher)
             if db.fetchone()[curr_att_day] == 1:
                 class_teachers.append(teacher)
 
