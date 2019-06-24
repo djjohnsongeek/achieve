@@ -65,10 +65,12 @@ Current Tasks:
             -clientside (DONE)
                 -JavaScript on classroom pages (DONE)
 
-        -Allow user to add a client that has no team members (JavaScript and serverside)
-            -check that this does not break scheduling functionality
+        -Allow user to add a client that has no team members (JavaScript and serverside) (DONE)
+        
+        -add tab to view classroom hours
         -Hours entry is confusing because end time of 1:30 is interpreted as 2:30 (causes an infinite loop atm)
-            -update createschouts to includ parsing of start and end times
+            -update createsch_hours to include parsing of start and end times
+
         -bug test with full data base
         -write client schedule in alphabetical order (requires adjustment to scheduling algorithm)
         -uses flashes built in catagory arguments, output flash messages as a list

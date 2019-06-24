@@ -1,4 +1,4 @@
-import {validate, validate_teachers, button_error} from "./lib.js"
+import {validate, button_error} from "./lib.js"
 
 //Listen for the add client button being clicked
 document.getElementById("btn_add_client").addEventListener("click", function(event){
@@ -6,9 +6,7 @@ document.getElementById("btn_add_client").addEventListener("click", function(eve
     // store client first and last name in variable
     var client_name = document.getElementById("client_name");
     var hrsForm = [client_name, document.getElementById("client_hours_start"), document.getElementById("client_hours_end")];
-    var teamForm = document.getElementsByClassName("teachers");
     var button = document.getElementById("btn_add_client");
-    var lable = document.getElementById("teachers_title");
 
     // reset default look
     document.getElementById("client_name_title").innerHTML = "Add Client";
@@ -21,7 +19,7 @@ document.getElementById("btn_add_client").addEventListener("click", function(eve
     $.get("/addclient?clientname=" + client_name.value, function(data){
         if (data == false)
         {
-            if (validate(hrsForm) && validate_teachers(teamForm, lable))
+            if (validate(hrsForm))
             {
                 document.getElementById("form_add_client").submit();
             }

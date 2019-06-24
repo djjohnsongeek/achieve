@@ -216,9 +216,9 @@ def clients():
     t_members[:] = [member for member in t_members if member]
 
     # check to make sure at least one team member was assigned to client's team 
-    if len(t_members) == 0:
-        flash(f"Please provide {unscramble(client_name)} with at least one Team Member")
-        return redirect("/clients")
+    # if len(t_members) == 0:
+    #     flash(f"Please provide {unscramble(client_name)} with at least one Team Member")
+    #     return redirect("/clients")
 
     # remove duplicates
     unique_members = set(t_members)

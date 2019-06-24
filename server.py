@@ -87,12 +87,16 @@ def generate_schedules(client_ID: int, client_name: str, client_team: list, clie
     db.execute("SELECT totalhours FROM clients WHERE clientID=?", (client_ID,))
     client_data = db.fetchone()
     
-    # decide the number of hours a client should be scheduled at a time, prepare current step
-    schedule_var = round(client_data["totalhours"] / len(client_team))
+    # decide the number of hours a client should be scheduled at a time, check for empty team
+    team_size = len(client_team)
+    if team_size < 1:
+        schedule_var = 2
+    else:
+        schedule_var = round(client_data["totalhours"] / len(client_team))
     if schedule_var == 1:
         schedule_var += 1
-    current_step = 0
 
+    current_step = 0
     # generates client schedule
     while 0 in client_sch.values():
         tier = current_step + 1
