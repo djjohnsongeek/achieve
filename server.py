@@ -35,7 +35,9 @@ def create_schhours(start: int, end: int):
 
     hours = []
     while True:
-        if start > end:
+        if start > end - 100:
+            if len(hours) == 0:
+                hours.append(start)
             break
         if start <= 1230:
             hours.append(start)
@@ -92,7 +94,7 @@ def generate_schedules(client_ID: int, client_name: str, client_team: list, clie
     if team_size < 1:
         schedule_var = 2
     else:
-        schedule_var = round(client_data["totalhours"] / len(client_team))
+        schedule_var = round(client_data["totalhours"] / len(client_team) + .0001)
     if schedule_var == 1:
         schedule_var += 1
 
@@ -182,6 +184,6 @@ def generate_schedules(client_ID: int, client_name: str, client_team: list, clie
         for k in range(j):
             client_sch[client_open_times[k]] = tier_client_team[i]
             all_staff_sch[tier_client_team[i]][client_open_times[k]] = client_name
-    
+
     conn.close()
     return client_sch

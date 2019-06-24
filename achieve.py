@@ -1540,7 +1540,6 @@ def schedule():
         
         # generate a list of the client's scheduable hours
         times = create_schhours(convert_strtime(client_hours[0]), convert_strtime(client_hours[1]))
-
         # update client's scheduling dictionary
         for time in times:
             if time in client.keys():
