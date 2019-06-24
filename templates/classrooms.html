@@ -16,6 +16,18 @@
         <div class="fieldset"><br/>
             <lable class="form_titles" for="class_name">Classroom Name</lable><br/>
             <input type="text" id="class_name" name="class_name" placeholder="Classroom Name"><br/>
+            <lable class="form_titles" for="class_hours_start">Start Time (hh:30)</lable><br/>
+            <input type="time" name="class_hours_start" id="class_hours_start" placeholder="hh:mm (24hr)"><br/>
+            <lable class="form_titles" for="class_hours_end">End Time (hh:30) </lable><br/>
+            <input type="time" name="class_hours_end" id="class_hours_end" placeholder="hh:mm (24hr)"><br/><br/>
+            <label class="form_titles" for="lst_client_dys">Check Days Classroom is In-session</label><br/>
+            <ul id="lst_client_days" class="lst_client_days">
+                <li class="chbx_staff_days"><input type="checkbox" name="monday" value="monday">Monday</li>
+                <li class="chbx_staff_days"><input type="checkbox" name="tuesday" value="tuesday">Tuesday</li>
+                <li class="chbx_staff_days"><input type="checkbox" name="wednesday" value="wednesday">Wednesday</li>
+                <li class="chbx_staff_days"><input type="checkbox" name="thursday" value="thursday">Thursday</li>
+                <li class="chbx_staff_days"><input type="checkbox" name="friday" value="friday">Friday</li>
+            </ul><br/></br>
             <!--Main classroom Teachers-->
             <lable id="lable_class_teachers" class="form_titles">Choose Teachers</lable><br/>
             <select class="teachers" id="class_teacher1" name="class_teacher1">

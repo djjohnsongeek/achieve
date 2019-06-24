@@ -1010,7 +1010,7 @@ def view_staff_hours():
 @app.route("/staff/view-staff-attendance")
 @login_required
 @admin_required
-def vew_staff_att():
+def view_staff_att():
     db, conn = db_connect(DB_PATH)
 
     # get staff attendance
@@ -1063,6 +1063,33 @@ def classrooms():
         flash(f"{classroom} is already in the database")
         return redirect ("/classrooms")
 
+    # validate time forms
+    if not request.form.get("class_hours_start") or not request.form.get("class_hours_end"):
+        flash("Please provide classroom start and end times")
+        return redirect("/classrooms")
+
+    # check hour data is in the correct format
+    class_hours_start = request.form.get("class_hours_start")
+    class_hours_end = request.form.get("class_hours_end")
+    time = re.compile(r"[012][0-9]:30")
+    if not time.match(class_hours_start) or not time.match(class_hours_end):
+        flash("Incorrect time format")
+        return redirect("/classrooms")
+
+    class_hours = class_hours_start + "-" + class_hours_end
+
+    # build weekly hours list
+    days_toupdate = []
+    for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
+        if request.form.get(day) != day and request.form.get(day) != None: # change to or?
+            flash("Invalid day data")
+            return redirect("/classrooms")
+
+        if not request.form.get(day):
+            days_toupdate.append(None)
+        else:
+            days_toupdate.append(class_hours)
+    
     # validate teacher forms
     teachers = []
     count = 0
@@ -1128,7 +1155,17 @@ def classrooms():
     teachers.insert(0, classroom)
 
     # insert classroom data into the databvase
-    db.execute("INSERT INTO classrooms (classroom, req, teacher1, teacher2, sub1, sub2, sub3, sub4 ) VALUES(?,?,?,?,?,?,?,?)", teachers)
+    db.execute("INSERT INTO classrooms (classroom, req, teacher1, teacher2, sub1, sub2, sub3, sub4) VALUES(?,?,?,?,?,?,?,?)", teachers)
+    db.execute("SELECT classID FROM classrooms WHERE classroom=?", (classroom,))
+    try:
+        classID = db.fetchone()["classID"]
+    except TypeError:
+        flash("No classroom of that name in the database")
+        return redirect("/classrooms")
+
+    # get classroom ID, insert classroom hours
+    days_toupdate.insert(0, classID)
+    db.execute("INSERT INTO classroomhours (classID, monday, tuesday, wednesday, thursday, friday) VALUES(?,?,?,?,?,?)", days_toupdate)
     conn.commit()
     conn.close()
     
@@ -1147,8 +1184,10 @@ def classrooms_remove():
     if classrm:
         db, conn = db_connect(DB_PATH)
         db.execute("SELECT classID FROM classrooms WHERE classroom=?", (classrm,))
-        if db.fetchone():
+        class_id = db.fetchone()
+        if class_id:
             db.execute("DELETE FROM classrooms WHERE classroom=?", (classrm,))
+            db.execute("DELETE FROM classroomhours WHERE classID=?", (class_id["classID"],))
             conn.commit()
             conn.close()
             session["error"] = 0
@@ -1198,9 +1237,37 @@ def class_update_form():
 
     # check given classroom is in the database
     db.execute("SELECT classID FROM classrooms WHERE classroom=?", (classrm,))
-    if not db.fetchone():
+    class_id = db.fetchone()
+    if not class_id:
         flash(f"{classrm} is not in the database")
         return redirect("/classrooms-update")
+
+    # validate time forms
+    if request.form.get("class_hours_update_start") and request.form.get("class_hours_update_end"):
+
+        # check hour data is in the correct format
+        class_hours_start = request.form.get("class_hours_update_start")
+        class_hours_end = request.form.get("class_hours_update_end")
+        time = re.compile(r"[012][0-9]:30")
+        if not time.match(class_hours_start) or not time.match(class_hours_end):
+            flash("Incorrect time format")
+            return redirect("/classrooms-update")
+
+        class_hours = class_hours_start + "-" + class_hours_end
+
+        # build weekly hours list
+        days_toupdate = []
+        for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
+            if request.form.get(day) != day and request.form.get(day) != None: # change to or?
+                flash("Invalid day data")
+                return redirect("/classrooms-update")
+
+            if request.form.get(day):
+                days_toupdate.append(day)
+
+        # update class_hours
+        for item in days_toupdate:
+            db.execute(f"UPDATE classroomhours SET {item}=? WHERE classID=?", (class_hours, class_id["classID"]))
 
     # remove provided staff name NOTE: this assumes that subs and teachers are never the same
     staff_toremove = request.form.get("slct_classTeacher")
@@ -1373,11 +1440,26 @@ def schedule():
     # build classroom dicts
     db.execute("SELECT * FROM classrooms")
     class_info = db.fetchall()
-    classroom_hrs = {830: 0, 930: 0, 1030: 0, 1130: 0, 1230: 0, 130: 0}
-    classrooms_sch = [classroom_hrs.copy() for row in class_info]
+    if not class_info:
+        flash("No classrooms in database")
+        return redirect("/schedule")
 
     # loop through classrooms
-    for i in range(len(classrooms_sch)):
+    for i in range(len(class_info)):
+        db.execute(f"SELECT {current_day} FROM classroomhours WHERE classID=?", (class_info[i]["classID"],))
+        hours_data = db.fetchone()
+
+        if not hours_data:
+            flash(f"{class_info[i]['classroom']} has no hours on {current_day} and was not scheduled")
+            continue
+
+        class_hours = hours_data[current_day].split("-")
+        class_hours = create_schhours(convert_strtime(class_hours[0]), convert_strtime(class_hours[1]))
+
+        class_sch = {} # may need to empty this differenty
+        for hour in class_hours:
+            class_sch[hour] = 0
+
         allclass_teachers = [class_info[i]["teacher1"], class_info[i]["teacher2"], class_info[i]["sub1"], 
                              class_info[i]["sub2"], class_info[i]["sub3"], class_info[i]["sub4"]]
         allclass_teachers = [teacher for teacher in allclass_teachers if teacher]
@@ -1386,7 +1468,6 @@ def schedule():
         # create teacher list, removing those that are absent from work
         for teacher in allclass_teachers:
             db.execute(f"SELECT {curr_att_day} FROM staff WHERE name=?", (teacher,))
-            print(teacher)
             if db.fetchone()[curr_att_day] == 1:
                 class_teachers.append(teacher)
 
@@ -1408,7 +1489,7 @@ def schedule():
             teacher_hours = create_schhours(convert_strtime(teacher_hours[0]), convert_strtime(teacher_hours[1]))
 
             # remove hours that are not class times, that are "full"
-            teacher_hours = [hour for hour in teacher_hours if hour in classroom_hrs.keys()]
+            teacher_hours = [hour for hour in teacher_hours if hour in class_sch.keys()]
             teacher_hours = [hour for hour in teacher_hours if hour not in full_hours]
 
             # end loop if no hours left to schedule
@@ -1421,10 +1502,10 @@ def schedule():
                     print("overlap error!!!!")
 
                 all_staff_sch[teacher][hr] = class_info[i]["classroom"]
-                classrooms_sch[i][hr] += 1
+                class_sch[hr] += 1
 
             # track hours that no longer need teachers
-            full_hours = [item[0] for item in classrooms_sch[i].items() if item[1] == class_info[i]["req"]]
+            full_hours = [item[0] for item in class_sch.items() if item[1] == class_info[i]["req"]]
     # ------------------------------------------------------------------------------------------------------------ #
 
     # get client data (where client/staff are present, ordered by color and total hours)

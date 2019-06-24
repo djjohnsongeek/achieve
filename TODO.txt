@@ -53,19 +53,25 @@ Server Side Functionality (DONE)
 
 Client Side Functionality (Requires update)
     -In-depth client Side Feedback/Search/AJAX
-        -staff
-            -ajax requests for staff name
         -view staff/clients/teams/schedule
             -searchable tables
         -look at rewriting JavaScript Validation
 
 Current Tasks:
-        -Custom classroom hours
+        -Custom classroom hours (DONE)
+            -database table (DONE)
+            -HTML, CSS (DONE)
+            -serverside (DONE)
+            -clientside (DONE)
+                -JavaScript on classroom pages (DONE)
+
         -Allow user to add a client that has no team members (JavaScript and serverside)
+            -check that this does not break scheduling functionality
         -Hours entry is confusing because end time of 1:30 is interpreted as 2:30 (causes an infinite loop atm)
-        -JavaScript on classroom page
+            -update createschouts to includ parsing of start and end times
         -bug test with full data base
         -write client schedule in alphabetical order (requires adjustment to scheduling algorithm)
+        -uses flashes built in catagory arguments, output flash messages as a list
 
 Backburner:
         -bigger check boxes (on hold)

@@ -1,4 +1,4 @@
-import {validate_teachers, reveal_error, button_error} from "./lib.js"
+import {validate_teachers, validate, button_error} from "./lib.js"
 
 // listen for add-class form submission
 document.getElementById("btn_add_class").addEventListener("click", function(event){
@@ -6,7 +6,7 @@ document.getElementById("btn_add_class").addEventListener("click", function(even
     event.preventDefault();
 
     // store form data
-    var class_name = document.getElementById("class_name");
+    var class_data = [document.getElementById("class_name"), document.getElementById("class_hours_start"), document.getElementById("class_hours_end")];
     var button = document.getElementById("btn_add_class");
     var teachers = [document.getElementById("class_teacher1"), document.getElementById("class_teacher2")];
     var subs = [document.getElementById("sub_teacher1"), document.getElementById("sub_teacher2"), document.getElementById("sub_teacher3"),
@@ -19,13 +19,12 @@ document.getElementById("btn_add_class").addEventListener("click", function(even
     class_name.style.border = "";
 
     // validate forms
-    if (!class_name.value)
+    if (!validate(class_data))
     {
-        class_name.style.border = "1px solid red";
         button_error(button)
     }
 
-    else if (validate_teachers(teachers, button, lable1) && validate_teachers(subs, button, lable2))
+    else if (validate_teachers(teachers, lable1) && validate_teachers(subs, lable2))
     {
         if (teacher_num.value)
         {
