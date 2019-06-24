@@ -3,12 +3,12 @@
 {% block main %}
 <div class="tabs">
     <header style="padding: 0;">
-    <div class="tab_add-remove" style="background-color: rgb(220, 231, 235); border: 1px solid lightgrey; border-top: none;">
-        <a href="/classrooms-viewinfo" style="color:#212962;">Classroom Info</a>
-    </div><!--
-    --><div class="tab_update">
-        <a href="/classrooms-viewhours">Classroom Hours</a>
-    </div>
+        <div class="tab_add-remove">
+            <a href="/classrooms-viewinfo">Classroom Info</a>
+        </div><!--
+        --><div class="tab_update" style="background-color: rgb(220, 231, 235); border: 1px solid lightgrey;border-top: none;">
+            <a href="/classrooms-viewhours" style="color:#212962;">Classroom Hours</a>
+        </div>
     </header>
 </div>
 <div class="spacer"></div>
@@ -17,17 +17,15 @@
         <thead>
             <tr>
                 <th>Class</th>
-                <th>Staff Num.</th>
-                <th>Teacher</th>
-                <th>Teacher</th>
-                <th>Sub</th>
-                <th>Sub</th>
-                <th>Sub</th>
-                <th>Sub</th>
+                <th>Mon.</th>
+                <th>Tue.</th>
+                <th>Wed.</th>
+                <th>Thur.</th>
+                <th>Fri.</th>
             </tr>
         </thead>
         <tbody>
-            {% for classrooms in class_data %}
+            {% for classrooms in class_hours%}
             <tr>
                 {% for data in classrooms %}
                 <td>{{ data }}</td>

@@ -1376,7 +1376,7 @@ def class_update_form():
     flash(f"{classrm} successfully updated")
     return redirect("/classrooms-update")
 
-@app.route("/classrooms-viewinfo",)
+@app.route("/classrooms-viewinfo")
 @login_required
 @admin_required
 def view_class():
@@ -1385,6 +1385,16 @@ def view_class():
     class_data = db.fetchall()
     conn.close()
     return render_template("classrooms-view-info.html", class_data = class_data)
+
+@app.route("/classrooms-viewhours")
+@login_required
+@admin_required
+def view_class_hours():
+    db, conn = db_connect(DB_PATH)
+    db.execute("SELECT classrooms.classroom, monday, tuesday, wednesday, thursday, friday FROM classroomhours INNER JOIN classrooms ON classrooms.classID=classroomhours.classID")
+    class_hours = db.fetchall()
+    conn.close()
+    return render_template("classrooms-view-hours.html", class_hours = class_hours)
 
 @app.route("/schedule", methods=["GET", "POST"])
 @login_required
