@@ -179,14 +179,10 @@ def clients():
         return redirect("/clients")
 
     # build final start and end times, build scheduable hours
-    start = convert_strtime(client_hours_start)
-    end = convert_strtime(client_hours_end)
+    client_hours = client_hours_start + "-" + client_hours_end
   
     # generate a list of the staff's scheduable hours
-    total_hours = len(create_schhours(start, end))
-
-    # combine start and end times into one variable
-    client_hours = client_hours_start + "-" + client_hours_end
+    total_hours = len(create_schhours(client_hours))
 
     # prepare client info variables as a tuple
     client_name = scramble(client_name)
@@ -371,9 +367,9 @@ def update_client():
             return redirect("/clients-update")
 
         # get client's total number of hours
-        total_hours = len(create_schhours(convert_strtime(client_hours_start), convert_strtime(client_hours_end)))
         client_hours = client_hours_start + "-" + client_hours_end
-
+        total_hours = len(create_schhours(client_hours))
+        
         # store client hours
         client_days = []
         for day in ["monday", "tuesday", "wednesday", "thursday", "friday"]:
@@ -486,7 +482,7 @@ def update_client():
         if add_or_remove == "remove":
             if not team_info:
                 flash(f"No removal necessary: {new_teacher} and {unscramble(client_name)} are not on the same team")
-                return redirect("/clients")
+                return redirect("/clients-update")
             else:
                 # remove selected teacher from selected Client's team
                 db.execute("DELETE FROM teams WHERE clientID=? and staffID=?", (client_info["clientID"], staff_info["staffID"]))
@@ -497,7 +493,7 @@ def update_client():
 
     session["error"] = 0
     flash(f"{unscramble(client_name)}'s info has been updated")
-    return redirect("/clients")
+    return redirect("/clients-update")
 
 @app.route("/addclient", methods=["GET"])
 def addclient():
@@ -1426,9 +1422,7 @@ def schedule():
         if hours[current_day] is None:
             total_hours = 0
         else:
-            times = hours[current_day].split('-')
-            total_hours = len(create_schhours(convert_strtime(times[0]), convert_strtime(times[1])))
-
+            total_hours = len(create_schhours(hours[current_day]))
         db.execute("UPDATE clients SET totalhours=? WHERE clientID=?", (total_hours, hours["clientID"]))
     conn.commit()
     
@@ -1441,8 +1435,7 @@ def schedule():
         # NOTE: dynamically generate these times?
         all_staff_sch[row["name"]] = {830: "" , 930: "" , 1030: "" , 1130: "" , 1230: "" , 130: "" , 230: "" , 330: "" , 430: ""}
         for time in all_staff_sch[row["name"]].keys():
-            hours = row[current_day].split("-")
-            hours = create_schhours(convert_strtime(hours[0]), convert_strtime(hours[1]))
+            hours = create_schhours(row[current_day])
             if time not in hours:
                 all_staff_sch[row["name"]][time] = "OUT"
 
@@ -1463,8 +1456,7 @@ def schedule():
             flash(f"{class_info[i]['classroom']} has no hours on {current_day} and was not scheduled")
             continue
 
-        class_hours = hours_data[current_day].split("-")
-        class_hours = create_schhours(convert_strtime(class_hours[0]), convert_strtime(class_hours[1]))
+        class_hours = create_schhours(hours_data[current_day])
 
         class_sch = {} # may need to empty this differenty
         for hour in class_hours:
@@ -1495,8 +1487,8 @@ def schedule():
 
             # get teacher hours
             db.execute(f"SELECT {current_day} FROM staffhours where staffID=?", (teacher_id,))
-            teacher_hours = db.fetchone()[current_day].split("-")
-            teacher_hours = create_schhours(convert_strtime(teacher_hours[0]), convert_strtime(teacher_hours[1]))
+            teacher_hours = db.fetchone()[current_day]
+            teacher_hours = create_schhours(teacher_hours)
 
             # remove hours that are not class times, that are "full"
             teacher_hours = [hour for hour in teacher_hours if hour in class_sch.keys()]
@@ -1536,10 +1528,10 @@ def schedule():
         client_name = unscramble(client_data[client_num]["name"])
         db.execute(f"SELECT {current_day} FROM clienthours WHERE clientID=?", (client_ID,))
         # NOTE: check for None here?
-        client_hours = db.fetchone()[current_day].split("-")
+        client_hours = db.fetchone()[current_day]
         
         # generate a list of the client's scheduable hours
-        times = create_schhours(convert_strtime(client_hours[0]), convert_strtime(client_hours[1]))
+        times = create_schhours(client_hours)
         # update client's scheduling dictionary
         for time in times:
             if time in client.keys():

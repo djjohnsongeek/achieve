@@ -28,10 +28,17 @@ def admin_required(f):
             return redirect("/")
         return f(*args, **kwargs)
     return admin_req
+
+def convert_strtime(time_string: str):
+    """ Takes a string with 12hr time information (such as '8:30') and strips away punctuation and returns a int """
+    return int("".join(letter for letter in time_string if letter.isdigit()))
     
-def create_schhours(start: int, end: int):
+def create_schhours(times: str):
     """ Takes a start and endtime (integers) and creates a list of times seperated by an hour and ending at end """
     # TODO: deal with times that start on the hour (8:00) as well as times that start halfway through (8:30)
+    time = times.split("-")
+    start = convert_strtime(time[0])
+    end = convert_strtime(time[1])
 
     hours = []
     while True:
@@ -46,11 +53,6 @@ def create_schhours(start: int, end: int):
         start += 100
     
     return hours
-
-def convert_strtime(time_string: str):
-    """ Takes a string with 12hr time information (such as '8:30') and strips away punctuation and returns a int """
-
-    return int("".join(letter for letter in time_string if letter.isdigit()))
 
 def shorten_day(day: str):
     """ Takes a string and returns the first three letters as a string """
