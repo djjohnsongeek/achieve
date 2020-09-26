@@ -1,5 +1,6 @@
 # Achieve
 <b>Scheduling Web app</b><br/>
+This is my first major project as a software developer.<br/>
 You can check it out at:<br/>
 https://djjohnsongeek.pythonanywhere.com<br/>
 This is a web app that is meant to generate a schedule for an ABA clinic. For those unfamiliar with ABA it stands for Applied Behavioral Analysis. ABA therapy is used to teach children on the Autism Spectrum. Mostly this means 1:1 sessions where a client is paired with a teacher. Scheduling can be complicated when multiple clients who have multiple teachers on their teams require different hours each day.<br/>
